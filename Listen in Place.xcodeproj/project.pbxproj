@@ -15,6 +15,10 @@
 		FC521CE82479A46800D2AC82 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC521CE62479A46800D2AC82 /* LaunchScreen.storyboard */; };
 		FC521CF32479A46800D2AC82 /* Listen_in_PlaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521CF22479A46800D2AC82 /* Listen_in_PlaceTests.swift */; };
 		FC521CFE2479A46800D2AC82 /* Listen_in_PlaceUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521CFD2479A46800D2AC82 /* Listen_in_PlaceUITests.swift */; };
+		FC521D0C2479A51B00D2AC82 /* MusicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521D0B2479A51B00D2AC82 /* MusicView.swift */; };
+		FC521D0E2479B06100D2AC82 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521D0D2479B06100D2AC82 /* Player.swift */; };
+		FCC94AC6247A979B00DCFD25 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */; };
+		FCD1325A2479D961008ADEF5 /* SwiftUI+DarkMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD132592479D961008ADEF5 /* SwiftUI+DarkMode.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +53,10 @@
 		FC521CF92479A46800D2AC82 /* Listen in PlaceUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Listen in PlaceUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC521CFD2479A46800D2AC82 /* Listen_in_PlaceUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Listen_in_PlaceUITests.swift; sourceTree = "<group>"; };
 		FC521CFF2479A46800D2AC82 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FC521D0B2479A51B00D2AC82 /* MusicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicView.swift; sourceTree = "<group>"; };
+		FC521D0D2479B06100D2AC82 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPlayButton.swift; sourceTree = "<group>"; };
+		FCD132592479D961008ADEF5 /* SwiftUI+DarkMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftUI+DarkMode.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +114,10 @@
 				FC521CE62479A46800D2AC82 /* LaunchScreen.storyboard */,
 				FC521CE92479A46800D2AC82 /* Info.plist */,
 				FC521CE32479A46800D2AC82 /* Preview Content */,
+				FC521D0B2479A51B00D2AC82 /* MusicView.swift */,
+				FC521D0D2479B06100D2AC82 /* Player.swift */,
+				FCD132592479D961008ADEF5 /* SwiftUI+DarkMode.swift */,
+				FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */,
 			);
 			path = "Listen in Place";
 			sourceTree = "<group>";
@@ -267,8 +279,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FCC94AC6247A979B00DCFD25 /* AirPlayButton.swift in Sources */,
 				FC521CDC2479A46600D2AC82 /* AppDelegate.swift in Sources */,
 				FC521CDE2479A46600D2AC82 /* SceneDelegate.swift in Sources */,
+				FC521D0C2479A51B00D2AC82 /* MusicView.swift in Sources */,
+				FC521D0E2479B06100D2AC82 /* Player.swift in Sources */,
+				FCD1325A2479D961008ADEF5 /* SwiftUI+DarkMode.swift in Sources */,
 				FC521CE02479A46600D2AC82 /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
