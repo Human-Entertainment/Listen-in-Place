@@ -10,26 +10,26 @@ import Foundation
 import AVFoundation
 import Combine
 
+enum PlayerEnum {
+    case none
+    case AVPlayer(AV)
+}
+
 struct Song: Hashable {
     let title: String
     let artist: String
 }
 
-final class Player: ObservableObject {
+struct AV {
     private var player: AVPlayer
     private var url: URL
+}
+
+final class Player: ObservableObject {
+    var player: PlayerEnum
     @Published var progress: Float = 0.0
     
-    init(url: URL) {
-        self.player = AVQueuePlayer(url: url)
-        self.url = url
-    }
-    
-    func play() {
-        self.player.play()
-    }
-    
-    func pause() {
-        self.player.pause()
+    init() {
+        player = .none
     }
 }

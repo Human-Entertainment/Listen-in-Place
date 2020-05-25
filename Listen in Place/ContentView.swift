@@ -20,19 +20,21 @@ struct ContentView: View {
                  
                  Song(title: "Song",
                       artist: "Artist")]
-    
+    @ObservedObject var player = Player()
     var body: some View {
         NavigationView {
             List {
+                //DocumentPickerButton()
                 ForEach(songs, id: \.self) { song in
-                    SongCellView(song: song)
+                    SongCellView(player: self.player, song: song)
                     
                 }
             }.onAppear {
                 UITableView.appearance()
                     .separatorStyle = .none
             }
-            .navigationBarTitle("Songs")
+            .navigationBarTitle(Text("Song"))
+            .navigationBarItems(trailing: DocumentPickerButton() )
             
         }.accentColor(.orange)
     }
@@ -40,10 +42,14 @@ struct ContentView: View {
 
 struct SongCellView: View {
     @State var showPlayer = false
+    
+    @ObservedObject var player: Player
+    
     let song: Song
     var body: some View {
         Button(action: { self.showPlayer.toggle() }) {
             HStack {
+                
                 Image("LP")
                     .resizable()
                     .renderingMode(.original)
@@ -59,13 +65,14 @@ struct SongCellView: View {
                 }.padding(2)
             }
         }.sheet(isPresented: self.$showPlayer) {
-            MusicView(song: self.song)
+            MusicView(player: self.player, song: self.song)
         }
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        TestView(view: ContentView())
+        
+        return TestView(view: ContentView())
     }
 }

@@ -10,8 +10,8 @@ import SwiftUI
 import Combine
 
 struct MusicView: View {
-//    @ObservedObject
-//    var player: Player
+    @ObservedObject
+    var player: Player
     let song: Song
     
     @State
@@ -39,7 +39,9 @@ struct MusicView: View {
 
 struct MusicView_Previews: PreviewProvider {
     static var previews: some View {
-        TestView(view: MusicView(song: Song(title: "Song", artist: "Artist")) )
+        
+        
+        return TestView(view: MusicView(player: Player(), song: Song(title: "Song", artist: "Artist")) )
     }
 }
 
@@ -70,10 +72,10 @@ struct PlayButton: View {
             self.isPlaying.toggle()
         }) {
             if !isPlaying {
-                Image(systemName: "livephoto.play")
+                Image(systemName: "play.fill")
                     .resizable()
             } else {
-                Image(systemName: "icloud.circle.fill")
+                Image(systemName: "pause.fill")
                     .resizable()
             }
         }.frame(width: 50, height: 50)
