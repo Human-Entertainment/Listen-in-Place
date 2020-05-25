@@ -11,7 +11,7 @@ import Combine
 
 struct MusicView: View {
 //    @ObservedObject
-    //var player: Player
+//    var player: Player
     let song: Song
     
     @State
@@ -23,8 +23,7 @@ struct MusicView: View {
         VStack {
             Spacer()
             Text(song.title)
-            
-            
+
             ProgressBar(value: $progressValue).frame(height: 20)
             PlayButton(isPlaying: isPlaying)
             

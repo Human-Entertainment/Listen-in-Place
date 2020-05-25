@@ -46,6 +46,7 @@ struct SongCellView: View {
             HStack {
                 Image("LP")
                     .resizable()
+                    .renderingMode(.original)
                     .frame(width: 40, height: 40, alignment: .leading)
                     .shadow(radius: 5)
                     //.colorInvert()

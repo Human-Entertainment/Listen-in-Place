@@ -23,8 +23,14 @@ class AirPLayViewController: UIViewController {
         let boldSearch = UIImage(systemName: "airplayaudio",
                                  withConfiguration: boldConfig)
 
-        button.setImage(boldSearch, for: .normal)
-        button.frame = CGRect(x: 0, y: 0, width: 40, height: 40)
+        button.setImage(boldSearch,
+                        for: .normal)
+        
+        button.frame = CGRect(x: 0,
+                              y: 0,
+                              width: 40,
+                              height: 40)
+        
         button.tintColor = isDarkMode ? .white : .black
 
         button.addTarget(self,
