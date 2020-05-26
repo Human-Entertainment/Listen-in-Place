@@ -10,7 +10,7 @@ import SwiftUI
 import Combine
 
 struct MusicView: View {
-    @ObservedObject
+    @EnvironmentObject
     var player: Player
     let song: Song
     
@@ -24,8 +24,8 @@ struct MusicView: View {
             Spacer()
             Text(song.title)
 
-            ProgressBar(value: $progressValue).frame(height: 20)
-            PlayButton(isPlaying: isPlaying)
+            ProgressBar(value: self.$player.progress).frame(height: 20)
+            MusicControls()
             
             Spacer()
             
@@ -39,9 +39,8 @@ struct MusicView: View {
 
 struct MusicView_Previews: PreviewProvider {
     static var previews: some View {
-        
-        
-        return TestView(view: MusicView(player: Player(), song: Song(title: "Song", artist: "Artist")) )
+        TestView(view: MusicView(song: Song(title: "Song", artist: "Artist")) )
+            .environmentObject(Player())
     }
 }
 
@@ -56,28 +55,40 @@ struct ProgressBar: View {
                     .opacity(0.3)
                     .foregroundColor(Color(.systemTeal))
                 
-                Rectangle().frame(width: min(CGFloat(self.value)*geometry.size.width, geometry.size.width),
+                Rectangle().frame(width: self.min(geometry: geometry),
                                   height: geometry.size.height)
                     .foregroundColor(.accentColor)
                     .animation(.linear)
             }.cornerRadius(45.0)
         }
     }
+    func min(geometry: GeometryProxy) -> CGFloat {
+        print(self.value)
+        return Swift.min(CGFloat(self.value)*geometry.size.width, geometry.size.width)
+    }
 }
 
 struct PlayButton: View {
-    @State var isPlaying: Bool
+    @EnvironmentObject
+    var player: Player
     var body: some View {
         Button(action: {
-            self.isPlaying.toggle()
+            self.player.toggle()
         }) {
-            if !isPlaying {
+            if !player.isPlaying {
                 Image(systemName: "play.fill")
                     .resizable()
             } else {
                 Image(systemName: "pause.fill")
                     .resizable()
             }
-        }.frame(width: 50, height: 50)
+        }.frame(width: 40, height: 40)
+    }
+}
+
+struct MusicControls: View {
+    
+    var body: some View {
+        PlayButton()
     }
 }

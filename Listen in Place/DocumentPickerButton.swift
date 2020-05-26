@@ -1,40 +1,69 @@
 import SwiftUI
 
-struct DocumentPickerButton: View {
+typealias URLS = ([URL]) -> ()
+typealias voidFunc = () -> ()
+
+struct DocumentPickerButton<Label: View>: View {
     @State
     var showPicker = false
     
+    private let documentTypes: [String]
+    private let onOpen: URLS
+    private let onCancel: voidFunc
+    private let view: () -> (Label)
+    
+    init(documentTypes: [String],
+         onOpen: @escaping ([URL]) -> (),
+         onCancel: @escaping () -> () = {},
+         @ViewBuilder view: @escaping () -> (Label))
+    {
+        self.documentTypes = documentTypes
+        self.onOpen = onOpen
+        self.onCancel = onCancel
+        self.view = view
+    }
+    
     var body: some View {
         Button(action: {self.showPicker.toggle() }) {
-            Image(systemName: "plus.circle.fill")
-            .resizable()
+            view()
         }
         .sheet(isPresented: self.$showPicker) {
-            DocumentPickerController()
-                .accentColor(.orange)
+            DocumentPickerController(documentTypes: self.documentTypes,
+                                     onOpen: self.onOpen,
+                                     onCancel: self.onCancel)
         }
     }
 }
 
-struct DocumentPickerController: UIViewControllerRepresentable {
+fileprivate struct DocumentPickerController: UIViewControllerRepresentable {
     
     typealias UIViewControllerType = DocumentPicker
-    let picker = UIViewControllerType(documentTypes: ["public.mp3"], in: .open)
+    let picker: UIViewControllerType
     
-    let delagate = DocumentDelagate()
+    init(documentTypes: [String],
+         onOpen:  @escaping URLS,
+         onCancel: @escaping voidFunc = {} ) {
+        self.picker = UIViewControllerType(documentTypes: documentTypes, in: .open)
+        let delagate = DocumentDelagate()
+        delagate.onOpen = onOpen
+        delagate.onCancel = onCancel
+        picker.documentDelegate = delagate
+    }
+    
     func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {
         
     }
     
+    
     func makeUIViewController(context: Context) -> UIViewControllerType {
-        picker.delegate = self.delagate
-        return picker
+        picker
     }
     
 }
 
-class DocumentPicker: UIDocumentPickerViewController {
-    let documentDelegate = DocumentDelagate()
+fileprivate class DocumentPicker: UIDocumentPickerViewController {
+    var documentDelegate: UIDocumentPickerDelegate? = nil
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -42,33 +71,17 @@ class DocumentPicker: UIDocumentPickerViewController {
     }
 }
 
-class DocumentDelagate: UIView ,UIDocumentPickerDelegate {
-
+fileprivate class DocumentDelagate: UIView ,UIDocumentPickerDelegate {
+    var onOpen: URLS = { print($0) }
+    var onCancel: voidFunc = {}
+    
     func documentPicker(_ controller: UIDocumentPickerViewController,
                         didPickDocumentsAt urls: [URL]) {
-        print("Reading URLS")
-        urls.forEach { url in
-            guard url.startAccessingSecurityScopedResource() else {
-                print("Failed to open the file")
-                return
-            }
-            print(url)
-            defer { url.stopAccessingSecurityScopedResource() }
-            
-            guard let bookmark = try? url.bookmarkData() else {
-                return
-            }
-            
-            let defaults = UserDefaults.standard
-            
-            var array = defaults.array(forKey: "Songs") as? [Data]
-            array?.append(bookmark)
-            defaults.set(array, forKey: "Songs")
-        }
+        onOpen(urls)
     }
     
     func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-        print("Document picker was cancelled")
+        onCancel()
     }
     
 }

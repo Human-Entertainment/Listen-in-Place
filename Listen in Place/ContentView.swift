@@ -1,12 +1,5 @@
-//
-//  ContentView.swift
-//  Listen in Place
-//
-//  Created by Bastian Inuk Christensen on 23/05/2020.
-//  Copyright © 2020 Bastian Inuk Christensen. All rights reserved.
-//
-
 import SwiftUI
+import AVFoundation
 
 struct ContentView: View {
     var songs = [Song(title: "Click me",
@@ -20,13 +13,13 @@ struct ContentView: View {
                  
                  Song(title: "Song",
                       artist: "Artist")]
-    @ObservedObject var player = Player()
+    @EnvironmentObject var player: Player
     var body: some View {
+        VStack {
         NavigationView {
             List {
-                //DocumentPickerButton()
                 ForEach(songs, id: \.self) { song in
-                    SongCellView(player: self.player, song: song)
+                    SongCellView(song: song)
                     
                 }
             }.onAppear {
@@ -34,20 +27,84 @@ struct ContentView: View {
                     .separatorStyle = .none
             }
             .navigationBarTitle(Text("Song"))
-            .navigationBarItems(trailing: DocumentPickerButton() )
+            .navigationBarItems(trailing: DocumentPickerButton(documentTypes: ["public.mp3"],
+                                                               onOpen: self.openSong){
+                Image(systemName: "plus.circle.fill")
+                .resizable()
+            } )
+            
+            
             
         }.accentColor(.orange)
+            if !self.player.queue.isEmpty {
+                GlobalControls()
+            } else {
+                EmptyView()
+            }
+        }
+        
+    }
+    
+    func openSong (urls: [URL]) -> () {
+        print("Reading URLS")
+        urls.forEach { url in
+            guard url.startAccessingSecurityScopedResource() else {
+                print("Failed to open the file")
+                return
+            }
+            print(url)
+            defer { url.stopAccessingSecurityScopedResource() }
+            
+            guard let bookmark = try? url.bookmarkData() else {
+                return
+            }
+            
+            let defaults = UserDefaults.standard
+            
+            var array = defaults.array(forKey: "Songs") as? [Data]
+            array?.append(bookmark)
+            defaults.set(array, forKey: "Songs")
+            
+            self.player.song = .AVPlayer(.init(url: url))
+        }
+    }
+}
+
+struct GlobalControls: View {
+    @State
+    var showPlayer = false
+    
+    @EnvironmentObject
+    var player: Player
+    
+    var body: some View {
+        Button(action: {
+            self.showPlayer.toggle()
+        }) {
+            HStack {
+                Spacer()
+                MusicControls()
+            }
+            
+    }
+        .sheet(isPresented: self.$showPlayer) {
+            MusicView(song: self.player.queue.first!)
+            .environmentObject(self.player)
+        }
+        .padding()
     }
 }
 
 struct SongCellView: View {
     @State var showPlayer = false
     
-    @ObservedObject var player: Player
+    @EnvironmentObject var player: Player
     
     let song: Song
     var body: some View {
-        Button(action: { self.showPlayer.toggle() }) {
+        Button(action: {
+            self.showPlayer.toggle()
+        }) {
             HStack {
                 
                 Image("LP")
@@ -55,7 +112,6 @@ struct SongCellView: View {
                     .renderingMode(.original)
                     .frame(width: 40, height: 40, alignment: .leading)
                     .shadow(radius: 5)
-                    //.colorInvert()
 
                 VStack {
                     Text(song.title)
@@ -65,7 +121,8 @@ struct SongCellView: View {
                 }.padding(2)
             }
         }.sheet(isPresented: self.$showPlayer) {
-            MusicView(player: self.player, song: self.song)
+            MusicView(song: self.song)
+                .environmentObject(self.player)
         }
     }
 }
