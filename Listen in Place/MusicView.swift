@@ -16,7 +16,8 @@ struct MusicView: View {
             Spacer()
             Text(song.title)
 
-            ProgressBar(value: self.$player.progress).frame(height: 20)
+            Slider(value: Binding( get: {self.player.progress},
+                                   set: self.player.seek))
             MusicControls()
             
             Spacer()
@@ -33,30 +34,6 @@ struct MusicView_Previews: PreviewProvider {
     static var previews: some View {
         TestView(view: MusicView(song: Song(title: "Song", artist: "Artist")) )
             .environmentObject(Player())
-    }
-}
-
-struct ProgressBar: View {
-    @Binding var value: Float
-    
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Rectangle().frame(width: geometry.size.width,
-                                  height: geometry.size.height)
-                    .opacity(0.3)
-                    .foregroundColor(Color(.systemGray4))
-                
-                Rectangle().frame(width: self.min(geometry: geometry),
-                                  height: geometry.size.height)
-                    .foregroundColor(.accentColor)
-                    .animation(.linear)
-            }.cornerRadius(45.0)
-        }
-    }
-    func min(geometry: GeometryProxy) -> CGFloat {
-        print(self.value)
-        return Swift.min(CGFloat(self.value)*geometry.size.width, geometry.size.width)
     }
 }
 

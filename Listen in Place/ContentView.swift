@@ -31,7 +31,7 @@ struct ContentView: View {
                         .separatorStyle = .none
                 }
                 .navigationBarTitle(Text("Song"))
-                .navigationBarItems(trailing: DocumentPickerButton(documentTypes: ["public.mp3"],
+                .navigationBarItems(trailing: DocumentPickerButton(documentTypes: ["public.mp3", "org.xiph.flac"],
                                                                    onOpen: self.openSong){
                     Image(systemName: "plus.circle.fill")
                     .resizable()

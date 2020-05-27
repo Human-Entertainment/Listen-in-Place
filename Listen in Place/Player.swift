@@ -27,6 +27,19 @@ final class Player: ObservableObject {
         queue[0]
     }
     
+    func seek(to: Float){
+        switch song {
+        case .AVPlayer(let player):
+            
+            let duration = player.currentItem?.duration.seconds ?? 0
+            let percent = Double(to) * duration
+            player.seek(to: .init(seconds: percent, preferredTimescale: CMTimeScale(10)))
+            print ( percent )
+        default:
+            break
+        }
+    }
+    
     var queue: [Song] = []
     
     var song: PlayerEnum {
