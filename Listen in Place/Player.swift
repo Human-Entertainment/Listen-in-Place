@@ -1,11 +1,3 @@
-//
-//  Player.swift
-//  Listen in Place
-//
-//  Created by Bastian Inuk Christensen on 23/05/2020.
-//  Copyright © 2020 Bastian Inuk Christensen. All rights reserved.
-//
-
 import Foundation
 import AVFoundation
 
@@ -31,6 +23,9 @@ final class Player: ObservableObject {
     @Published var isPlaying = false
     private var url: URL? = nil
     private var audioQueue = DispatchQueue.init(label: "audio")
+    var nowPlaying: Song? {
+        queue[0]
+    }
     
     var queue: [Song] = []
     
@@ -75,7 +70,7 @@ final class Player: ObservableObject {
         switch player {
         case .AVPlayer(let player):
             player.play()
-            player.addPeriodicTimeObserver(forInterval: .init(seconds: 0.5, preferredTimescale: CMTimeScale(kCMTimeMaxTimescale)),
+            player.addPeriodicTimeObserver(forInterval: .init(seconds: 0.1, preferredTimescale: CMTimeScale(10)),
                                            queue: nil,
                                            using: { time in
                                             let seconds = time.seconds

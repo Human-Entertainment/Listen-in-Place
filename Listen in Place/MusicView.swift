@@ -1,11 +1,3 @@
-//
-//  MusicView.swift
-//  Listen in Place
-//
-//  Created by Bastian Inuk Christensen on 23/05/2020.
-//  Copyright © 2020 Bastian Inuk Christensen. All rights reserved.
-//
-
 import SwiftUI
 import Combine
 
@@ -53,7 +45,7 @@ struct ProgressBar: View {
                 Rectangle().frame(width: geometry.size.width,
                                   height: geometry.size.height)
                     .opacity(0.3)
-                    .foregroundColor(Color(.systemTeal))
+                    .foregroundColor(Color(.systemGray4))
                 
                 Rectangle().frame(width: self.min(geometry: geometry),
                                   height: geometry.size.height)
