@@ -21,13 +21,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // Create the SwiftUI view that provides the window contents.
         let contentView = ContentView()
+            .environmentObject(Player())
             
 
         // Use a UIHostingController as window root view controller.
         if let windowScene = scene as? UIWindowScene {
             let window = UIWindow(windowScene: windowScene)
-            window.rootViewController = UIHostingController(rootView: contentView.environmentObject(Player()))
+            window.rootViewController = UIHostingController(rootView: contentView)
             self.window = window
+            self.window?.tintColor = .systemOrange
             window.makeKeyAndVisible()
         }
     }
