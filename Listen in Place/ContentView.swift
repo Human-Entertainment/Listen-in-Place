@@ -66,7 +66,7 @@ struct ContentView: View {
             array?.append(bookmark)
             defaults.set(array, forKey: "Songs")
             
-            self.player.song = .AVPlayer(.init(url: url))
+            self.player.song = .AVPlayer(.init(url: url), url)
         }
     }
 }
@@ -122,13 +122,13 @@ struct SongView: View {
     var body: some View {
         HStack {
             
-            Image("LP")
+            Image(uiImage: song.album)
                 .resizable()
                 .renderingMode(.original)
                 .frame(width: 40, height: 40, alignment: .leading)
                 .shadow(radius: 5)
 
-            VStack {
+            VStack (alignment: .leading) {
                 Text(song.title)
                     .font(.headline)
 

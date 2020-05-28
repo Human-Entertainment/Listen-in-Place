@@ -18,6 +18,7 @@ struct MusicView: View {
 
             Slider(value: Binding( get: {self.player.progress},
                                    set: self.player.seek))
+                
             MusicControls()
             
             Spacer()

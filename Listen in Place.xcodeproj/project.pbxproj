@@ -39,6 +39,19 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		FC970BD4247F9F77002B1E97 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		FC521CD82479A46600D2AC82 /* Listen in Place.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Listen in Place.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC521CDB2479A46600D2AC82 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -86,6 +99,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FC403C95247F31EC00BB500E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		FC521CCF2479A46600D2AC82 = {
 			isa = PBXGroup;
 			children = (
@@ -93,6 +113,7 @@
 				FC521CF12479A46800D2AC82 /* Listen in PlaceTests */,
 				FC521CFC2479A46800D2AC82 /* Listen in PlaceUITests */,
 				FC521CD92479A46600D2AC82 /* Products */,
+				FC403C95247F31EC00BB500E /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -161,6 +182,7 @@
 				FC521CD42479A46600D2AC82 /* Sources */,
 				FC521CD52479A46600D2AC82 /* Frameworks */,
 				FC521CD62479A46600D2AC82 /* Resources */,
+				FC970BD4247F9F77002B1E97 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -219,6 +241,7 @@
 				TargetAttributes = {
 					FC521CD72479A46600D2AC82 = {
 						CreatedOnToolsVersion = 11.5;
+						LastSwiftMigration = 1150;
 					};
 					FC521CED2479A46800D2AC82 = {
 						CreatedOnToolsVersion = 11.5;
@@ -454,9 +477,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"Listen in Place/Preview Content\"";
+				DEVELOPMENT_TEAM = S64A8TJ7UP;
 				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = "Listen in Place/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -464,6 +493,9 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "app.inuk.Listen-in-Place";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INCLUDE_PATHS = "$(SRCROOT)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Listen in Place/Listen in Place-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -473,9 +505,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"Listen in Place/Preview Content\"";
+				DEVELOPMENT_TEAM = S64A8TJ7UP;
 				ENABLE_PREVIEWS = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = "Listen in Place/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -483,6 +521,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "app.inuk.Listen-in-Place";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INCLUDE_PATHS = "$(SRCROOT)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Listen in Place/Listen in Place-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
