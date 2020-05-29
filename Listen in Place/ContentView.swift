@@ -75,6 +75,9 @@ struct GlobalControls: View {
     @State
     var showPlayer = false
     
+    @State
+    var text: String = "Hello"
+    
     @EnvironmentObject
     var player: Player
     
@@ -122,7 +125,7 @@ struct SongView: View {
     var body: some View {
         HStack {
             
-            Image(uiImage: song.album)
+            Image(uiImage: song.cover)
                 .resizable()
                 .renderingMode(.original)
                 .frame(width: 40, height: 40, alignment: .leading)

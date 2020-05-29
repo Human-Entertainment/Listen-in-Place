@@ -1,9 +1,22 @@
 import Foundation
 import AVFoundation
 import UIKit
+import MediaPlayer
 
 typealias Byte = UInt8
 
+enum Bit: UInt8, CustomStringConvertible {
+    case zero, one
+
+    var description: String {
+        switch self {
+        case .one:
+            return "1"
+        case .zero:
+            return "0"
+        }
+    }
+}
 extension Data {
     var bytes: [Byte] {
         var byteArray = [UInt8](repeating: 0, count: self.count)
@@ -16,6 +29,39 @@ extension Array where Element == Byte {
     var data: Data {
         Data(bytes: self, count: self.count)
     }
+    
+    var bits: [Bit] {
+        self.flatMap { byte in
+            byte.bits
+        }
+    }
+    
+    var int: Int {
+        var compound = 0
+        let ints = self.map { Int($0) }
+        for i in 0..<self.count {
+            let reverseIndex = self.count - i - 1
+            compound += ints[i] << (reverseIndex * 8)
+        }
+        return compound
+    }
+}
+
+extension FixedWidthInteger {
+    var bits: [Bit] {
+        var bitArray = self
+        var bits = [Bit](repeating: .zero, count: self.bitWidth)
+        for i in 0..<self.bitWidth {
+            let currentBit = bitArray & 0x01
+            if currentBit != 0 {
+                bits[i] = .one
+            }
+
+            bitArray >>= 1
+        }
+
+        return bits
+    }
 }
 
 enum PlayerEnum {
@@ -26,7 +72,9 @@ enum PlayerEnum {
         var lyrics: String? = nil
         var title = "Unknown Title"
         var artist = "Unknown Artist"
-        var album: UIImage? = nil
+        var cover: UIImage? = nil
+        var album: String? = nil
+        
         switch self {
         case .AVPlayer(let player, let url):
             guard let asset = player.currentItem?.asset else { break }
@@ -41,20 +89,16 @@ enum PlayerEnum {
                     case "artist":
                         artist = value
                         break
+                    case "album":
+                        album = value
                     default:
-                        print("\(key): \(key)")
+                        print("\(key): \(value)")
                         break
                     }
                 }
-                
-                if let cgCover = try? AVAssetImageGenerator(asset: asset).copyCGImage(at: CMTime(seconds: 0.0,
-                                                                                                preferredTimescale: .max),
-                                                                                     actualTime: nil)
-                {
-                    album = UIImage(cgImage: cgCover)
-                }
+                cover = getFlacAlbum(url: url)
             }
-            
+    
             asset.commonMetadata.forEach { metadata in
                 guard let common = metadata.commonKey else {
                     print("Not common key")
@@ -67,7 +111,7 @@ enum PlayerEnum {
                 case .commonKeyArtist, .commonKeyAuthor:
                     artist = metadata.value as? String ?? artist
                 case .commonKeyArtwork:
-                    album = UIImage(data: metadata.value as? Data ?? Data.init())
+                    cover = UIImage(data: metadata.value as? Data ?? Data.init())
                 default: break
                 }
             }
@@ -79,7 +123,7 @@ enum PlayerEnum {
         }
         
         
-        return .init(title: title, artist: artist, lyrics: lyrics, album: album)
+        return .init(title: title, artist: artist, lyrics: lyrics, album: album, cover: cover)
     }
     
     private func getFlacMeta(url: URL) -> [String: String]? {
@@ -108,8 +152,54 @@ enum PlayerEnum {
     }
     
     private func getFlacAlbum(url: URL) -> UIImage? {
+        guard let file = try? Data(contentsOf: url) else { return nil }
+        let fileBytes = file.bytes
+        
+        guard String(bytes: fileBytes[0...3], encoding: .ascii) == "fLaC" else
+        {
+            print("Not a flac")
+           return nil
+        }
+        print("Isa flac")
+        print(readBlockHeader(byte: Array(fileBytes[4...8])))
+        
+        
+        
         return nil
         
+    }
+    
+    private func readBlockHeader(byte: [Byte]) -> MetaHeader {
+        let (isLast, type) = isLastAndType(int: byte[0])
+        return MetaHeader(last: isLast,
+                   type: type,
+                   length: Array(byte[1..<4]).int )
+    }
+    
+    func isLastAndType(int: UInt8) -> (Bool, MetaType) {
+        let isLast = int >= 1 << 7
+        let type = MetaType(rawValue: int)
+        return (isLast, type)
+    }
+    
+    struct MetaHeader {
+        var last: Bool
+        var type: MetaType
+        var length: Int
+    }
+    
+    enum MetaType {
+        case STREAMINGINFO
+        
+        case other
+        init(rawValue: UInt8) {
+            switch rawValue {
+            case 0, 1 << 7 + 0:
+                self = .STREAMINGINFO
+            default:
+                self = .other
+            }
+        }
     }
 }
 
@@ -117,12 +207,14 @@ struct Song: Hashable {
     let title: String
     let artist: String
     let lyrics: String?
-    let album: UIImage
-    init(title: String, artist: String, lyrics: String? = nil, album: UIImage? = nil) {
+    let cover: UIImage
+    let album: String?
+    init(title: String, artist: String, lyrics: String? = nil, album: String? = nil, cover: UIImage? = nil) {
         self.title = title
         self.artist = artist
         self.lyrics = lyrics
-        self.album = album ?? UIImage(named: "LP")!
+        self.album = album
+        self.cover = cover ?? UIImage(named: "LP")!
     }
 }
 
@@ -179,6 +271,7 @@ final class Player: ObservableObject {
     
     init() {
         player = .none
+        setupRemoteTransportControls()
     }
     
     func toggle() {
@@ -206,6 +299,7 @@ final class Player: ObservableObject {
                                             let duration = player.currentItem?.duration.seconds ?? 0
                                             let percent = seconds / duration
                                             self.progress = Float( percent )
+                                            self.setupNowPlaying(song: self.nowPlaying!, elapsed: seconds, total: duration)
             })
             
         default:
@@ -214,7 +308,41 @@ final class Player: ObservableObject {
         isPlaying = true
     }
     
+    func setupRemoteTransportControls() {
+        // Get the shared MPRemoteCommandCenter
+        let commandCenter = MPRemoteCommandCenter.shared()
+
+        // Add handler for Play Command
+        commandCenter.playCommand.addTarget { [unowned self] event in
+            self.play()
+            return .success
+        }
+
+        // Add handler for Pause Command
+        commandCenter.pauseCommand.addTarget { [unowned self] event in
+            self.pause()
+            return .success
+        }
+    }
     
+    func setupNowPlaying(song: Song, elapsed: Double, total: Double) {
+        // Define Now Playing Info
+        var nowPlayingInfo = [String : Any]()
+        nowPlayingInfo[MPMediaItemPropertyTitle] = song.title
+
+        nowPlayingInfo[MPMediaItemPropertyArtist] = song.artist
+        
+        nowPlayingInfo[MPMediaItemPropertyArtwork] =
+            MPMediaItemArtwork(boundsSize: song.cover.size) { size in
+                return song.cover
+        }
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = elapsed
+        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = total
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = 1
+
+        // Set the metadata
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    }
     
     func pause() {
         switch player {
