@@ -76,18 +76,6 @@ struct Picture: MetaBlcok {
     }
 }
 
-enum Bit: UInt8, CustomStringConvertible {
-    case zero, one
-
-    var description: String {
-        switch self {
-            case .one:
-                return "1"
-            case .zero:
-                return "0"
-        }
-    }
-}
 extension Data {
     var bytes: [Byte] {
         var byteArray = [UInt8](repeating: 0, count: self.count)
@@ -104,13 +92,6 @@ extension ArrayAble where Element == Byte {
     var data: Data {
         Data(self)
     }
-    
-    var bits: [Bit] {
-        self.flatMap { byte in
-            byte.bits
-        }
-    }
-    
     var int: Int {
         var compound = 0
         let ints = self.map { Int($0) }
@@ -124,23 +105,6 @@ extension ArrayAble where Element == Byte {
 
 extension Array: ArrayAble {}
 extension ArraySlice: ArrayAble {}
-
-extension FixedWidthInteger {
-    var bits: [Bit] {
-        var bitArray = self
-        var bits = [Bit](repeating: .zero, count: self.bitWidth)
-        for i in 0..<self.bitWidth {
-            let currentBit = bitArray & 0x01
-            if currentBit != 0 {
-                bits[i] = .one
-            }
-
-            bitArray >>= 1
-        }
-
-        return bits
-    }
-}
 
 enum PlayerEnum {
     case none
@@ -302,11 +266,6 @@ struct Song: Hashable {
         self.cover = cover ?? UIImage(named: "LP")!
         self.bookmark = bookmark
     }
-}
-
-struct AV {
-    private var player: AVPlayer
-    private var url: URL
 }
 
 final class Player: ObservableObject {
