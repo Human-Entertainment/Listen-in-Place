@@ -1,15 +1,25 @@
 import SwiftUI
 import AVFoundation
+import CoreData
+
+let errorSong = Song(title: "Couldn't load title", artist: "Cound't load artis")
 
 struct ContentView: View {
-    @EnvironmentObject var player: Player
+    @Environment(\.managedObjectContext)
+    var moc
+    
+    @FetchRequest(entity: Songs.entity(),
+                  sortDescriptors: [])
+    var songs: FetchedResults<Songs>
+    
+    @EnvironmentObject
+    var player: Player
     var body: some View {
         VStack {
             NavigationView {
                 List {
-                    ForEach(player.all, id: \.self) { song in
-                        SongCellView(song: song)
-                        
+                    ForEach(songs, id: \.self) { song in
+                        SongCellView(song: (try? Song(bookmark: song.bookmark)) ?? errorSong)
                     }
                 }.onAppear {
                     UITableView.appearance()
@@ -42,7 +52,7 @@ struct ContentView: View {
             print(url)
             defer { url.stopAccessingSecurityScopedResource() }
             
-            self.player.song = .AVPlayer(.init(url: url), url)
+            self.player.add(url: url)
         }
     }
 }

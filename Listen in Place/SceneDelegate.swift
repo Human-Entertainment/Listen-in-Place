@@ -8,6 +8,7 @@
 
 import UIKit
 import SwiftUI
+import CoreData
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -20,9 +21,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
 
+        // Get the managed object context from the shared persistent container.
+        guard let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext else {
+            // throw an issue with databse
+            return
+        }
+        
+        context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+    
         // Create the SwiftUI view that provides the window contents.
         let contentView = ContentView()
             .environmentObject(self.player)
+            .environment(\.managedObjectContext, context)
             
 
         // Use a UIHostingController as window root view controller.
@@ -61,6 +71,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
+        (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
     }
 
 

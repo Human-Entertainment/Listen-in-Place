@@ -5,6 +5,10 @@ import MediaPlayer
 
 typealias Byte = UInt8
 
+enum SongError: Error {
+    case noBookmark
+}
+
 struct Song: Hashable {
     let title: String
     let artist: String
@@ -21,7 +25,9 @@ struct Song: Hashable {
         self.bookmark = bookmark
     }
     
-    init(bookmark: Data) throws {
+    init(bookmark data: Data?) throws {
+        guard let bookmark = data else { throw SongError.noBookmark }
+            
         var isStale = false
         let url = try URL(
             resolvingBookmarkData: bookmark,
@@ -50,56 +56,35 @@ final class Player: ObservableObject {
     // MARK: Access
     
     var queue: [Song] = []
-    private let songKey = "All songs"
     
     @Published var all: [Song] = [Song]()
     
-    var song: PlayerEnum {
-        set(song) {
-            pause()
-            player = song
-            
-            switch song {
-                case .AVPlayer(_, let url):
-                    self.url = url
-                default:
-                    break
-            }
-            let currentSong = song.getSong()
-            queue.removeAll(keepingCapacity: false)
-            queue.append(currentSong)
-            play()
-            
-            
-            if let bookmark = currentSong.bookmark {
-                let defaults = UserDefaults.standard
-                var array = defaults.array(forKey: songKey) as? [Data] ?? [Data]()
-                if !array.contains(bookmark) {
-                    array.append(bookmark)
-                    defaults.set(array, forKey: songKey)
-                }
-            }
+    func add(url: URL) {
+        guard let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext else {
+            return
         }
         
-        get {
-            player
-        }
+        let newSong = Songs(context: context)
+        newSong.bookmark = try? url.bookmarkData()
+        
+        try? context.save()
     }
     
     // MARK: Setup
     
     init() {
         player = .none
+        // Setup mediacenter controls
         setupRemoteTransportControls()
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(avPlayerDidFinishPlaying(note:)),
                                                name: .AVPlayerItemDidPlayToEndTime, object: nil)
-        let defaults = UserDefaults.standard
         
-        let array = defaults.array(forKey: songKey) as? [Data]
-        
-        all = array?.compactMap { try? Song(bookmark: $0) } ?? [Song]()
+        if let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext {
+            
+        }
     }
+    
     
     func setupRemoteTransportControls() {
         // Get the shared MPRemoteCommandCenter
@@ -137,9 +122,7 @@ final class Player: ObservableObject {
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
     
-    enum SongError: Error {
-        case noBookmark
-    }
+
     // MARK: controls
     func play(_ song: Song) throws {
         guard let bookmark = song.bookmark else { throw SongError.noBookmark }
@@ -151,7 +134,19 @@ final class Player: ObservableObject {
             bookmarkDataIsStale: &isStale
         )
         
-        self.song = .AVPlayer(.init(url: url), url)
+        pause()
+        player = .AVPlayer(.init(url: url), url)
+        
+        switch player {
+            case .AVPlayer(_, let url):
+                self.url = url
+            default:
+                break
+        }
+        let currentSong = player.getSong()
+        queue.removeAll(keepingCapacity: false)
+        queue.append(currentSong)
+        play()
     }
     
     var token: Any?
@@ -202,7 +197,7 @@ final class Player: ObservableObject {
     }
     
     func seek(to: Float){
-        switch song {
+        switch player {
             case .AVPlayer(let player, _):
                 
                 let duration = player.currentItem?.duration.seconds ?? 0
