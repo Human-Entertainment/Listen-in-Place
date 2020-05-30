@@ -5,15 +5,84 @@ import MediaPlayer
 
 typealias Byte = UInt8
 
+protocol MetaBlcok {
+    init(bytes: ArraySlice<Byte>)
+}
+
+struct Streaminfo: MetaBlcok {
+    let bytes: ArraySlice<Byte>
+    init(bytes: ArraySlice<Byte>) {
+        self.bytes = bytes
+    }
+}
+
+enum PictureType {
+    case CoverFront
+    case other
+}
+
+struct Picture: MetaBlcok {
+    let pictureType: PictureType
+    let mimeType: String
+    let description: String
+    let width: Int
+    let height: Int
+    let colorDepth: Int
+    let colorCount: Int
+    let image: UIImage?
+    
+    init(bytes: ArraySlice<Byte>) {
+        let start = bytes.startIndex
+        let mimeLengthStart = start + 4
+        let mimeStart = mimeLengthStart + 4
+        switch bytes[start..<start + mimeStart].int {
+            case 3:
+                pictureType = .CoverFront
+            default:
+                pictureType = .other
+                break
+        }
+        
+        /// End position of the MimeType string
+        let mimeLength = bytes[mimeLengthStart..<mimeStart].int + mimeStart
+        
+        mimeType = String(bytes: bytes[mimeStart..<mimeLength], encoding: .ascii) ?? ""
+        
+        let descriptionStart = mimeLength + 4
+        /// The end position of the description
+        let descriptionLength = bytes[mimeLength..<descriptionStart].int + descriptionStart
+        
+        description = String(bytes: bytes[descriptionStart..<descriptionLength], encoding: .ascii) ?? ""
+        
+        let widthEnd = descriptionLength + 4
+        width = bytes[descriptionLength..<widthEnd].int
+        
+        let heightEnd = widthEnd + 4
+        height = bytes[widthEnd..<heightEnd].int
+        
+        let colorDepthEnd = heightEnd + 4
+        colorDepth = bytes[heightEnd..<colorDepthEnd].int
+        
+        let colorCountEnd = colorDepthEnd + 4
+        colorCount = bytes[colorDepthEnd..<colorCountEnd].int
+        
+        let pictureLengthEnd = colorCountEnd + 4
+        let pictureLength = bytes[colorCountEnd..<pictureLengthEnd].int + pictureLengthEnd
+        
+        let imageData = bytes[pictureLengthEnd..<pictureLength].data
+        image = UIImage(data: imageData)
+    }
+}
+
 enum Bit: UInt8, CustomStringConvertible {
     case zero, one
 
     var description: String {
         switch self {
-        case .one:
-            return "1"
-        case .zero:
-            return "0"
+            case .one:
+                return "1"
+            case .zero:
+                return "0"
         }
     }
 }
@@ -25,9 +94,13 @@ extension Data {
     }
 }
 
-extension Array where Element == Byte {
+protocol ArrayAble: Sequence {
+    var count: Int { get }
+}
+
+extension ArrayAble where Element == Byte {
     var data: Data {
-        Data(bytes: self, count: self.count)
+        Data(self)
     }
     
     var bits: [Bit] {
@@ -46,6 +119,9 @@ extension Array where Element == Byte {
         return compound
     }
 }
+
+extension Array: ArrayAble {}
+extension ArraySlice: ArrayAble {}
 
 extension FixedWidthInteger {
     var bits: [Bit] {
@@ -83,17 +159,17 @@ enum PlayerEnum {
             if let meta = self.getFlacMeta(url: url) {
                 meta.forEach { key, value in
                     switch key.lowercased() {
-                    case "title":
-                        title = value
-                        break
-                    case "artist":
-                        artist = value
-                        break
-                    case "album":
-                        album = value
-                    default:
-                        print("\(key): \(value)")
-                        break
+                        case "title":
+                            title = value
+                            break
+                        case "artist":
+                            artist = value
+                            break
+                        case "album":
+                            album = value
+                        default:
+                            print("\(key): \(value)")
+                            break
                     }
                 }
                 cover = getFlacAlbum(url: url)
@@ -161,45 +237,48 @@ enum PlayerEnum {
            return nil
         }
         print("Isa flac")
-        print(readBlockHeader(byte: Array(fileBytes[4...8])))
+        let blocks = readBlock(byte: Array(fileBytes[4..<fileBytes.count]))
+        let pictures = blocks.compactMap { $0 as? Picture }
         
+        print(pictures.count)
         
+        var cover: UIImage? = nil
         
-        return nil
-        
-    }
-    
-    private func readBlockHeader(byte: [Byte]) -> MetaHeader {
-        let (isLast, type) = isLastAndType(int: byte[0])
-        return MetaHeader(last: isLast,
-                   type: type,
-                   length: Array(byte[1..<4]).int )
-    }
-    
-    func isLastAndType(int: UInt8) -> (Bool, MetaType) {
-        let isLast = int >= 1 << 7
-        let type = MetaType(rawValue: int)
-        return (isLast, type)
-    }
-    
-    struct MetaHeader {
-        var last: Bool
-        var type: MetaType
-        var length: Int
-    }
-    
-    enum MetaType {
-        case STREAMINGINFO
-        
-        case other
-        init(rawValue: UInt8) {
-            switch rawValue {
-            case 0, 1 << 7 + 0:
-                self = .STREAMINGINFO
-            default:
-                self = .other
+        pictures.forEach { picture in
+            if picture.pictureType == .CoverFront {
+                cover = picture.image
             }
         }
+        
+        return cover
+        
+    }
+    
+    private func readBlock(byte: [Byte]) -> [MetaBlcok]  {
+        var i = 0
+        let valueMask: UInt8 = 0x7f
+        let bitMask: UInt8 = 0x80
+        var last = false
+        var block = [MetaBlcok]()
+        while !last {
+            let rawValue = byte[i]
+            last = rawValue & bitMask != 0
+            let length = Array(byte[i+1..<i+4]).int
+            i += 4
+            switch rawValue & valueMask {
+                case 0:
+                    block.append(Streaminfo(bytes: byte[i..<i+length] ))
+                    break
+                case 6:
+                    block.append(Picture(bytes: byte[i..<i+length]))
+                    break
+                default: break
+                    
+            }
+            i += length
+        }
+        return block
+        
     }
 }
 
