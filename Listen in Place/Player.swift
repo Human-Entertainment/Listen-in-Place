@@ -35,11 +35,13 @@ struct Picture: MetaBlcok {
         let start = bytes.startIndex
         let mimeLengthStart = start + 4
         let mimeStart = mimeLengthStart + 4
-        switch bytes[start..<start + mimeStart].int {
+        let pictureType = bytes[start..<mimeLengthStart].int
+        switch pictureType {
             case 3:
-                pictureType = .CoverFront
+                self.pictureType = .CoverFront
             default:
-                pictureType = .other
+                self.pictureType = .other
+                print(pictureType)
                 break
         }
         
@@ -247,6 +249,8 @@ enum PlayerEnum {
         pictures.forEach { picture in
             if picture.pictureType == .CoverFront {
                 cover = picture.image
+            } else {
+                print(picture.mimeType)
             }
         }
         
