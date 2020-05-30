@@ -194,6 +194,7 @@ final class Player: ObservableObject {
     
     var song: PlayerEnum {
         set(song) {
+            pause()
             player = song
             
             switch song {
