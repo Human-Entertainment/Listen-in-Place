@@ -152,6 +152,7 @@ enum PlayerEnum {
         var artist = "Unknown Artist"
         var cover: UIImage? = nil
         var album: String? = nil
+        var bookmark: Data? = nil
         
         switch self {
         case .AVPlayer(let player, let url):
@@ -194,14 +195,14 @@ enum PlayerEnum {
                 }
             }
             
-            
+            bookmark = try? url.bookmarkData()
             break
         default:
             break
         }
         
         
-        return .init(title: title, artist: artist, lyrics: lyrics, album: album, cover: cover)
+        return .init(title: title, artist: artist, lyrics: lyrics, album: album, cover: cover, bookmark: bookmark)
     }
     
     private func getFlacMeta(url: URL) -> [String: String]? {
@@ -292,12 +293,14 @@ struct Song: Hashable {
     let lyrics: String?
     let cover: UIImage
     let album: String?
-    init(title: String, artist: String, lyrics: String? = nil, album: String? = nil, cover: UIImage? = nil) {
+    let bookmark: Data?
+    init(title: String, artist: String, lyrics: String? = nil, album: String? = nil, cover: UIImage? = nil, bookmark: Data? = nil) {
         self.title = title
         self.artist = artist
         self.lyrics = lyrics
         self.album = album
         self.cover = cover ?? UIImage(named: "LP")!
+        self.bookmark = bookmark
     }
 }
 
@@ -314,7 +317,7 @@ final class Player: ObservableObject {
     private var url: URL? = nil
     private var audioQueue = DispatchQueue.init(label: "audio")
     var nowPlaying: Song? {
-        queue[0]
+        queue.first
     }
     
     func seek(to: Float){
@@ -355,6 +358,9 @@ final class Player: ObservableObject {
     init() {
         player = .none
         setupRemoteTransportControls()
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(avPlayerDidFinishPlaying(note:)),
+                                               name: .AVPlayerItemDidPlayToEndTime, object: nil)
     }
     
     func toggle() {
@@ -389,6 +395,12 @@ final class Player: ObservableObject {
             break
         }
         isPlaying = true
+    }
+    
+    @objc func avPlayerDidFinishPlaying(note: NSNotification) {
+        queue.removeFirst()
+        player = .none
+        isPlaying = false
     }
     
     func setupRemoteTransportControls() {

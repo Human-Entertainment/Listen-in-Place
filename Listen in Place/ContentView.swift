@@ -2,27 +2,12 @@ import SwiftUI
 import AVFoundation
 
 struct ContentView: View {
-    var songs = [Song(title: "Click me",
-                      artist: "Art"),
-                 
-                 Song(title: "Some  song",
-                      artist: "My Art"),
-                 
-                 Song(title: "Hello world",
-                      artist: "Tom"),
-                 
-                 Song(title: "Song",
-                      artist: "Artist"),
-                 Song(title: "Tom",
-                      artist: "Nook"),
-                 Song(title: "The Ballad of Mona Lisa",
-                      artist: "Panic! at the Disco")]
     @EnvironmentObject var player: Player
     var body: some View {
         VStack {
             NavigationView {
                 List {
-                    ForEach(songs, id: \.self) { song in
+                    ForEach(player.queue, id: \.self) { song in
                         SongCellView(song: song)
                         
                     }
@@ -34,7 +19,8 @@ struct ContentView: View {
                 .navigationBarItems(trailing: DocumentPickerButton(documentTypes: ["public.mp3", "org.xiph.flac"],
                                                                    onOpen: self.openSong){
                     Image(systemName: "plus.circle.fill")
-                    .resizable()
+                        .resizable()
+                        .padding()
                 } )
             }
             if !self.player.queue.isEmpty {
@@ -83,10 +69,12 @@ struct GlobalControls: View {
     
     var body: some View {
         Button(action: {
-            self.showPlayer.toggle()
+            if (self.player.nowPlaying != nil) {
+                self.showPlayer.toggle()
+            }
         }) {
             HStack {
-                SongView(song: player.nowPlaying!)
+                SongView(song: player.nowPlaying ?? notPlaying)
                 Spacer()
                 MusicControls()
             }.padding()
@@ -119,6 +107,8 @@ struct SongCellView: View {
         }
     }
 }
+
+let notPlaying = Song(title: "Not Playing", artist: "Not Playing")
 
 struct SongView: View {
     let song: Song

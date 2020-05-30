@@ -24,13 +24,19 @@ struct DocumentPickerButton<Label: View>: View {
     }
     
     var body: some View {
-        Button(action: {self.showPicker.toggle() }) {
+        Button(action: {self.showPicker = true }) {
             view()
         }
         .sheet(isPresented: self.$showPicker) {
             DocumentPickerController(documentTypes: self.documentTypes,
-                                     onOpen: self.onOpen,
-                                     onCancel: self.onCancel)
+                                     onOpen: { url in
+                                        self.showPicker = false
+                                        self.onOpen(url)
+                                     },
+                                     onCancel: {
+                                        self.showPicker = false
+                                        self.onCancel()
+                                     })
         }
     }
 }
@@ -58,7 +64,6 @@ fileprivate struct DocumentPickerController: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewControllerType {
         picker
     }
-    
 }
 
 fileprivate class DocumentPicker: UIDocumentPickerViewController {
