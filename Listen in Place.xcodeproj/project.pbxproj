@@ -21,6 +21,7 @@
 		FC625AB82482B19600ED60BF /* Streaminginfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625AB72482B19600ED60BF /* Streaminginfo.swift */; };
 		FC625ABA2482B1BD00ED60BF /* Picture.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625AB92482B1BD00ED60BF /* Picture.swift */; };
 		FC625ABC2482B1F300ED60BF /* Array+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABB2482B1F300ED60BF /* Array+Extensions.swift */; };
+		FC625ABE2482CB9600ED60BF /* PlayerEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABD2482CB9600ED60BF /* PlayerEnum.swift */; };
 		FCC3FB4D247BF51100F355B1 /* DocumentPickerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC3FB4C247BF51100F355B1 /* DocumentPickerButton.swift */; };
 		FCC94AC6247A979B00DCFD25 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */; };
 		FCD1325A2479D961008ADEF5 /* SwiftUI+DarkMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD132592479D961008ADEF5 /* SwiftUI+DarkMode.swift */; };
@@ -77,6 +78,7 @@
 		FC625AB72482B19600ED60BF /* Streaminginfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Streaminginfo.swift; sourceTree = "<group>"; };
 		FC625AB92482B1BD00ED60BF /* Picture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Picture.swift; sourceTree = "<group>"; };
 		FC625ABB2482B1F300ED60BF /* Array+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extensions.swift"; sourceTree = "<group>"; };
+		FC625ABD2482CB9600ED60BF /* PlayerEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerEnum.swift; sourceTree = "<group>"; };
 		FCC3FB4C247BF51100F355B1 /* DocumentPickerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPickerButton.swift; sourceTree = "<group>"; };
 		FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPlayButton.swift; sourceTree = "<group>"; };
 		FCD132592479D961008ADEF5 /* SwiftUI+DarkMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftUI+DarkMode.swift"; sourceTree = "<group>"; };
@@ -152,6 +154,7 @@
 				FC521CE32479A46800D2AC82 /* Preview Content */,
 				FC521D0D2479B06100D2AC82 /* Player.swift */,
 				FC625ABB2482B1F300ED60BF /* Array+Extensions.swift */,
+				FC625ABD2482CB9600ED60BF /* PlayerEnum.swift */,
 			);
 			path = "Listen in Place";
 			sourceTree = "<group>";
@@ -337,6 +340,7 @@
 				FCD1325A2479D961008ADEF5 /* SwiftUI+DarkMode.swift in Sources */,
 				FCC3FB4D247BF51100F355B1 /* DocumentPickerButton.swift in Sources */,
 				FC521CE02479A46600D2AC82 /* ContentView.swift in Sources */,
+				FC625ABE2482CB9600ED60BF /* PlayerEnum.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

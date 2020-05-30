@@ -7,7 +7,7 @@ struct ContentView: View {
         VStack {
             NavigationView {
                 List {
-                    ForEach(player.queue, id: \.self) { song in
+                    ForEach(player.all, id: \.self) { song in
                         SongCellView(song: song)
                         
                     }
@@ -41,16 +41,6 @@ struct ContentView: View {
             }
             print(url)
             defer { url.stopAccessingSecurityScopedResource() }
-            
-            guard let bookmark = try? url.bookmarkData() else {
-                return
-            }
-            
-            let defaults = UserDefaults.standard
-            
-            var array = defaults.array(forKey: "Songs") as? [Data]
-            array?.append(bookmark)
-            defaults.set(array, forKey: "Songs")
             
             self.player.song = .AVPlayer(.init(url: url), url)
         }
