@@ -52,13 +52,7 @@ final class Player: ObservableObject {
     var queue: [Song] = []
     private let songKey = "All songs"
     
-    var all: [Song] {
-        let defaults = UserDefaults.standard
-        
-        let array = defaults.array(forKey: songKey) as? [Data]
-        
-        return array?.compactMap { try? Song(bookmark: $0) } ?? [Song]()
-    }
+    @Published var all: [Song] = [Song]()
     
     var song: PlayerEnum {
         set(song) {
@@ -100,6 +94,11 @@ final class Player: ObservableObject {
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(avPlayerDidFinishPlaying(note:)),
                                                name: .AVPlayerItemDidPlayToEndTime, object: nil)
+        let defaults = UserDefaults.standard
+        
+        let array = defaults.array(forKey: songKey) as? [Data]
+        
+        all = array?.compactMap { try? Song(bookmark: $0) } ?? [Song]()
     }
     
     func setupRemoteTransportControls() {
