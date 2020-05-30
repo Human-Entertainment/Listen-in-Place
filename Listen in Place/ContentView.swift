@@ -88,7 +88,7 @@ struct SongCellView: View {
     let song: Song
     var body: some View {
         Button(action: {
-            self.showPlayer.toggle()
+            try? self.player.play(self.song)
         }) {
             SongView(song: song)
         }.sheet(isPresented: self.$showPlayer) {

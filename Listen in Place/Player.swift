@@ -36,7 +36,7 @@ struct Song: Hashable {
 }
 
 final class Player: ObservableObject {
-    private let songKey = "Songs"
+    
     private var player: PlayerEnum
     private var _avPlayer: AVPlayer?
     @Published var progress: Float = 0.0
@@ -47,19 +47,10 @@ final class Player: ObservableObject {
         queue.first
     }
     
-    func seek(to: Float){
-        switch song {
-        case .AVPlayer(let player, _):
-            
-            let duration = player.currentItem?.duration.seconds ?? 0
-            let percent = Double(to) * duration
-            player.seek(to: .init(seconds: percent, preferredTimescale: CMTimeScale(10)))
-        default:
-            break
-        }
-    }
+    // MARK: Access
     
     var queue: [Song] = []
+    private let songKey = "All songs"
     
     var all: [Song] {
         let defaults = UserDefaults.standard
@@ -75,10 +66,10 @@ final class Player: ObservableObject {
             player = song
             
             switch song {
-            case .AVPlayer(_, let url):
-                self.url = url
-            default:
-                break
+                case .AVPlayer(_, let url):
+                    self.url = url
+                default:
+                    break
             }
             let currentSong = song.getSong()
             queue.removeAll(keepingCapacity: false)
@@ -89,8 +80,10 @@ final class Player: ObservableObject {
             if let bookmark = currentSong.bookmark {
                 let defaults = UserDefaults.standard
                 var array = defaults.array(forKey: songKey) as? [Data] ?? [Data]()
-                array.append(bookmark)
-                defaults.set(array, forKey: songKey)
+                if !array.contains(bookmark) {
+                    array.append(bookmark)
+                    defaults.set(array, forKey: songKey)
+                }
             }
         }
         
@@ -98,6 +91,8 @@ final class Player: ObservableObject {
             player
         }
     }
+    
+    // MARK: Setup
     
     init() {
         player = .none
@@ -107,18 +102,57 @@ final class Player: ObservableObject {
                                                name: .AVPlayerItemDidPlayToEndTime, object: nil)
     }
     
-    func toggle() {
-        if isPlaying {
-            pause()
-            isPlaying = false
-        } else {
-            play()
-            isPlaying = true
+    func setupRemoteTransportControls() {
+        // Get the shared MPRemoteCommandCenter
+        let commandCenter = MPRemoteCommandCenter.shared()
+        
+        // Add handler for Play Command
+        commandCenter.playCommand.addTarget { [unowned self] event in
+            self.play()
+            return .success
+        }
+        
+        // Add handler for Pause Command
+        commandCenter.pauseCommand.addTarget { [unowned self] event in
+            self.pause()
+            return .success
         }
     }
     
-    func play(_ song: URL) {
+    func setupNowPlaying(song: Song, elapsed: Double, total: Double) {
+        // Define Now Playing Info
+        var nowPlayingInfo = [String : Any]()
+        nowPlayingInfo[MPMediaItemPropertyTitle] = song.title
         
+        nowPlayingInfo[MPMediaItemPropertyArtist] = song.artist
+        
+        nowPlayingInfo[MPMediaItemPropertyArtwork] =
+            MPMediaItemArtwork(boundsSize: song.cover.size) { size in
+                return song.cover
+        }
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = elapsed
+        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = total
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = 1
+        
+        // Set the metadata
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    }
+    
+    enum SongError: Error {
+        case noBookmark
+    }
+    // MARK: controls
+    func play(_ song: Song) throws {
+        guard let bookmark = song.bookmark else { throw SongError.noBookmark }
+        var isStale = false
+        let url = try URL(
+            resolvingBookmarkData: bookmark,
+            options: .withoutUI,
+            relativeTo: nil,
+            bookmarkDataIsStale: &isStale
+        )
+        
+        self.song = .AVPlayer(.init(url: url), url)
     }
     
     var token: Any?
@@ -145,56 +179,48 @@ final class Player: ObservableObject {
     }
     
     @objc func avPlayerDidFinishPlaying(note: NSNotification) {
-        queue.removeFirst()
-        player = .none
-        isPlaying = false
-    }
-    
-    func setupRemoteTransportControls() {
-        // Get the shared MPRemoteCommandCenter
-        let commandCenter = MPRemoteCommandCenter.shared()
-
-        // Add handler for Play Command
-        commandCenter.playCommand.addTarget { [unowned self] event in
-            self.play()
-            return .success
+        guard case let PlayerEnum.AVPlayer(player, _) = self.player else { return }
+        if let token = token {
+            player.removeTimeObserver(token)
         }
-
-        // Add handler for Pause Command
-        commandCenter.pauseCommand.addTarget { [unowned self] event in
-            self.pause()
-            return .success
-        }
-    }
-    
-    func setupNowPlaying(song: Song, elapsed: Double, total: Double) {
-        // Define Now Playing Info
-        var nowPlayingInfo = [String : Any]()
-        nowPlayingInfo[MPMediaItemPropertyTitle] = song.title
-
-        nowPlayingInfo[MPMediaItemPropertyArtist] = song.artist
         
-        nowPlayingInfo[MPMediaItemPropertyArtwork] =
-            MPMediaItemArtwork(boundsSize: song.cover.size) { size in
-                return song.cover
-        }
-        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = elapsed
-        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = total
-        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = 1
-
-        // Set the metadata
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+        queue.removeFirst()
+        self.player = .none
+        isPlaying = false
+        
     }
+    
+    
     
     func pause() {
         switch player {
         case .AVPlayer(let player, _):
             player.pause()
-            if let token = token {
-                player.removeTimeObserver(token)
-            }
+            
         default:
             break
+        }
+    }
+    
+    func seek(to: Float){
+        switch song {
+            case .AVPlayer(let player, _):
+                
+                let duration = player.currentItem?.duration.seconds ?? 0
+                let percent = Double(to) * duration
+                player.seek(to: .init(seconds: percent, preferredTimescale: CMTimeScale(10)))
+            default:
+                break
+        }
+    }
+    
+    func toggle() {
+        if isPlaying {
+            pause()
+            isPlaying = false
+        } else {
+            play()
+            isPlaying = true
         }
     }
 }
