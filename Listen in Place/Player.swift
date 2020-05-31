@@ -174,6 +174,12 @@ final class Player: ObservableObject {
         let newSong = Songs(context: context)
         newSong.bookmark = try? url.bookmarkData()
         
+        if let songToAll = try? Song(bookmark: newSong.bookmark) {
+            if !all.contains(songToAll) {
+                all.append(songToAll)
+            }
+        }
+        
         try? context.save()
     }
     
@@ -263,8 +269,7 @@ final class Player: ObservableObject {
             default:
                 break
         }
-        let currentSong = player.getSong()
-        nowPlaying = currentSong
+        nowPlaying = song
         
         // TODO: Empty queue and add this song to queue
         
