@@ -7,19 +7,19 @@ let errorSong = Song(title: "Couldn't load title", artist: "Cound't load artis")
 struct ContentView: View {
     @Environment(\.managedObjectContext)
     var moc
-    
+    /*
     @FetchRequest(entity: Songs.entity(),
                   sortDescriptors: [])
     var songs: FetchedResults<Songs>
-    
+    */
     @EnvironmentObject
     var player: Player
     var body: some View {
         VStack {
             NavigationView {
                 List {
-                    ForEach(songs, id: \.self) { song in
-                        SongCellView(song: (try? Song(bookmark: song.bookmark)) ?? errorSong)
+                    ForEach(player.all, id: \.self) { song in
+                        SongCellView(song: song)
                     }
                 }.onAppear {
                     UITableView.appearance()
@@ -33,7 +33,7 @@ struct ContentView: View {
                         .padding()
                 } )
             }
-            if !self.player.queue.isEmpty {
+            if self.player.nowPlaying != nil {
                 GlobalControls()
             } else {
                 EmptyView()
@@ -84,7 +84,7 @@ struct GlobalControls: View {
         .clipped()
         .shadow(radius: 5)
         .sheet(isPresented: self.$showPlayer) {
-            MusicView(song: self.player.queue.first!)
+            MusicView(song: self.player.nowPlaying ?? notPlaying)
                 .environmentObject(self.player)
         }
     }
