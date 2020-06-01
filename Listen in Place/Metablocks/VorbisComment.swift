@@ -15,16 +15,14 @@ struct VorbisComment: MetaBlcok {
         let commentListCount = bytes[vendorEnd..+<1].uint32
         
         var comments = [String]()
-        var currentComment = 0
         var commentStart = commentListStart
-        while currentComment != commentListCount {
+        for _ in 0..<commentListCount {
             let commentLengthEnd = commentStart + 4
             let commentStringStart = commentLengthEnd + 4
             let commentLength = bytes[commentLengthEnd..+<1].int + commentLengthEnd
             let comment = String(bytes: bytes[commentStringStart..<commentLength], encoding: .utf8)!
             comments.append(extract(comment: comment))
             commentStart = commentLength
-            currentComment+=1
         }
         return comments
     }
