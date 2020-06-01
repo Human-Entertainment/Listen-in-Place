@@ -24,6 +24,8 @@
 		FC625ABE2482CB9600ED60BF /* PlayerEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABD2482CB9600ED60BF /* PlayerEnum.swift */; };
 		FC625AC12483021B00ED60BF /* Songs.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABF2483021A00ED60BF /* Songs.xcdatamodeld */; };
 		FC625AC42483093F00ED60BF /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC625AC32483093E00ED60BF /* CoreData.framework */; };
+		FC625ACE2483D4E800ED60BF /* URL+Coordiantor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ACD2483D4E800ED60BF /* URL+Coordiantor.swift */; };
+		FC625AD02484128700ED60BF /* VorbisComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ACF2484128600ED60BF /* VorbisComment.swift */; };
 		FCC3FB4D247BF51100F355B1 /* DocumentPickerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC3FB4C247BF51100F355B1 /* DocumentPickerButton.swift */; };
 		FCC94AC6247A979B00DCFD25 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */; };
 		FCD1325A2479D961008ADEF5 /* SwiftUI+DarkMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD132592479D961008ADEF5 /* SwiftUI+DarkMode.swift */; };
@@ -83,6 +85,8 @@
 		FC625ABD2482CB9600ED60BF /* PlayerEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerEnum.swift; sourceTree = "<group>"; };
 		FC625AC02483021A00ED60BF /* Songs.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Songs.xcdatamodel; sourceTree = "<group>"; };
 		FC625AC32483093E00ED60BF /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		FC625ACD2483D4E800ED60BF /* URL+Coordiantor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Coordiantor.swift"; sourceTree = "<group>"; };
+		FC625ACF2484128600ED60BF /* VorbisComment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VorbisComment.swift; sourceTree = "<group>"; };
 		FCC3FB4C247BF51100F355B1 /* DocumentPickerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPickerButton.swift; sourceTree = "<group>"; };
 		FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPlayButton.swift; sourceTree = "<group>"; };
 		FCD132592479D961008ADEF5 /* SwiftUI+DarkMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftUI+DarkMode.swift"; sourceTree = "<group>"; };
@@ -154,6 +158,7 @@
 				FC625ABB2482B1F300ED60BF /* Array+Extensions.swift */,
 				FC625ABD2482CB9600ED60BF /* PlayerEnum.swift */,
 				FC625ABF2483021A00ED60BF /* Songs.xcdatamodeld */,
+				FC625ACD2483D4E800ED60BF /* URL+Coordiantor.swift */,
 			);
 			path = "Listen in Place";
 			sourceTree = "<group>";
@@ -190,6 +195,7 @@
 				FC625AB52482B17600ED60BF /* Metablock.swift */,
 				FC625AB72482B19600ED60BF /* Streaminginfo.swift */,
 				FC625AB92482B1BD00ED60BF /* Picture.swift */,
+				FC625ACF2484128600ED60BF /* VorbisComment.swift */,
 			);
 			path = Metablocks;
 			sourceTree = "<group>";
@@ -336,10 +342,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				FCC94AC6247A979B00DCFD25 /* AirPlayButton.swift in Sources */,
+				FC625ACE2483D4E800ED60BF /* URL+Coordiantor.swift in Sources */,
 				FC521CDC2479A46600D2AC82 /* AppDelegate.swift in Sources */,
 				FC521CDE2479A46600D2AC82 /* SceneDelegate.swift in Sources */,
 				FC625ABA2482B1BD00ED60BF /* Picture.swift in Sources */,
 				FC521D0C2479A51B00D2AC82 /* MusicView.swift in Sources */,
+				FC625AD02484128700ED60BF /* VorbisComment.swift in Sources */,
 				FC521D0E2479B06100D2AC82 /* Player.swift in Sources */,
 				FC625AC12483021B00ED60BF /* Songs.xcdatamodeld in Sources */,
 				FC625AB62482B17600ED60BF /* Metablock.swift in Sources */,

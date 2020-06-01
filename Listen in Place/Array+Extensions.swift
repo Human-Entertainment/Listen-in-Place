@@ -25,6 +25,23 @@ extension ArrayAble where Element == Byte {
         }
         return compound
     }
+    
+    var uint32: UInt32 {
+        var compound: UInt32 = 0
+        let uints = self.map { UInt32($0) }
+        for i in 0..<self.count {
+            let reverseIndex = self.count - i - 1
+            compound += uints[i] << (reverseIndex * 8)
+        }
+        return compound
+    }
+}
+
+infix operator ..+<
+extension Strideable where Stride: SignedInteger {
+    public static func ..+<(minimum: Self, count: Self.Stride) -> Range<Self> {
+        minimum..<minimum.advanced(by: count)
+    }
 }
 
 extension Array: ArrayAble {}

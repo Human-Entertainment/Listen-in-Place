@@ -45,7 +45,8 @@ enum PlayerEnum {
                 break
         }
         
-        
-        return .init(title: title, artist: artist, lyrics: lyrics, album: album, cover: cover, bookmark: bookmark)
+        let song = Song()
+            song.load(title: title, artist: artist, lyrics: lyrics, album: album, cover: cover, bookmark: bookmark)
+        return song
     }
 }

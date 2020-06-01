@@ -10,14 +10,15 @@ enum SongError: Error {
     case noBookmark
 }
 
-struct Song: Hashable {
-    private(set) var title: String
-    private(set) var artist: String
+class Song: NSFileCoordinator {
+    private(set) var title: String = ""
+    private(set) var artist: String = ""
     private(set) var lyrics: String? = nil
-    private(set) var cover: UIImage
+    private(set) var cover: UIImage = UIImage(named: "LP")!
     private(set) var album: String? = nil
     private(set) var bookmark: Data? = nil
-    init(title: String, artist: String, lyrics: String? = nil, album: String? = nil, cover: UIImage? = nil, bookmark: Data? = nil) {
+    
+    func load(title: String, artist: String, lyrics: String? = nil, album: String? = nil, cover: UIImage? = nil, bookmark: Data? = nil) {
         self.title = title
         self.artist = artist
         self.lyrics = lyrics
@@ -26,7 +27,7 @@ struct Song: Hashable {
         self.bookmark = bookmark
     }
     
-    init(bookmark data: Data?) throws {
+    func load(bookmark data: Data?) throws {
         guard let bookmark = data else { throw SongError.noBookmark }
             
         var isStale = false
@@ -36,11 +37,11 @@ struct Song: Hashable {
             relativeTo: nil,
             bookmarkDataIsStale: &isStale
             )
-        self.init(url: url, bookmark: bookmark)
+        self.load(url: url, bookmark: bookmark)
     }
     
-    init(url: URL, bookmark: Data? = nil) {
-        // TODO: Fix this
+    func load(url: URL, bookmark: Data? = nil) {
+        
         var album: String? = nil
         var artist: String? = nil
         var title: String? = nil
@@ -63,15 +64,25 @@ struct Song: Hashable {
             }
             
         }
-        cover = Song.getFlacAlbum(url: url) ?? UIImage(named: "LP")!
+        var cover: UIImage? = nil
+        url.coordinatedRead(self, callback: { (data, error) in
+            if let data = data {
+                cover = Song.getFlacAlbum(data: data)
+            }
+        })
+        self.cover = cover ?? UIImage(named: "LP")!
         self.title = title ?? "Unknow title"
         self.artist = artist ?? "Unknown artist"
         self.album = album ?? "Unknown album"
         self.bookmark = bookmark ?? (try? url.bookmarkData())
+    
+        // TODO: make it so MP3 can also be parsed
+        
     }
     
     private static func getFlacMeta(url: URL) -> [String: String]? {
         var fileID: AudioFileID? = nil
+        
         guard AudioFileOpenURL(url as CFURL,
                                .readPermission,
                                kAudioFileFLACType,
@@ -95,9 +106,9 @@ struct Song: Hashable {
         return .init(_immutableCocoaDictionary: cfDict)
     }
     
-    private static func getFlacAlbum(url: URL) -> UIImage? {
-        guard let file = try? Data(contentsOf: url) else { return nil }
-        let fileBytes = file.bytes
+    private static func getFlacAlbum(data: Data) -> UIImage? {
+        
+        let fileBytes = data.bytes
         
         guard String(bytes: fileBytes[0...3], encoding: .ascii) == "fLaC" else
         {
@@ -137,10 +148,13 @@ struct Song: Hashable {
             i += 4
             switch rawValue & valueMask {
                 case 0:
-                    block.append(Streaminfo(bytes: byte[i..<i+length] ))
+                    block.append(Streaminfo(bytes: byte[i..+<length] ))
+                    break
+                case 4:
+                    block.append(VorbisComment(bytes: byte[i..+<length] ))
                     break
                 case 6:
-                    block.append(Picture(bytes: byte[i..<i+length]))
+                    block.append(Picture(bytes: byte[i..+<length]))
                     break
                 default: break
                 
@@ -173,10 +187,11 @@ final class Player: ObservableObject {
         
         let newSong = Songs(context: context)
         newSong.bookmark = try? url.bookmarkData()
-        
-        if let songToAll = try? Song(bookmark: newSong.bookmark) {
-            if !all.contains(songToAll) {
-                all.append(songToAll)
+        let song = Song()
+        do {
+            try? song.load(bookmark: newSong.bookmark)
+            if !all.contains(song) {
+                all.append(song)
             }
         }
         
@@ -201,8 +216,14 @@ final class Player: ObservableObject {
                 
                 (result as! [NSManagedObject]).forEach { result in
                     guard let bookmark = result.value(forKey: "bookmark") as? Data else { return }
-                    guard let song = try? Song(bookmark: bookmark) else { return }
-                    self.all.append(song)
+                    do {
+                        let song = Song()
+                        try song.load(bookmark: bookmark)
+                        
+                        self.all.append(song)
+                    } catch {
+                        
+                    }
                 }
             } catch {
                 

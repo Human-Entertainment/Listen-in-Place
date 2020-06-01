@@ -31,13 +31,6 @@ struct MusicView: View {
     }
 }
 
-struct MusicView_Previews: PreviewProvider {
-    static var previews: some View {
-        TestView(view: MusicView(song: Song(title: "Song", artist: "Artist")) )
-            .environmentObject(Player())
-    }
-}
-
 struct PlayButton: View {
     @EnvironmentObject
     var player: Player
