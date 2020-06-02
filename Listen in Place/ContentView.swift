@@ -3,8 +3,7 @@ import AVFoundation
 import CoreData
 
 var errorSong: Song {
-    let song = Song()
-    song.load(title: "Couldn't load title", artist: "Cound't load artis")
+    let song = Song(title: "Couldn't load title", artist: "Cound't load artis")
     return song
 }
 struct ContentView: View {
@@ -112,8 +111,7 @@ struct SongCellView: View {
 }
 
 var notPlaying: Song {
-    let song = Song()
-    song.load(title: "Not Playing", artist: "Not Playing")
+    let song = Song(title: "Not Playing", artist: "Not Playing")
     return song
 }
 

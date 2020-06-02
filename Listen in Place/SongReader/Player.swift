@@ -3,10 +3,32 @@ import AVFoundation
 import UIKit
 import MediaPlayer
 import CoreData
+import Combine
 
 typealias Byte = UInt8
 
-final class Player: ObservableObject {
+final class Player: ObservableObject, Subscriber {
+    private var subscription: Subscription? = nil
+    func receive(subscription: Subscription) {
+        self.subscription = subscription
+    }
+    
+    func receive(_ input: Song) -> Subscribers.Demand {
+        if !all.contains(input) {
+            all.append(input)
+        }
+        return Subscribers.Demand.unlimited
+    }
+    
+    func receive(completion: Subscribers.Completion<SongError>) {
+        
+    }
+    
+    
+    typealias Input = Song
+    
+    typealias Failure = SongError
+    
     
     private var player: PlayerEnum
     private var _avPlayer: AVPlayer?
@@ -27,13 +49,9 @@ final class Player: ObservableObject {
         
         let newSong = Songs(context: context)
         newSong.bookmark = try? url.bookmarkData()
-        let song = Song()
-        do {
-            try? song.load(bookmark: newSong.bookmark)
-            if !all.contains(song) {
-                all.append(song)
-            }
-        }
+        // TODO: Fix this stuff
+        
+        try? SongPublisher().load(bookmark: newSong.bookmark).receive(subscriber: self)
         
         try? context.save()
     }
@@ -56,14 +74,9 @@ final class Player: ObservableObject {
                 
                 (result as! [NSManagedObject]).forEach { result in
                     guard let bookmark = result.value(forKey: "bookmark") as? Data else { return }
-                    do {
-                        let song = Song()
-                        try song.load(bookmark: bookmark)
+                    // TODO: Fix
                         
-                        self.all.append(song)
-                    } catch {
-                        
-                    }
+                    try? SongPublisher().load(bookmark: bookmark).receive(subscriber: self)
                 }
             } catch {
                 
@@ -71,7 +84,6 @@ final class Player: ObservableObject {
         }
         
     }
-    
     
     func setupRemoteTransportControls() {
         // Get the shared MPRemoteCommandCenter

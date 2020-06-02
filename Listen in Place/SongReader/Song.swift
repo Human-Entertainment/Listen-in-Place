@@ -2,11 +2,24 @@ import NIO
 import NIOTransportServices
 import Foundation
 import UIKit
+import Combine
 
 enum SongError: Error {
     case noBookmark
+    case coundtReadFile
 }
-class Song: NSFileCoordinator {
+
+class SongFileCoordinator: NSFileCoordinator {}
+
+struct Song: Hashable {
+    static func == (lhs: Song, rhs: Song) -> Bool {
+        guard lhs.title == rhs.title else { return false }
+        guard lhs.artist == rhs.artist else { return false }
+        guard lhs.album == lhs.album else { return false }
+        
+        return true
+    }
+    
     private(set) var title: String = ""
     private(set) var artist: String = ""
     private(set) var lyrics: String? = nil
@@ -14,7 +27,7 @@ class Song: NSFileCoordinator {
     private(set) var album: String? = nil
     private(set) var bookmark: Data? = nil
     
-    func load(title: String,
+    init(title: String,
               artist: String,
               lyrics: String? = nil,
               album: String? = nil,
@@ -29,7 +42,11 @@ class Song: NSFileCoordinator {
         self.bookmark = bookmark
     }
     
-    func load(bookmark data: Data?) throws {
+    
+}
+
+struct SongPublisher {
+    func load(bookmark data: Data?) throws -> AnyPublisher<Song, SongError> {
         guard let bookmark = data else { throw SongError.noBookmark }
         
         var isStale = false
@@ -39,10 +56,12 @@ class Song: NSFileCoordinator {
             relativeTo: nil,
             bookmarkDataIsStale: &isStale
         )
-        self.load(url: url, bookmark: bookmark)
-    }
-    
-    func load(url: URL, bookmark: Data? = nil) {
+        
+        var loaded: (URL?, Error?) = (nil, nil)
+        url.coordinatedRead(SongFileCoordinator()) { inputURL,inputError  in
+            loaded = (inputURL, inputError)
+        }
+        guard let loadURL = loaded.0 else { return Fail<Song, SongError>.init(error: SongError.coundtReadFile ).eraseToAnyPublisher() }
         
         var album: String? = nil
         var artist: String? = nil
@@ -50,29 +69,33 @@ class Song: NSFileCoordinator {
         var cover: UIImage? = nil
         
         let eventLoop = NIOTSEventLoopGroup().next()
-        url.coordinatedRead(self) { (url, error) in
-            guard let url = url else { return }
-            let io = NonBlockingFileIO(threadPool: .init(numberOfThreads: 3))
-            
-            _ = io.readEntireFile(url.path,
+        
+        let io = NonBlockingFileIO(threadPool: .init(numberOfThreads: 3))
+        
+        return Future<Song, SongError> { promise in
+            io.readEntireFile(loadURL.path,
                               on: eventLoop)
-                .map { data in
+                .whenSuccess { data in
                     var bytes = data
                     let flac = Flac()
                     cover = flac.getFlacAlbum(bytes: &bytes)
+                    
+                    promise(.success( Song(title: title ?? "Unknow title",
+                                artist: artist ?? "Unknown artist",
+                                lyrics: nil,
+                                album: album ?? "Unknown album",
+                                cover: cover ?? UIImage(named: "LP")!,
+                                bookmark: bookmark )
+                    ))
             }
-            
-            self.load(title: title ?? "Unknow title",
-                 artist: artist ?? "Unknown artist",
-                 lyrics: nil,
-                 album: album ?? "Unknown album",
-                 cover: cover ?? UIImage(named: "LP")!,
-                 bookmark: bookmark ?? (try? url.bookmarkData()) )
-            
-            
-            // TODO: make it so MP3 can also be parsed
-            
-            
-        }
+        }.eraseToAnyPublisher()
+        
+        
+        
+        // TODO: make it so MP3 can also be parsed
     }
+}
+
+extension Notification.Name {
+    static let newSong = Notification.Name("New Song")
 }
