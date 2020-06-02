@@ -25,9 +25,9 @@ final class Player: ObservableObject {
     var cancellable = [AnyCancellable]()
 
     func add(url: URL) {
-        guard let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext else {
-            return
-        }
+        guard let context = (UIApplication.shared.delegate as? AppDelegate)?
+            .persistentContainer
+            .viewContext else { return }
         
         let newSong = Songs(context: context)
         newSong.bookmark = try? url.bookmarkData()
@@ -42,10 +42,21 @@ final class Player: ObservableObject {
         try? SongPublisher(threadPool: .init(numberOfThreads: 3))
             .load(bookmark: bookmark)
             .sink(receiveCompletion: {
-                print("Read error with \($0)")
+                switch $0 {
+                    case .failure(let songError):
+                        print("Read error with \(songError)")
+                        break
+                    case .finished:
+                        print("Got all the things")
+                        break
+                    
+                }
+                
             }, receiveValue: { song in
                 DispatchQueue.main.async {
-                    self.all.append(song)
+                    if !self.all.contains(song) {
+                        self.all.append(song)
+                    }
                 }
             }).store(in: &cancellable)
     }
@@ -60,7 +71,13 @@ final class Player: ObservableObject {
                                                selector: #selector(avPlayerDidFinishPlaying(note:)),
                                                name: .AVPlayerItemDidPlayToEndTime, object: nil)
         
-        if let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext {
+        asyncInit()
+        
+    }
+    
+    func asyncInit() {
+        (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.performBackgroundTask { context in
+            //.viewContext {
             let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Songs")
             
             do {
@@ -69,14 +86,14 @@ final class Player: ObservableObject {
                 (result as! [NSManagedObject]).forEach { result in
                     guard let bookmark = result.value(forKey: "bookmark") as? Data else { return }
                     // TODO: Fix
-                    fetchSong(bookmark: bookmark)
+                    self.fetchSong(bookmark: bookmark)
                     
                 }
             } catch {
-                
+                // TODO: Couldn't get file UI
+                print("Couldn't retrieve file in CoreData with error \(error)")
             }
         }
-        
     }
     
     func setupRemoteTransportControls() {

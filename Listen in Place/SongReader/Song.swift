@@ -11,9 +11,10 @@ enum SongError: Error {
 
 struct Song: Hashable {
     static func == (lhs: Song, rhs: Song) -> Bool {
-        guard lhs.title == rhs.title else { return false }
-        guard lhs.artist == rhs.artist else { return false }
-        guard lhs.album == lhs.album else { return false }
+        guard lhs.title == rhs.title &&
+              lhs.artist == rhs.artist &&
+              lhs.album == rhs.album &&
+              lhs.cover == rhs.cover else { return false }
         
         return true
     }
