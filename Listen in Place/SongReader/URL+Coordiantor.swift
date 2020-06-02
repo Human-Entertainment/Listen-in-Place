@@ -3,17 +3,15 @@ import Foundation
 // From https://github.com/palmin/open-in-place/blob/master/OpenInPlace/UrlCoordination.swift
 extension URL {
     public func coordinatedRead(_ coordinator : NSFileCoordinator,
-                                callback: @escaping ((Data?, Error?) -> ())) {
+                                callback: @escaping ((URL?, Error?) -> ())) {
         
         let error: NSErrorPointer = nil
         coordinator.coordinate(readingItemAt: self, options: [],
                                error: error, byAccessor: { url in
-                                do {
-                                    let text = try Data(contentsOf: url)
-                                    callback(text, nil)
-                                    
-                                } catch {
-                                    callback(nil, error)
+                                if let error = error as? Error {
+                                    callback(nil,error)
+                                } else {
+                                    callback(url,nil)
                                 }
         })
         

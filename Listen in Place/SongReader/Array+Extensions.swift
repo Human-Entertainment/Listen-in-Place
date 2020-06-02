@@ -12,7 +12,7 @@ protocol ArrayAble: Sequence {
     var count: Int { get }
 }
 
-extension ArrayAble where Element == Byte {
+extension Collection where Element == Byte {
     var data: Data {
         Data(self)
     }
@@ -35,6 +35,8 @@ extension ArrayAble where Element == Byte {
         }
         return compound
     }
+    
+
 }
 
 infix operator ..+<
@@ -44,5 +46,27 @@ extension Strideable where Stride: SignedInteger {
     }
 }
 
-extension Array: ArrayAble {}
-extension ArraySlice: ArrayAble {}
+//extension Array: ArrayAble {}
+extension ArraySlice where Element == Byte {
+    func readInt(toNext drop: Int) -> Int {
+        let dropPoint = self.count - drop
+        return self.dropLast(dropPoint).int
+    }
+    
+    func readData(toNext drop: Int) -> Data {
+        let dropPoint = self.count - drop
+        return self.dropLast(dropPoint).data
+    }
+    
+    func readString(toNext drop: Int) -> String? {
+        let dropPoint = self.count - drop
+        let bytes = self.dropLast(dropPoint)
+        return String(bytes: bytes, encoding: .utf8)
+    }
+    
+    func readBytes(toNext drop: Int) -> Self {
+        let dropPoint = self.count - drop
+        let bytes = self.dropLast(dropPoint)
+        return bytes
+    }
+}
