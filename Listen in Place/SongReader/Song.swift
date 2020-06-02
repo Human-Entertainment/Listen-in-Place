@@ -51,7 +51,7 @@ struct SongPublisher {
         self.threadPool = threadPool
     }
     
-    func load(bookmark data: Data?) throws -> AnyPublisher<Song, SongError> {
+    func load(bookmark data: Data?) throws -> Future<Song, SongError> {
         guard let bookmark = data else { throw SongError.noBookmark }
         
         var isStale = false
@@ -81,7 +81,7 @@ struct SongPublisher {
             loaded.whenFailure { error in
                 promise(.failure(.coundtReadFile))
             }
-        }.eraseToAnyPublisher()
+        }
         
         
         
@@ -100,6 +100,7 @@ struct SongPublisher {
                 var artist: String? = nil
                 var title: String? = nil
                 var cover: UIImage? = nil
+                
                 cover = flac.getFlacAlbum(bytes: &bytes)
                 
                 return Song(title: title ?? "Unknow title",

@@ -42,23 +42,30 @@ struct Flac {
         while !last {
             guard let rawValue = bytes.readInteger(endianness: .big, as: UInt8.self) else { return block }
             last = rawValue & bitMask != 0
-            let length = bytes.readInteger(endianness: .big, as: UInt32.self)
-            print("Reading block of \(length) bytes")
-            switch rawValue & valueMask {
-                case 0:
-                    guard let streamInfo = try? Streaminfo(bytes: &bytes) else { return block }
-                    block.append(streamInfo)
-                    break
-                case 4:
-                    guard let comment = try? VorbisComment(bytes: &bytes) else { return block }
-                    block.append(comment)
-                    break
-                case 6:
-                    guard let picture = try? Picture(bytes: &bytes) else { return block }
-                    block.append(picture)
-                    break
-                default: break
-                
+            guard let length = bytes.readBytes(length: 3)?.uint32 else { return block }
+            if length > 0 {
+                let metablockType = rawValue & valueMask
+                switch metablockType {
+                    case 0:
+                        guard let streamInfo = try? Streaminfo(bytes: &bytes) else { return block }
+                        bytes.moveReaderIndex(forwardBy: Int(length))
+                        block.append(streamInfo)
+                        break
+                    case 4:
+                        guard let comment = try? VorbisComment(bytes: &bytes) else { return block }
+                        bytes.moveReaderIndex(forwardBy: Int(length))
+                        block.append(comment)
+                        break
+                    case 6:
+                        guard let picture = try? Picture(bytes: &bytes) else { return block }
+                        block.append(picture)
+                        break
+                    default:
+                        bytes.moveReaderIndex(forwardBy: Int(length))
+                        print("Couldn't parse block")
+                        break
+                    
+                }
             }
         }
         return block

@@ -9,28 +9,7 @@ import NIOTransportServices
 
 typealias Byte = UInt8
 
-final class Player: ObservableObject, Subscriber {
-    private var subscription: Subscription? = nil
-    func receive(subscription: Subscription) {
-        self.subscription = subscription
-    }
-    
-    func receive(_ input: Song) -> Subscribers.Demand {
-        if !all.contains(input) {
-            all.append(input)
-        }
-        return Subscribers.Demand.unlimited
-    }
-    
-    func receive(completion: Subscribers.Completion<SongError>) {
-        
-    }
-    
-    
-    typealias Input = Song
-    
-    typealias Failure = SongError
-    
+final class Player: ObservableObject {
     
     private var player: PlayerEnum
     private var _avPlayer: AVPlayer?
@@ -44,6 +23,9 @@ final class Player: ObservableObject, Subscriber {
     
     @Published var all = [Song]()
     
+    // TODO: find a cleaner solution
+    var cancellable = [AnyCancellable?]()
+
     func add(url: URL) {
         guard let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext else {
             return
@@ -53,10 +35,20 @@ final class Player: ObservableObject, Subscriber {
         newSong.bookmark = try? url.bookmarkData()
         // TODO: Fix this stuff
         
-        try? SongPublisher(threadPool: .init(numberOfThreads: 3))
-            .load(bookmark: newSong.bookmark).receive(subscriber: self)
+        let cancellable = fetchSong(bookmark: newSong.bookmark)
+        self.cancellable.append(cancellable)
         
         try? context.save()
+    }
+
+    func fetchSong(bookmark: Data?) -> AnyCancellable? {
+        try? SongPublisher(threadPool: .init(numberOfThreads: 3))
+            .load(bookmark: bookmark)
+            .sink(receiveCompletion: {
+                print("Read error with \($0)")
+            }, receiveValue: {
+                self.all.append($0)
+            })
     }
     
     // MARK: Setup
@@ -78,8 +70,9 @@ final class Player: ObservableObject, Subscriber {
                 (result as! [NSManagedObject]).forEach { result in
                     guard let bookmark = result.value(forKey: "bookmark") as? Data else { return }
                     // TODO: Fix
-                        
-                    try? SongPublisher(threadPool: .init(numberOfThreads: 3)).load(bookmark: bookmark).receive(subscriber: self)
+                    let cancellable = fetchSong(bookmark: bookmark)
+                    self.cancellable.append(cancellable)
+                    
                 }
             } catch {
                 

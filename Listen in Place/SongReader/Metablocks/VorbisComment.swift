@@ -8,6 +8,7 @@ struct VorbisComment: MetaBlcok {
     }
     
     private static func getVorbisComment(bytes data: ByteBuffer) throws {//-> [String] {
+        /*
         var bytes = data
         guard let vendorEnd = (bytes.readBytes(length: 4)?.reversed().reduce(0 as UInt32) { ($0 << 8) | UInt32($1) })
         else { throw VorbisError.lengthError }
@@ -28,7 +29,7 @@ struct VorbisComment: MetaBlcok {
         }
         return comments
          
- */return
+ */return*/
     }
     
     private static func extract(comment: String) -> String {
