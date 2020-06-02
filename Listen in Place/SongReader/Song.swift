@@ -90,29 +90,46 @@ struct SongPublisher {
     }
     
     private func asyncLoad(url: URL, bookmark: Data) -> EventLoopFuture<Song> {
-        NonBlockingFileIO(threadPool: self.threadPool)
-            .readEntireFile(url.path,
-                            on: NIOTSEventLoopGroup().next())
-            .map { data in
-                var bytes = data
-                let flac = Flac()
-                
-                var album: String? = nil
-                var artist: String? = nil
-                var title: String? = nil
-                var cover: UIImage? = nil
-                
-                cover = flac.getFlacAlbum(bytes: &bytes)
-                
-                return Song(title: title ?? "Unknow title",
-                            artist: artist ?? "Unknown artist",
-                            lyrics: nil,
-                            album: album ?? "Unknown album",
-                            cover: cover ?? UIImage(named: "LP")!,
-                            bookmark: bookmark )
-        }
+        var album: String? = nil
+        var artist: String? = nil
+        var title: String? = nil
+        var cover: UIImage? = nil
+        
+        let eventLoop = NIOTSEventLoopGroup().next()
+        
+        return NonBlockingFileIO(threadPool: self.threadPool)
+            .metablockReader(path: url.path,
+                             on: eventLoop) { data, flac, type, length  in
+                                var bytes = data
+                                switch type {
+                                    case 6:
+                                        guard let picture = try? Picture(bytes: &bytes) else { return }
+                                        if picture.pictureType == .CoverFront {
+                                            cover = picture.image
+                                        } else {
+                                            print(picture.mimeType)
+                                        }
+                                    break
+                                    default:
+                                        print("Couldn't parse block")
+                                        break
+                                }
+            }.flatMapResult { () -> Result<Song, SongError> in
+                let song = Song(title: title ?? "Unknow title",
+                                artist: artist ?? "Unknown artist",
+                                lyrics: nil,
+                                album: album ?? "Unknown album",
+                                cover: cover ?? UIImage(named: "LP")!,
+                                bookmark: bookmark )
+                return .success(song)
+            }
+       
     }
+
+
 }
+
+
 
 extension Notification.Name {
     static let newSong = Notification.Name("New Song")

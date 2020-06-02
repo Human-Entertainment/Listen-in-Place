@@ -4,71 +4,28 @@ import Foundation
 import UIKit
 
 struct Flac {
-    
-    func getFlacAlbum(bytes: inout ByteBuffer) -> UIImage? {
-        let bufferView = ByteBufferView(bytes)
-        var fileBytes = ByteBuffer(bufferView)
-        
-        guard fileBytes.readString(length: 4) == "fLaC" else
-        {
-            print("Not a flac")
-            return nil
-        }
-        print("Isa flac")
-        let blocks = readBlock(bytes: &fileBytes)
-        let pictures = blocks.compactMap { $0 as? Picture }
-        
-        print(pictures.count)
-        
-        var cover: UIImage? = nil
-        
-        pictures.forEach { picture in
-            if picture.pictureType == .CoverFront {
-                cover = picture.image
-            } else {
-                print(picture.mimeType)
-            }
-        }
-        
-        return cover
-        
+    struct Head {
+        let isLast: Bool
+        let metaType: Int
+        let bodyLength: Int
     }
     
-    func readBlock(bytes: inout ByteBuffer) -> [MetaBlcok]  {
+    /// A function to read the header files for a Flac file
+    /// - Parameter bytes: The bytes for the Metablock header
+    /// - Throws: a `SongError` if it can't read the file
+    /// - Returns: The first `Bool` is telling the consumer wether the reading block is the last or not. The second return `Int` is the type of which the metadata block is as defined by [Flac](https://xiph.org/flac/format.html#metadata_block_header).
+    func readHead(bytes: inout ByteBuffer) throws -> (Head) {
+        guard let rawValue = bytes.readInteger(endianness: .big, as: UInt8.self) else { throw SongError.coundtReadFile }
+        guard let length = bytes.readBytes(length: 3)?.uint32 else { throw SongError.coundtReadFile }
+        
         let valueMask: UInt8 = 0x7f
         let bitMask: UInt8 = 0x80
-        var last = false
-        var block = [MetaBlcok]()
-        while !last {
-            guard let rawValue = bytes.readInteger(endianness: .big, as: UInt8.self) else { return block }
-            last = rawValue & bitMask != 0
-            guard let length = bytes.readBytes(length: 3)?.uint32 else { return block }
-            if length > 0 {
-                let metablockType = rawValue & valueMask
-                switch metablockType {
-                    case 0:
-                        guard let streamInfo = try? Streaminfo(bytes: &bytes) else { return block }
-                        bytes.moveReaderIndex(forwardBy: Int(length))
-                        block.append(streamInfo)
-                        break
-                    case 4:
-                        guard let comment = try? VorbisComment(bytes: &bytes) else { return block }
-                        bytes.moveReaderIndex(forwardBy: Int(length))
-                        block.append(comment)
-                        break
-                    case 6:
-                        guard let picture = try? Picture(bytes: &bytes) else { return block }
-                        block.append(picture)
-                        break
-                    default:
-                        bytes.moveReaderIndex(forwardBy: Int(length))
-                        print("Couldn't parse block")
-                        break
-                    
-                }
-            }
-        }
-        return block
         
+        let isLast = rawValue & bitMask != 0
+        let metablockType = Int(rawValue & valueMask)
+        
+        return Head(isLast: isLast,
+                    metaType: metablockType,
+                    bodyLength: Int(length))
     }
 }

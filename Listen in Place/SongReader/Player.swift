@@ -39,7 +39,7 @@ final class Player: ObservableObject {
     }
 
     func fetchSong(bookmark: Data?) {
-        try? SongPublisher(threadPool: .init(numberOfThreads: 3))
+        try? SongPublisher(threadPool: .init(numberOfThreads: 1))
             .load(bookmark: bookmark)
             .sink(receiveCompletion: {
                 switch $0 {
@@ -76,8 +76,9 @@ final class Player: ObservableObject {
     }
     
     func asyncInit() {
-        (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.performBackgroundTask { context in
-            //.viewContext {
+        (UIApplication.shared.delegate as? AppDelegate)?
+            .persistentContainer
+            .performBackgroundTask { context in
             let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Songs")
             
             do {
