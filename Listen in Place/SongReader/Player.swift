@@ -22,9 +22,7 @@ final class Player: ObservableObject {
     // MARK: Access
     
     @Published var all = [Song]()
-    
-    // TODO: find a cleaner solution
-    var cancellable = [AnyCancellable?]()
+    var cancellable = [AnyCancellable]()
 
     func add(url: URL) {
         guard let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext else {
@@ -35,20 +33,21 @@ final class Player: ObservableObject {
         newSong.bookmark = try? url.bookmarkData()
         // TODO: Fix this stuff
         
-        let cancellable = fetchSong(bookmark: newSong.bookmark)
-        self.cancellable.append(cancellable)
+        fetchSong(bookmark: newSong.bookmark)
         
         try? context.save()
     }
 
-    func fetchSong(bookmark: Data?) -> AnyCancellable? {
+    func fetchSong(bookmark: Data?) {
         try? SongPublisher(threadPool: .init(numberOfThreads: 3))
             .load(bookmark: bookmark)
             .sink(receiveCompletion: {
                 print("Read error with \($0)")
-            }, receiveValue: {
-                self.all.append($0)
-            })
+            }, receiveValue: { song in
+                DispatchQueue.main.async {
+                    self.all.append(song)
+                }
+            }).store(in: &cancellable)
     }
     
     // MARK: Setup
@@ -70,8 +69,7 @@ final class Player: ObservableObject {
                 (result as! [NSManagedObject]).forEach { result in
                     guard let bookmark = result.value(forKey: "bookmark") as? Data else { return }
                     // TODO: Fix
-                    let cancellable = fetchSong(bookmark: bookmark)
-                    self.cancellable.append(cancellable)
+                    fetchSong(bookmark: bookmark)
                     
                 }
             } catch {
