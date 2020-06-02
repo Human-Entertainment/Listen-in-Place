@@ -4,6 +4,8 @@ import UIKit
 import MediaPlayer
 import CoreData
 import Combine
+import NIO
+import NIOTransportServices
 
 typealias Byte = UInt8
 
@@ -51,7 +53,8 @@ final class Player: ObservableObject, Subscriber {
         newSong.bookmark = try? url.bookmarkData()
         // TODO: Fix this stuff
         
-        try? SongPublisher().load(bookmark: newSong.bookmark).receive(subscriber: self)
+        try? SongPublisher(threadPool: .init(numberOfThreads: 3))
+            .load(bookmark: newSong.bookmark).receive(subscriber: self)
         
         try? context.save()
     }
@@ -76,7 +79,7 @@ final class Player: ObservableObject, Subscriber {
                     guard let bookmark = result.value(forKey: "bookmark") as? Data else { return }
                     // TODO: Fix
                         
-                    try? SongPublisher().load(bookmark: bookmark).receive(subscriber: self)
+                    try? SongPublisher(threadPool: .init(numberOfThreads: 3)).load(bookmark: bookmark).receive(subscriber: self)
                 }
             } catch {
                 

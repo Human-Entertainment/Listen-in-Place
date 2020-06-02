@@ -16,22 +16,17 @@ extension NonBlockingFileIO {
             }
         }
         
-        self.openFile(path: path, eventLoop: eventLoop).flatMap { handle, region -> EventLoopFuture<ByteBuffer> in
-            guard region.readableBytes <= maxBytes else {
-                return eventLoop.makeFailedFuture(NonBlockingFileIOReadError.inputTooLong)
-            }
-            
-            return self.read(fileRegion: region, allocator: .init(), eventLoop: eventLoop)
-                .always { _ in try? handle.close() }
-        }.cascade(to: promise)
+        self.openFile(path: path, eventLoop: eventLoop)
+            .flatMap { handle, region -> EventLoopFuture<ByteBuffer> in
+                guard region.readableBytes <= maxBytes else {
+                    return eventLoop.makeFailedFuture(NonBlockingFileIOReadError.inputTooLong)
+                }
+                
+                return self.read(fileRegion: region, allocator: .init(), eventLoop: eventLoop)
+                    .always { _ in try? handle.close() }
+            }.cascade(to: promise)
         
         return promise.futureResult
-    }
-}
-
-extension EventLoopFuture {
-    func flatWhen(callback: @escaping (Value) -> EventLoopFuture<Void>) {
-        _ = self.flatMap(callback)
     }
 }
 

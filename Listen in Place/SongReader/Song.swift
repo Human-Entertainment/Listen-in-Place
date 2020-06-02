@@ -9,8 +9,6 @@ enum SongError: Error {
     case coundtReadFile
 }
 
-class SongFileCoordinator: NSFileCoordinator {}
-
 struct Song: Hashable {
     static func == (lhs: Song, rhs: Song) -> Bool {
         guard lhs.title == rhs.title else { return false }
@@ -46,6 +44,13 @@ struct Song: Hashable {
 }
 
 struct SongPublisher {
+    private let threadPool: NIOThreadPool
+    
+    init(threadPool: NIOThreadPool)
+    {
+        self.threadPool = threadPool
+    }
+    
     func load(bookmark data: Data?) throws -> AnyPublisher<Song, SongError> {
         guard let bookmark = data else { throw SongError.noBookmark }
         
@@ -57,42 +62,53 @@ struct SongPublisher {
             bookmarkDataIsStale: &isStale
         )
         
+        // TODO: Add Coordinator
+        /*
         var loaded: (URL?, Error?) = (nil, nil)
-        url.coordinatedRead(SongFileCoordinator()) { inputURL,inputError  in
+        let coordinator = NSFileCoordinator()
+        url.coordinatedRead(coordinator) { inputURL,inputError  in
             loaded = (inputURL, inputError)
         }
         guard let loadURL = loaded.0 else { return Fail<Song, SongError>.init(error: SongError.coundtReadFile ).eraseToAnyPublisher() }
-        
-        var album: String? = nil
-        var artist: String? = nil
-        var title: String? = nil
-        var cover: UIImage? = nil
-        
-        let eventLoop = NIOTSEventLoopGroup().next()
-        
-        let io = NonBlockingFileIO(threadPool: .init(numberOfThreads: 3))
+        */
         
         return Future<Song, SongError> { promise in
-            io.readEntireFile(loadURL.path,
-                              on: eventLoop)
-                .whenSuccess { data in
-                    var bytes = data
-                    let flac = Flac()
-                    cover = flac.getFlacAlbum(bytes: &bytes)
-                    
-                    promise(.success( Song(title: title ?? "Unknow title",
-                                artist: artist ?? "Unknown artist",
-                                lyrics: nil,
-                                album: album ?? "Unknown album",
-                                cover: cover ?? UIImage(named: "LP")!,
-                                bookmark: bookmark )
-                    ))
+            self.threadPool.start()
+            let loaded = self.asyncLoad(url: url, bookmark: bookmark)
+            loaded.whenSuccess { song in
+                promise(.success(song))
+            }
+            loaded.whenFailure { error in
+                promise(.failure(.coundtReadFile))
             }
         }.eraseToAnyPublisher()
         
         
         
         // TODO: make it so MP3 can also be parsed
+    }
+    
+    private func asyncLoad(url: URL, bookmark: Data) -> EventLoopFuture<Song> {
+        NonBlockingFileIO(threadPool: self.threadPool)
+            .readEntireFile(url.path,
+                            on: NIOTSEventLoopGroup().next())
+            .map { data in
+                var bytes = data
+                let flac = Flac()
+                
+                var album: String? = nil
+                var artist: String? = nil
+                var title: String? = nil
+                var cover: UIImage? = nil
+                cover = flac.getFlacAlbum(bytes: &bytes)
+                
+                return Song(title: title ?? "Unknow title",
+                            artist: artist ?? "Unknown artist",
+                            lyrics: nil,
+                            album: album ?? "Unknown album",
+                            cover: cover ?? UIImage(named: "LP")!,
+                            bookmark: bookmark )
+        }
     }
 }
 
