@@ -1,5 +1,5 @@
 import NIO
 
 protocol MetaBlcok {
-    init(bytes: ByteBuffer)
+    init(bytes: inout ByteBuffer)
 }
