@@ -99,21 +99,40 @@ struct SongPublisher {
         
         return NonBlockingFileIO(threadPool: self.threadPool)
             .metablockReader(path: url.path,
-                             on: eventLoop) { data, flac, type, length  in
-                                var bytes = data
-                                switch type {
-                                    case 6:
-                                        guard let picture = try? Picture(bytes: &bytes) else { return }
-                                        if picture.pictureType == .CoverFront {
-                                            cover = picture.image
-                                        } else {
-                                            print(picture.mimeType)
-                                        }
-                                    break
-                                    default:
-                                        print("Couldn't parse block")
-                                        break
-                                }
+                             on: eventLoop)
+            { data, flac, type  in
+                var bytes = data
+                switch type {
+                    case 0:
+                        print("Streaminfro block")
+                        break
+                    case 1:
+                        print("Padding block")
+                    break
+                    case 2:
+                        print("Application block")
+                    break
+                    case 3:
+                        print("Seekable block")
+                    break
+                    case 4:
+                        print("Vorbis comment block")
+                    break
+                    case 5:
+                        print("Cuesheet")
+                    break
+                    case 6:
+                        guard let picture = try? Picture(bytes: &bytes) else { return }
+                        if picture.pictureType == .CoverFront {
+                            cover = picture.image
+                        } else {
+                            print(picture.mimeType)
+                        }
+                        break
+                    default:
+                        assertionFailure("Heck?")
+                        break
+                }
             }.flatMapResult { () -> Result<Song, SongError> in
                 let song = Song(title: title ?? "Unknow title",
                                 artist: artist ?? "Unknown artist",
