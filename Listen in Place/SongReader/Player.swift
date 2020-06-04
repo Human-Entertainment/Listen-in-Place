@@ -90,7 +90,6 @@ final class Player: ObservableObject {
                 
                 result.forEach { [weak self] result in
                     guard let bookmark = result.value(forKey: "bookmark") as? Data else { return }
-                    // TODO: Fix
                     self?.fetchSong(bookmark: bookmark)
                     
                 }
