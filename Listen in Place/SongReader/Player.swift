@@ -85,9 +85,10 @@ final class Player: ObservableObject {
             let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Songs")
             
             do {
-                let result = try context.fetch(request)
+                // TODO: - Fix this
+                guard let result = try context.fetch(request) as? [NSManagedObject] else { return }
                 
-                (result as! [NSManagedObject]).forEach { [weak self] result in
+                result.forEach { [weak self] result in
                     guard let bookmark = result.value(forKey: "bookmark") as? Data else { return }
                     // TODO: Fix
                     self?.fetchSong(bookmark: bookmark)
