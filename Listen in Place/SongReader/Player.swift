@@ -87,10 +87,10 @@ final class Player: ObservableObject {
             do {
                 let result = try context.fetch(request)
                 
-                (result as! [NSManagedObject]).forEach { result in
+                (result as! [NSManagedObject]).forEach { [weak self] result in
                     guard let bookmark = result.value(forKey: "bookmark") as? Data else { return }
                     // TODO: Fix
-                    self.fetchSong(bookmark: bookmark)
+                    self?.fetchSong(bookmark: bookmark)
                     
                 }
             } catch {
