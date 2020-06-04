@@ -3,34 +3,32 @@ import NIO
 struct VorbisComment: MetaBlcok {
     var comments: [String: String]
     init(bytes: inout ByteBuffer) throws {
-        //comments = try? VorbisComment.getVorbisComment(bytes: bytes)
-        comments = [:]
+        comments = try VorbisComment.getVorbisComment(bytes: bytes)
+        //comments = [:]
         
     }
     
     private static func getVorbisComment(bytes data: ByteBuffer) throws -> [String: String] {
-        /*
         var bytes = data
-        guard let vendorEnd = (bytes.readBytes(length: 4)?.reversed().reduce(0 as UInt32) { ($0 << 8) | UInt32($1) })
+        guard let vendorEnd = bytes.readInteger(endianness: .little, as: UInt32.self)
         else { throw VorbisError.lengthError }
         let vendor = bytes.readString(length: Int(vendorEnd))
-        /*
-        let commentListStart = vendorEnd + 4
-        let commentListCount = bytes[vendorEnd..+<1].uint32
         
-        var comments = [String]()
-        var commentStart = commentListStart
+        print(vendor)
+        
+        var comments: [String: String] = [:]
+        guard let commentListCount = bytes.readInteger(endianness: .little, as: UInt32.self)
+        else { throw VorbisError.lengthError }
         for _ in 0..<commentListCount {
-            let commentLengthEnd = commentStart + 4
-            let commentStringStart = commentLengthEnd + 4
-            let commentLength = bytes[commentLengthEnd..+<1].int + commentLengthEnd
-            let comment = String(bytes: bytes[commentStringStart..<commentLength], encoding: .utf8)!
-            comments.append(extract(comment: comment))
-            commentStart = commentLength
+            guard let commentLength = bytes.readInteger(endianness: .little, as: UInt32.self)
+            else { throw VorbisError.lengthError }
+            guard let commentString = bytes.readString(length: Int(commentLength))
+                else { throw VorbisError.commentError }
+            print(commentString)
+            let comment = commentString.split(separator: "=")
+            comments[comment[0].lowercased()] = String(comment[1])
         }
         return comments
-         
-         */return*/ return [:]
     }
     
     private static func extract(comment: String) -> String {
@@ -41,4 +39,5 @@ struct VorbisComment: MetaBlcok {
 
 enum VorbisError: Error {
     case lengthError
+    case commentError
 }
