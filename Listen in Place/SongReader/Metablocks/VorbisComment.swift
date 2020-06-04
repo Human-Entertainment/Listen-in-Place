@@ -1,13 +1,14 @@
 import NIO
 
 struct VorbisComment: MetaBlcok {
+    var comments: [String: String]
     init(bytes: inout ByteBuffer) throws {
-        _ = try? VorbisComment.getVorbisComment(bytes: bytes)
-        
+        //comments = try? VorbisComment.getVorbisComment(bytes: bytes)
+        comments = [:]
         
     }
     
-    private static func getVorbisComment(bytes data: ByteBuffer) throws {//-> [String] {
+    private static func getVorbisComment(bytes data: ByteBuffer) throws -> [String: String] {
         /*
         var bytes = data
         guard let vendorEnd = (bytes.readBytes(length: 4)?.reversed().reduce(0 as UInt32) { ($0 << 8) | UInt32($1) })
@@ -29,7 +30,7 @@ struct VorbisComment: MetaBlcok {
         }
         return comments
          
- */return*/
+         */return*/ return [:]
     }
     
     private static func extract(comment: String) -> String {

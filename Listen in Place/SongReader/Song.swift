@@ -64,22 +64,23 @@ struct SongPublisher {
         )
         
         // TODO: Add Coordinator
-        /*
+        
         var loaded: (URL?, Error?) = (nil, nil)
         let coordinator = NSFileCoordinator()
         url.coordinatedRead(coordinator) { inputURL,inputError  in
             loaded = (inputURL, inputError)
         }
-        guard let loadURL = loaded.0 else { return Fail<Song, SongError>.init(error: SongError.coundtReadFile ).eraseToAnyPublisher() }
-        */
+        guard let loadURL = loaded.0 else { return Future<Song, SongError>{ $0(.failure(.coundtReadFile)) } }
+        
         
         return Future<Song, SongError> { promise in
             self.threadPool.start()
-            let loaded = self.asyncLoad(url: url, bookmark: bookmark)
+            let loaded = self.asyncLoad(url: loadURL, bookmark: bookmark)
             loaded.whenSuccess { song in
                 promise(.success(song))
             }
             loaded.whenFailure { error in
+                print(error)
                 promise(.failure(.coundtReadFile))
             }
         }
@@ -122,25 +123,33 @@ struct SongPublisher {
                         print("Cuesheet")
                     break
                     case 6:
-                        guard let picture = try? Picture(bytes: &bytes) else { return }
-                        if picture.pictureType == .CoverFront {
-                            cover = picture.image
-                        } else {
-                            print(picture.mimeType)
+                        print("Image")
+                        do {
+                            let picture = try Picture(bytes: &bytes)
+                            
+                            if picture.pictureType == .CoverFront {
+                                cover = picture.image
+                                print(cover)
+                            } else {
+                                print(picture.mimeType)
+                            }
+                        } catch {
+                            print("Image loading issue \(error)")
                         }
                         break
                     default:
                         assertionFailure("Heck?")
                         break
                 }
-            }.flatMapResult { () -> Result<Song, SongError> in
+        }.map { _ -> Song in
+                // TODO: Figure out of how to load this together with the rest of the async stuff
                 let song = Song(title: title ?? "Unknow title",
                                 artist: artist ?? "Unknown artist",
                                 lyrics: nil,
                                 album: album ?? "Unknown album",
                                 cover: cover ?? UIImage(named: "LP")!,
                                 bookmark: bookmark )
-                return .success(song)
+                return song
             }
        
     }

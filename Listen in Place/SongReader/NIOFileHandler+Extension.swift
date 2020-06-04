@@ -11,28 +11,35 @@ extension NonBlockingFileIO {
     /// - Returns: Void
     func metablockReader(path: String,
                          on eventLoop: EventLoop,
-                         callback: @escaping (_ buffer: ByteBuffer,_ flac: Flac,_ metaType: Int) -> ()) -> EventLoopFuture<Void> {
+                         callback: @escaping (_ buffer: ByteBuffer,_ flac: Flac,_ metaType: Int) -> ()) -> EventLoopFuture<Result<Void,Never>> {
+         let promise = eventLoop.makePromise(of: Result<Void,Never>.self)
+        
         self.openFile(path: path,
                       eventLoop: NIOTSEventLoopGroup().next())
-            .map { handler, region in
-
+            .flatMap { handler, region in
+               
+                
                 self.asyncLoadMeta(handler: handler,
                                    eventLoop: eventLoop,
                                    fileIndex: region.readerIndex + 4,
                                    flac: Flac(),
                                    callback: callback)
-            }
+                
+                
+                
+            }.cascade(to: promise)
+        return promise.futureResult
     }
     
     func asyncLoadMeta(handler: NIOFileHandle,
                        eventLoop: EventLoop,
                        fileIndex: Int,
                        flac: Flac,
-                       callback: @escaping (ByteBuffer,Flac,Int) -> ()) {
-        self.read(fileHandle: handler,
-                  fromOffset: Int64(fileIndex),
-                  byteCount: 4, allocator: .init(),
-                  eventLoop: eventLoop)
+                       callback: @escaping (ByteBuffer,Flac,Int) -> ()) -> EventLoopFuture<Result<Void,Never>> {
+        return self.read(fileHandle: handler,
+                         fromOffset: Int64(fileIndex),
+                         byteCount: 4, allocator: .init(),
+                         eventLoop: eventLoop)
             .flatMap { byteBuffer -> EventLoopFuture<(ByteBuffer, Flac.Head)> in
                 var buffer = byteBuffer
                 // TODO: Better error handling
@@ -45,13 +52,16 @@ extension NonBlockingFileIO {
                                  allocator: .init(),
                                  eventLoop: eventLoop)
                     .and(value: head)
-        }.whenSuccess { buffer, head in
+        }.flatMap { buffer, head in
             
             callback(buffer, flac, head.metaType)
             if head.isLast {
-                try? handler.close()
+                return eventLoop.submit {
+                    try? handler.close()
+                    return .success(Void())
+                }
             } else {
-                self.asyncLoadMeta(handler: handler,
+                return self.asyncLoadMeta(handler: handler,
                               eventLoop: eventLoop,
                               fileIndex: fileIndex + 4 + head.bodyLength,
                               flac: flac,

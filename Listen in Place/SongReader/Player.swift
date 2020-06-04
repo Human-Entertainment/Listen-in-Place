@@ -19,7 +19,7 @@ final class Player: ObservableObject {
     private var audioQueue = DispatchQueue.init(label: "audio")
     @Published var nowPlaying: Song? = nil
     
-    // MARK: Access
+    // MARK: - Access
     
     @Published var all = [Song]()
     var cancellable = [AnyCancellable]()
@@ -41,6 +41,7 @@ final class Player: ObservableObject {
     func fetchSong(bookmark: Data?) {
         try? SongPublisher(threadPool: .init(numberOfThreads: 1))
             .load(bookmark: bookmark)
+            .print("Song")
             .sink(receiveCompletion: {
                 switch $0 {
                     case .failure(let songError):
@@ -54,15 +55,17 @@ final class Player: ObservableObject {
                 
             }, receiveValue: { song in
                 DispatchQueue.main.async {
-                    if !self.all.contains(song) {
+                    //if !self.all.contains(song) {
                         self.all.append(song)
-                    }
+                    //}
                 }
             }).store(in: &cancellable)
     }
     
-    // MARK: Setup
-    
+    // MARK: - Setup
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
     init() {
         player = .none
         // Setup mediacenter controls
@@ -134,7 +137,7 @@ final class Player: ObservableObject {
     }
     
 
-    // MARK: controls
+    // MARK: - Controls
     func play(_ song: Song) throws {
         guard let bookmark = song.bookmark else { throw SongError.noBookmark }
         var isStale = false

@@ -29,12 +29,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
     
+        
         // Create the SwiftUI view that provides the window contents.
         let contentView = ContentView()
             .environmentObject(self.player)
             .environment(\.managedObjectContext, context)
-            
-
+        
+        
         // Use a UIHostingController as window root view controller.
         if let windowScene = scene as? UIWindowScene {
             let window = UIWindow(windowScene: windowScene)
@@ -43,6 +44,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             self.window?.tintColor = .systemOrange
             window.makeKeyAndVisible()
         }
+        
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
