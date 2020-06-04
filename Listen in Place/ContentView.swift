@@ -2,8 +2,10 @@ import SwiftUI
 import AVFoundation
 import CoreData
 
-let errorSong = Song(title: "Couldn't load title", artist: "Cound't load artis")
-
+var errorSong: Song {
+    let song = Song(title: "Couldn't load title", artist: "Cound't load artis")
+    return song
+}
 struct ContentView: View {
     @Environment(\.managedObjectContext)
     var moc
@@ -108,7 +110,10 @@ struct SongCellView: View {
     }
 }
 
-let notPlaying = Song(title: "Not Playing", artist: "Not Playing")
+var notPlaying: Song {
+    let song = Song(title: "Not Playing", artist: "Not Playing")
+    return song
+}
 
 struct SongView: View {
     let song: Song

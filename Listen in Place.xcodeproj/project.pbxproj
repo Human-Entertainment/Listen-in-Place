@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -24,6 +24,14 @@
 		FC625ABE2482CB9600ED60BF /* PlayerEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABD2482CB9600ED60BF /* PlayerEnum.swift */; };
 		FC625AC12483021B00ED60BF /* Songs.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABF2483021A00ED60BF /* Songs.xcdatamodeld */; };
 		FC625AC42483093F00ED60BF /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC625AC32483093E00ED60BF /* CoreData.framework */; };
+		FC625ACE2483D4E800ED60BF /* URL+Coordiantor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ACD2483D4E800ED60BF /* URL+Coordiantor.swift */; };
+		FC625AD02484128700ED60BF /* VorbisComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ACF2484128600ED60BF /* VorbisComment.swift */; };
+		FCBE77802485B27D00080BB5 /* NIO in Frameworks */ = {isa = PBXBuildFile; productRef = FCBE777F2485B27D00080BB5 /* NIO */; };
+		FCBE77822485B27D00080BB5 /* NIOFoundationCompat in Frameworks */ = {isa = PBXBuildFile; productRef = FCBE77812485B27D00080BB5 /* NIOFoundationCompat */; };
+		FCBE77852485B4E900080BB5 /* NIOTransportServices in Frameworks */ = {isa = PBXBuildFile; productRef = FCBE77842485B4E900080BB5 /* NIOTransportServices */; };
+		FCBE778724864D6E00080BB5 /* Flac.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCBE778624864D6E00080BB5 /* Flac.swift */; };
+		FCBE778924864FB600080BB5 /* NIOFileHandler+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCBE778824864FB600080BB5 /* NIOFileHandler+Extension.swift */; };
+		FCBE778B2486516200080BB5 /* Song.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCBE778A2486516200080BB5 /* Song.swift */; };
 		FCC3FB4D247BF51100F355B1 /* DocumentPickerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC3FB4C247BF51100F355B1 /* DocumentPickerButton.swift */; };
 		FCC94AC6247A979B00DCFD25 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */; };
 		FCD1325A2479D961008ADEF5 /* SwiftUI+DarkMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD132592479D961008ADEF5 /* SwiftUI+DarkMode.swift */; };
@@ -83,6 +91,11 @@
 		FC625ABD2482CB9600ED60BF /* PlayerEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerEnum.swift; sourceTree = "<group>"; };
 		FC625AC02483021A00ED60BF /* Songs.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Songs.xcdatamodel; sourceTree = "<group>"; };
 		FC625AC32483093E00ED60BF /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		FC625ACD2483D4E800ED60BF /* URL+Coordiantor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Coordiantor.swift"; sourceTree = "<group>"; };
+		FC625ACF2484128600ED60BF /* VorbisComment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VorbisComment.swift; sourceTree = "<group>"; };
+		FCBE778624864D6E00080BB5 /* Flac.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Flac.swift; sourceTree = "<group>"; };
+		FCBE778824864FB600080BB5 /* NIOFileHandler+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NIOFileHandler+Extension.swift"; sourceTree = "<group>"; };
+		FCBE778A2486516200080BB5 /* Song.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Song.swift; sourceTree = "<group>"; };
 		FCC3FB4C247BF51100F355B1 /* DocumentPickerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPickerButton.swift; sourceTree = "<group>"; };
 		FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPlayButton.swift; sourceTree = "<group>"; };
 		FCD132592479D961008ADEF5 /* SwiftUI+DarkMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftUI+DarkMode.swift"; sourceTree = "<group>"; };
@@ -94,6 +107,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				FC625AC42483093F00ED60BF /* CoreData.framework in Frameworks */,
+				FCBE77822485B27D00080BB5 /* NIOFoundationCompat in Frameworks */,
+				FCBE77802485B27D00080BB5 /* NIO in Frameworks */,
+				FCBE77852485B4E900080BB5 /* NIOTransportServices in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,7 +154,7 @@
 		FC521CDA2479A46600D2AC82 /* Listen in Place */ = {
 			isa = PBXGroup;
 			children = (
-				FC625AB42482B16400ED60BF /* Metablocks */,
+				FCBE778C24865A7600080BB5 /* SongReader */,
 				FC521CDF2479A46600D2AC82 /* ContentView.swift */,
 				FC521D0B2479A51B00D2AC82 /* MusicView.swift */,
 				FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */,
@@ -150,9 +166,6 @@
 				FC521CE62479A46800D2AC82 /* LaunchScreen.storyboard */,
 				FC521CE92479A46800D2AC82 /* Info.plist */,
 				FC521CE32479A46800D2AC82 /* Preview Content */,
-				FC521D0D2479B06100D2AC82 /* Player.swift */,
-				FC625ABB2482B1F300ED60BF /* Array+Extensions.swift */,
-				FC625ABD2482CB9600ED60BF /* PlayerEnum.swift */,
 				FC625ABF2483021A00ED60BF /* Songs.xcdatamodeld */,
 			);
 			path = "Listen in Place";
@@ -190,6 +203,7 @@
 				FC625AB52482B17600ED60BF /* Metablock.swift */,
 				FC625AB72482B19600ED60BF /* Streaminginfo.swift */,
 				FC625AB92482B1BD00ED60BF /* Picture.swift */,
+				FC625ACF2484128600ED60BF /* VorbisComment.swift */,
 			);
 			path = Metablocks;
 			sourceTree = "<group>";
@@ -200,6 +214,21 @@
 				FC625AC32483093E00ED60BF /* CoreData.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		FCBE778C24865A7600080BB5 /* SongReader */ = {
+			isa = PBXGroup;
+			children = (
+				FC521D0D2479B06100D2AC82 /* Player.swift */,
+				FC625AB42482B16400ED60BF /* Metablocks */,
+				FCBE778A2486516200080BB5 /* Song.swift */,
+				FCBE778624864D6E00080BB5 /* Flac.swift */,
+				FCBE778824864FB600080BB5 /* NIOFileHandler+Extension.swift */,
+				FC625ACD2483D4E800ED60BF /* URL+Coordiantor.swift */,
+				FC625ABB2482B1F300ED60BF /* Array+Extensions.swift */,
+				FC625ABD2482CB9600ED60BF /* PlayerEnum.swift */,
+			);
+			path = SongReader;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -219,6 +248,11 @@
 			dependencies = (
 			);
 			name = "Listen in Place";
+			packageProductDependencies = (
+				FCBE777F2485B27D00080BB5 /* NIO */,
+				FCBE77812485B27D00080BB5 /* NIOFoundationCompat */,
+				FCBE77842485B4E900080BB5 /* NIOTransportServices */,
+			);
 			productName = "Listen in Place";
 			productReference = FC521CD82479A46600D2AC82 /* Listen in Place.app */;
 			productType = "com.apple.product-type.application";
@@ -292,6 +326,10 @@
 				Base,
 			);
 			mainGroup = FC521CCF2479A46600D2AC82;
+			packageReferences = (
+				FCBE777E2485B27D00080BB5 /* XCRemoteSwiftPackageReference "swift-nio" */,
+				FCBE77832485B4E900080BB5 /* XCRemoteSwiftPackageReference "swift-nio-transport-services" */,
+			);
 			productRefGroup = FC521CD92479A46600D2AC82 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -336,15 +374,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				FCC94AC6247A979B00DCFD25 /* AirPlayButton.swift in Sources */,
+				FCBE778724864D6E00080BB5 /* Flac.swift in Sources */,
+				FC625ACE2483D4E800ED60BF /* URL+Coordiantor.swift in Sources */,
 				FC521CDC2479A46600D2AC82 /* AppDelegate.swift in Sources */,
 				FC521CDE2479A46600D2AC82 /* SceneDelegate.swift in Sources */,
 				FC625ABA2482B1BD00ED60BF /* Picture.swift in Sources */,
 				FC521D0C2479A51B00D2AC82 /* MusicView.swift in Sources */,
+				FC625AD02484128700ED60BF /* VorbisComment.swift in Sources */,
 				FC521D0E2479B06100D2AC82 /* Player.swift in Sources */,
 				FC625AC12483021B00ED60BF /* Songs.xcdatamodeld in Sources */,
 				FC625AB62482B17600ED60BF /* Metablock.swift in Sources */,
 				FC625ABC2482B1F300ED60BF /* Array+Extensions.swift in Sources */,
 				FC625AB82482B19600ED60BF /* Streaminginfo.swift in Sources */,
+				FCBE778924864FB600080BB5 /* NIOFileHandler+Extension.swift in Sources */,
+				FCBE778B2486516200080BB5 /* Song.swift in Sources */,
 				FCD1325A2479D961008ADEF5 /* SwiftUI+DarkMode.swift in Sources */,
 				FCC3FB4D247BF51100F355B1 /* DocumentPickerButton.swift in Sources */,
 				FC521CE02479A46600D2AC82 /* ContentView.swift in Sources */,
@@ -686,6 +729,43 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		FCBE777E2485B27D00080BB5 /* XCRemoteSwiftPackageReference "swift-nio" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-nio";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.17.0;
+			};
+		};
+		FCBE77832485B4E900080BB5 /* XCRemoteSwiftPackageReference "swift-nio-transport-services" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-nio-transport-services";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FCBE777F2485B27D00080BB5 /* NIO */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FCBE777E2485B27D00080BB5 /* XCRemoteSwiftPackageReference "swift-nio" */;
+			productName = NIO;
+		};
+		FCBE77812485B27D00080BB5 /* NIOFoundationCompat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FCBE777E2485B27D00080BB5 /* XCRemoteSwiftPackageReference "swift-nio" */;
+			productName = NIOFoundationCompat;
+		};
+		FCBE77842485B4E900080BB5 /* NIOTransportServices */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FCBE77832485B4E900080BB5 /* XCRemoteSwiftPackageReference "swift-nio-transport-services" */;
+			productName = NIOTransportServices;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		FC625ABF2483021A00ED60BF /* Songs.xcdatamodeld */ = {

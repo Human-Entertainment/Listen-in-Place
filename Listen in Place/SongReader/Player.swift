@@ -3,154 +3,11 @@ import AVFoundation
 import UIKit
 import MediaPlayer
 import CoreData
+import Combine
+import NIO
+import NIOTransportServices
 
 typealias Byte = UInt8
-
-enum SongError: Error {
-    case noBookmark
-}
-
-struct Song: Hashable {
-    private(set) var title: String
-    private(set) var artist: String
-    private(set) var lyrics: String? = nil
-    private(set) var cover: UIImage
-    private(set) var album: String? = nil
-    private(set) var bookmark: Data? = nil
-    init(title: String, artist: String, lyrics: String? = nil, album: String? = nil, cover: UIImage? = nil, bookmark: Data? = nil) {
-        self.title = title
-        self.artist = artist
-        self.lyrics = lyrics
-        self.album = album
-        self.cover = cover ?? UIImage(named: "LP")!
-        self.bookmark = bookmark
-    }
-    
-    init(bookmark data: Data?) throws {
-        guard let bookmark = data else { throw SongError.noBookmark }
-            
-        var isStale = false
-        let url = try URL(
-            resolvingBookmarkData: bookmark,
-            options: .withoutUI,
-            relativeTo: nil,
-            bookmarkDataIsStale: &isStale
-            )
-        self.init(url: url, bookmark: bookmark)
-    }
-    
-    init(url: URL, bookmark: Data? = nil) {
-        // TODO: Fix this
-        var album: String? = nil
-        var artist: String? = nil
-        var title: String? = nil
-        
-        if let meta = Song.getFlacMeta(url: url) {
-            meta.forEach { key, value in
-                switch key.lowercased() {
-                    case "title":
-                        title = value
-                        break
-                    case "artist":
-                        artist = value
-                        break
-                    case "album":
-                        album = value
-                    default:
-                        print("\(key): \(value)")
-                        break
-                }
-            }
-            
-        }
-        cover = Song.getFlacAlbum(url: url) ?? UIImage(named: "LP")!
-        self.title = title ?? "Unknow title"
-        self.artist = artist ?? "Unknown artist"
-        self.album = album ?? "Unknown album"
-        self.bookmark = bookmark ?? (try? url.bookmarkData())
-    }
-    
-    private static func getFlacMeta(url: URL) -> [String: String]? {
-        var fileID: AudioFileID? = nil
-        guard AudioFileOpenURL(url as CFURL,
-                               .readPermission,
-                               kAudioFileFLACType,
-                               &fileID) == noErr else { return nil }
-        
-        var dict: CFDictionary? = nil
-        var dataSize = UInt32(MemoryLayout<CFDictionary?>.size(ofValue: dict))
-        
-        guard let audioFile = fileID else { return nil }
-        
-        guard AudioFileGetProperty(audioFile,
-                                   kAudioFilePropertyInfoDictionary,
-                                   &dataSize,
-                                   &dict) == noErr else { return nil }
-        
-        
-        AudioFileClose(audioFile)
-        
-        guard let cfDict = dict else { return nil }
-        
-        return .init(_immutableCocoaDictionary: cfDict)
-    }
-    
-    private static func getFlacAlbum(url: URL) -> UIImage? {
-        guard let file = try? Data(contentsOf: url) else { return nil }
-        let fileBytes = file.bytes
-        
-        guard String(bytes: fileBytes[0...3], encoding: .ascii) == "fLaC" else
-        {
-            print("Not a flac")
-            return nil
-        }
-        print("Isa flac")
-        let blocks = readBlock(byte: Array(fileBytes[4..<fileBytes.count]))
-        let pictures = blocks.compactMap { $0 as? Picture }
-        
-        print(pictures.count)
-        
-        var cover: UIImage? = nil
-        
-        pictures.forEach { picture in
-            if picture.pictureType == .CoverFront {
-                cover = picture.image
-            } else {
-                print(picture.mimeType)
-            }
-        }
-        
-        return cover
-        
-    }
-    
-    private static func readBlock(byte: [Byte]) -> [MetaBlcok]  {
-        var i = 0
-        let valueMask: UInt8 = 0x7f
-        let bitMask: UInt8 = 0x80
-        var last = false
-        var block = [MetaBlcok]()
-        while !last {
-            let rawValue = byte[i]
-            last = rawValue & bitMask != 0
-            let length = Array(byte[i+1..<i+4]).int
-            i += 4
-            switch rawValue & valueMask {
-                case 0:
-                    block.append(Streaminfo(bytes: byte[i..<i+length] ))
-                    break
-                case 6:
-                    block.append(Picture(bytes: byte[i..<i+length]))
-                    break
-                default: break
-                
-            }
-            i += length
-        }
-        return block
-        
-    }
-}
 
 final class Player: ObservableObject {
     
@@ -162,29 +19,53 @@ final class Player: ObservableObject {
     private var audioQueue = DispatchQueue.init(label: "audio")
     @Published var nowPlaying: Song? = nil
     
-    // MARK: Access
+    // MARK: - Access
     
     @Published var all = [Song]()
-    
+    var cancellable = [AnyCancellable]()
+
     func add(url: URL) {
-        guard let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext else {
-            return
-        }
+        guard let context = (UIApplication.shared.delegate as? AppDelegate)?
+            .persistentContainer
+            .viewContext else { return }
         
         let newSong = Songs(context: context)
         newSong.bookmark = try? url.bookmarkData()
+        // TODO: Fix this stuff
         
-        if let songToAll = try? Song(bookmark: newSong.bookmark) {
-            if !all.contains(songToAll) {
-                all.append(songToAll)
-            }
-        }
+        fetchSong(bookmark: newSong.bookmark)
         
         try? context.save()
     }
+
+    func fetchSong(bookmark: Data?) {
+        try? SongPublisher(threadPool: .init(numberOfThreads: 1))
+            .load(bookmark: bookmark)
+            .print("Song")
+            .sink(receiveCompletion: {
+                switch $0 {
+                    case .failure(let songError):
+                        print("Read error with \(songError)")
+                        break
+                    case .finished:
+                        print("Got all the things")
+                        break
+                    
+                }
+                
+            }, receiveValue: { song in
+                DispatchQueue.main.async {
+                    //if !self.all.contains(song) {
+                        self.all.append(song)
+                    //}
+                }
+            }).store(in: &cancellable)
+    }
     
-    // MARK: Setup
-    
+    // MARK: - Setup
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
     init() {
         player = .none
         // Setup mediacenter controls
@@ -193,24 +74,31 @@ final class Player: ObservableObject {
                                                selector: #selector(avPlayerDidFinishPlaying(note:)),
                                                name: .AVPlayerItemDidPlayToEndTime, object: nil)
         
-        if let context = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer.viewContext {
-            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Songs")
-            
-            do {
-                let result = try context.fetch(request)
-                
-                (result as! [NSManagedObject]).forEach { result in
-                    guard let bookmark = result.value(forKey: "bookmark") as? Data else { return }
-                    guard let song = try? Song(bookmark: bookmark) else { return }
-                    self.all.append(song)
-                }
-            } catch {
-                
-            }
-        }
+        asyncInit()
         
     }
     
+    func asyncInit() {
+        (UIApplication.shared.delegate as? AppDelegate)?
+            .persistentContainer
+            .performBackgroundTask { context in
+            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Songs")
+            
+            do {
+                // TODO: - Fix this
+                guard let result = try context.fetch(request) as? [NSManagedObject] else { return }
+                
+                result.forEach { [weak self] result in
+                    guard let bookmark = result.value(forKey: "bookmark") as? Data else { return }
+                    self?.fetchSong(bookmark: bookmark)
+                    
+                }
+            } catch {
+                // TODO: Couldn't get file UI
+                print("Couldn't retrieve file in CoreData with error \(error)")
+            }
+        }
+    }
     
     func setupRemoteTransportControls() {
         // Get the shared MPRemoteCommandCenter
@@ -249,7 +137,7 @@ final class Player: ObservableObject {
     }
     
 
-    // MARK: controls
+    // MARK: - Controls
     func play(_ song: Song) throws {
         guard let bookmark = song.bookmark else { throw SongError.noBookmark }
         var isStale = false
