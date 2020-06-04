@@ -118,6 +118,12 @@ struct SongPublisher {
                     break
                     case 4:
                         print("Vorbis comment block")
+                        let vorbis = try? VorbisComment(bytes: &bytes)
+                        guard let comments = vorbis?.comments else { return }
+                        
+                        artist = comments["artist"]
+                        album = comments["album"]
+                        title = comments["title"]
                     break
                     case 5:
                         print("Cuesheet")
