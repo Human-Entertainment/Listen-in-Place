@@ -12,7 +12,7 @@ struct VorbisComment: MetaBlcok {
         var bytes = data
         guard let vendorEnd = bytes.readInteger(endianness: .little, as: UInt32.self)
         else { throw VorbisError.lengthError }
-        let vendor = bytes.readString(length: Int(vendorEnd))
+        guard let vendor = bytes.readString(length: Int(vendorEnd)) else { throw VorbisError.vendorIssue }
         
         print(vendor)
         
@@ -40,4 +40,5 @@ struct VorbisComment: MetaBlcok {
 enum VorbisError: Error {
     case lengthError
     case commentError
+    case vendorIssue
 }
