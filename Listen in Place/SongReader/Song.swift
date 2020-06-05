@@ -124,6 +124,7 @@ struct SongPublisher {
                         artist = comments["artist"]
                         album = comments["album"]
                         title = comments["title"]
+                        print(comments)
                     break
                     case 5:
                         print("Cuesheet")
@@ -135,7 +136,7 @@ struct SongPublisher {
                             
                             if picture.pictureType == .CoverFront {
                                 cover = picture.image
-                                print(cover)
+                                print(cover as Any)
                             } else {
                                 print(picture.mimeType)
                             }
