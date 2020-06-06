@@ -211,19 +211,17 @@ final class Player: ObservableObject {
             player.removeTimeObserver(token)
         }
         
-        // TODO: Remove first item in queue
-        
-        
-        
-        
+        playNext()
+    }
+    
+    func playNext() {
+        pause()
         self.player = .none
         isPlaying = false
         if let nextSong = nextSong() {
             try? play(nextSong)
         }
     }
-    
-    
     
     func pause() {
         switch player {
