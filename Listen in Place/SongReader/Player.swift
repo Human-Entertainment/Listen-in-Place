@@ -10,13 +10,13 @@ import NIOTransportServices
 typealias Byte = UInt8
 
 final class Player: ObservableObject {
+    public static let supportedFiles = ["public.mp3", "org.xiph.flac"]
+    
     
     private var player: PlayerEnum
-    private var _avPlayer: AVPlayer?
     @Published var progress: Float = 0.0
     @Published var isPlaying = false
     private var url: URL? = nil
-    private var audioQueue = DispatchQueue.init(label: "audio")
     @Published var nowPlaying: Song? = nil
     
     // MARK: - Access
@@ -57,6 +57,7 @@ final class Player: ObservableObject {
                 DispatchQueue.main.async {
                     //if !self.all.contains(song) {
                         self.all.append(song)
+                        self.addToQueue(song)
                     //}
                 }
             }).store(in: &cancellable)
@@ -66,7 +67,7 @@ final class Player: ObservableObject {
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-    init() {
+    private init() {
         player = .none
         // Setup mediacenter controls
         setupRemoteTransportControls()
@@ -77,6 +78,8 @@ final class Player: ObservableObject {
         asyncInit()
         
     }
+    
+    public static let shared = Player()
     
     func asyncInit() {
         (UIApplication.shared.delegate as? AppDelegate)?
@@ -134,6 +137,15 @@ final class Player: ObservableObject {
         
         // Set the metadata
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    }
+    
+
+    // MARK: - Queue
+    @Published
+    private(set) var sharedQueue = [Song]()
+    
+    func addToQueue(_ song: Song) {
+        sharedQueue.append(song)
     }
     
 
