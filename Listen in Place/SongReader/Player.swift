@@ -57,7 +57,6 @@ final class Player: ObservableObject {
                 DispatchQueue.main.async {
                     //if !self.all.contains(song) {
                         self.all.append(song)
-                        self.addToQueue(song)
                     //}
                 }
             }).store(in: &cancellable)
@@ -148,6 +147,13 @@ final class Player: ObservableObject {
         sharedQueue.append(song)
     }
     
+    func nextSong() -> Song? {
+        if sharedQueue.count > 0 {
+            return sharedQueue.removeFirst()
+        } else {
+            return nil
+        }
+    }
 
     // MARK: - Controls
     func play(_ song: Song) throws {
@@ -207,9 +213,14 @@ final class Player: ObservableObject {
         
         // TODO: Remove first item in queue
         
+        
+        
+        
         self.player = .none
         isPlaying = false
-        
+        if let nextSong = nextSong() {
+            try? play(nextSong)
+        }
     }
     
     
