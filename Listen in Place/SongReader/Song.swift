@@ -63,8 +63,6 @@ struct SongPublisher {
             bookmarkDataIsStale: &isStale
         )
         
-        // TODO: Add Coordinator
-        
         var loaded: (URL?, Error?) = (nil, nil)
         let coordinator = NSFileCoordinator()
         url.coordinatedRead(coordinator) { inputURL,inputError  in
