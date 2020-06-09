@@ -6,6 +6,7 @@ var errorSong: Song {
     let song = Song(title: "Couldn't load title", artist: "Cound't load artis")
     return song
 }
+
 struct ContentView: View {
     @Environment(\.managedObjectContext)
     var moc
@@ -16,12 +17,17 @@ struct ContentView: View {
     */
     @EnvironmentObject
     var player: Player
+    
+    @State
+    var showSongContext = false
+    
     var body: some View {
         VStack {
             NavigationView {
                 List {
                     ForEach(player.all, id: \.self) { song in
                         SongCellView(song: song)
+                            
                     }
                 }.onAppear {
                     UITableView.appearance()
@@ -93,9 +99,10 @@ struct GlobalControls: View {
 }
 
 struct SongCellView: View {
-    @State var showPlayer = false
     
     @EnvironmentObject var player: Player
+    
+    @State var showAction = false
     
     let song: Song
     var body: some View {
@@ -103,10 +110,33 @@ struct SongCellView: View {
             try? self.player.play(self.song)
         }) {
             SongView(song: song)
-        }.sheet(isPresented: self.$showPlayer) {
-            MusicView(song: self.song)
-                .environmentObject(self.player)
+            Spacer()
         }
+                
+        .onLongPressGesture {
+            self.showAction.toggle()
+        }
+        .actionSheet(isPresented: $showAction){
+            ActionSheet(title: "Hi", message: "Hello", buttons: [
+                .default("Play last", action: { self.player.addToQueue(self.song) }),
+                .default("Cancel", action: { self.showAction.toggle() })
+            ])
+        }
+           /*
+        .contextMenu {
+            Button(action: { self.player.addToQueue(self.song) }, label: {
+                Text("Add to queue")
+            })
+        }*/
+    }
+    
+}
+
+extension Text: ExpressibleByStringLiteral {
+    public typealias StringLiteralType = String
+    
+    public init(stringLiteral value: String) {
+        self.init(value)
     }
 }
 
