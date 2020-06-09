@@ -6,31 +6,76 @@ struct MusicView: View {
     var player: Player
     let song: Song
     
+    @State
+    var showQueue = false
+    
+    var hasQueue: Color {
+        if !player.sharedQueue.isEmpty {
+            return .accentColor
+        } else {
+            return .gray
+        }
+    }
+    
     var body: some View {
         VStack {
-            Spacer()
             
-            Image(uiImage: song.cover)
-                .resizable()
-                .padding()
-                .aspectRatio(contentMode: .fit)
+            
+            if showQueue {
                 
-                .cornerRadius(50)
-                .shadow(radius: 10)
-    
-            Text(song.title)
+                NavigationView {
+                
+                
+                List {
+                    ForEach (player.sharedQueue, id: \.self) { song in
+                        SongCellView(song: song)
+                    }
+                }.onAppear {
+                    UITableView.appearance()
+                        .separatorStyle = .none
+                }
+                    
+                .navigationBarTitle(Text("Queue"))
+                }
+            } else {
+                Spacer()
+                
+                Image(uiImage: song.cover)
+                    .resizable()
+                    .cornerRadius(10)
+                    .shadow(radius: 10)
+                    .padding()
+                    .aspectRatio(contentMode: .fit)
 
-            Slider(value: Binding( get: {self.player.progress},
-                                   set: self.player.seek))
+                Text(song.title)
+
+                Slider(value: Binding( get: {self.player.progress},
+                                       set: self.player.seek))
+                    
+                MusicControls()
                 
-            MusicControls()
-            
-            Spacer()
-            
-            AirPlayButton()
-                .frame(width: 40,
-                       height: 40,
-                       alignment: .center)
+                Spacer()
+            }
+            HStack {
+                
+                //Image(systemName: "square.and.arrow.up")
+                
+                Spacer()
+                
+                AirPlayButton()
+                    .frame(width: 40,
+                           height: 40,
+                           alignment: .center)
+                    .alignmentGuide(HorizontalAlignment.center, computeValue: {d in d[HorizontalAlignment.center]})
+                
+                Spacer()
+                
+                Button ( action: { self.showQueue.toggle() } ) {
+                    Image(systemName: "music.note.list")
+                    .accentColor(hasQueue)
+                    
+                }
+            }
         }.padding()
     }
 }
@@ -91,5 +136,6 @@ struct MusicControls: View {
 struct MusicView_Previews: PreviewProvider {
     static var previews: some View {
         MusicView(song: errorSong)
+            .environmentObject(Player.shared)
     }
 }
