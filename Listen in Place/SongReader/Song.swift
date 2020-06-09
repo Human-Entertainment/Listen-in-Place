@@ -63,8 +63,6 @@ struct SongPublisher {
             bookmarkDataIsStale: &isStale
         )
         
-        // TODO: Add Coordinator
-        
         var loaded: (URL?, Error?) = (nil, nil)
         let coordinator = NSFileCoordinator()
         url.coordinatedRead(coordinator) { inputURL,inputError  in
@@ -80,6 +78,7 @@ struct SongPublisher {
                 promise(.success(song))
             }
             loaded.whenFailure { error in
+                
                 print(error)
                 promise(.failure(.coundtReadFile))
             }
@@ -156,7 +155,10 @@ struct SongPublisher {
                                 cover: cover ?? UIImage(named: "LP")!,
                                 bookmark: bookmark )
                 return song
-            }
+        }.flatMapErrorThrowing { error in
+            let avEnum = PlayerEnum.AVPlayer(.init(url: url), url)
+            return avEnum.getSong()
+        }
        
     }
 
