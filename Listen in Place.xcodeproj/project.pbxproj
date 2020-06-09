@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FC06D5AE248BB4270041E794 /* ArrayBiggerThan.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */; };
 		FC521CDC2479A46600D2AC82 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521CDB2479A46600D2AC82 /* AppDelegate.swift */; };
 		FC521CDE2479A46600D2AC82 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521CDD2479A46600D2AC82 /* SceneDelegate.swift */; };
 		FC521CE02479A46600D2AC82 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521CDF2479A46600D2AC82 /* ContentView.swift */; };
@@ -68,6 +69,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayBiggerThan.swift; sourceTree = "<group>"; };
 		FC521CD82479A46600D2AC82 /* Listen in Place.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Listen in Place.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC521CDB2479A46600D2AC82 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FC521CDD2479A46600D2AC82 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -167,6 +169,7 @@
 				FC521CE92479A46800D2AC82 /* Info.plist */,
 				FC521CE32479A46800D2AC82 /* Preview Content */,
 				FC625ABF2483021A00ED60BF /* Songs.xcdatamodeld */,
+				FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */,
 			);
 			path = "Listen in Place";
 			sourceTree = "<group>";
@@ -383,6 +386,7 @@
 				FC625AD02484128700ED60BF /* VorbisComment.swift in Sources */,
 				FC521D0E2479B06100D2AC82 /* Player.swift in Sources */,
 				FC625AC12483021B00ED60BF /* Songs.xcdatamodeld in Sources */,
+				FC06D5AE248BB4270041E794 /* ArrayBiggerThan.swift in Sources */,
 				FC625AB62482B17600ED60BF /* Metablock.swift in Sources */,
 				FC625ABC2482B1F300ED60BF /* Array+Extensions.swift in Sources */,
 				FC625AB82482B19600ED60BF /* Streaminginfo.swift in Sources */,
@@ -570,7 +574,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "app.inuk.listen-in-place";
+				PRODUCT_BUNDLE_IDENTIFIER = "app.inuk.list-in-place";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_INCLUDE_PATHS = "$(SRCROOT)";
 				SWIFT_INSTALL_OBJC_HEADER = NO;
@@ -599,7 +603,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "app.inuk.listen-in-place";
+				PRODUCT_BUNDLE_IDENTIFIER = "app.inuk.list-in-place";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_INCLUDE_PATHS = "$(SRCROOT)";
 				SWIFT_INSTALL_OBJC_HEADER = NO;
@@ -614,7 +618,9 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2D7T23VV7R;
 				INFOPLIST_FILE = "Listen in PlaceTests/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.5;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -635,7 +641,9 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2D7T23VV7R;
 				INFOPLIST_FILE = "Listen in PlaceTests/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.5;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -656,6 +664,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2D7T23VV7R;
 				INFOPLIST_FILE = "Listen in PlaceUITests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -675,6 +684,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 2D7T23VV7R;
 				INFOPLIST_FILE = "Listen in PlaceUITests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

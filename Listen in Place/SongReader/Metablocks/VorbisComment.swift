@@ -1,5 +1,6 @@
 import NIO
 
+@dynamicMemberLookup
 struct VorbisComment: MetaBlcok {
     var comments: [String: String]
     init(bytes: inout ByteBuffer) throws {
@@ -31,9 +32,23 @@ struct VorbisComment: MetaBlcok {
         return comments
     }
     
+    subscript(dynamicMember member: String) -> String? {
+        comments[member]
+    }
+    
     private static func extract(comment: String) -> String {
         print(comment)
         return "Hello"
+    }
+}
+
+extension VorbisComment: CustomStringConvertible {
+    var description: String {
+        var string = ""
+        comments.forEach { (key, value) in
+            string += "\(key): \(value)\n"
+        }
+        return string
     }
 }
 

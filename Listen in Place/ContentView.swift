@@ -43,6 +43,8 @@ struct ContentView: View {
             }
             if self.player.nowPlaying != nil {
                 GlobalControls()
+                    .frame(width: .none, height: 100, alignment: .bottom)
+                    .alignmentGuide(.bottom, computeValue: {d in d[explicit: .bottom]!})
             } else {
                 EmptyView()
             }
@@ -82,15 +84,14 @@ struct GlobalControls: View {
             }
         }) {
             HStack {
-                SongView(song: player.nowPlaying ?? notPlaying)
+                SongView(song: player.nowPlaying ?? notPlaying, frame: 60)
                 Spacer()
                 MusicControls()
-            }.padding()
+            }.padding(5)
             
     }
         .background(Color(.secondarySystemBackground))
         .clipped()
-        .shadow(radius: 5)
         .sheet(isPresented: self.$showPlayer) {
             MusicView(song: self.player.nowPlaying ?? notPlaying)
                 .environmentObject(self.player)
@@ -110,16 +111,18 @@ struct SongCellView: View {
             try? self.player.play(self.song)
         }) {
             SongView(song: song)
-            Spacer()
+                .onTapGesture {
+                    try? self.player.play(self.song)
+            }
+            .onLongPressGesture {
+                self.showAction.toggle()
+            }
         }
-                
-        .onLongPressGesture {
-            self.showAction.toggle()
-        }
+        
         .actionSheet(isPresented: $showAction){
             ActionSheet(title: "Hi", message: "Hello", buttons: [
                 .default("Play last", action: { self.player.addToQueue(self.song) }),
-                .default("Cancel", action: { self.showAction.toggle() })
+                .cancel { self.showAction.toggle() }
             ])
         }
            /*
@@ -146,6 +149,12 @@ var notPlaying: Song {
 }
 
 struct SongView: View {
+    init(song: Song, frame: Int? = nil) {
+        self.frame = frame ?? 40
+        self.song = song
+    }
+    
+    var frame: Int
     let song: Song
     var body: some View {
         HStack {
@@ -153,14 +162,14 @@ struct SongView: View {
             Image(uiImage: song.cover)
                 .resizable()
                 .renderingMode(.original)
-                .frame(width: 40, height: 40, alignment: .leading)
-                .shadow(radius: 5)
+                .frame(width: CGFloat(self.frame), height: CGFloat(self.frame), alignment: .leading)
+                .cornerRadius(5)
+                .shadow(radius: 2)
+                
 
             VStack (alignment: .leading) {
                 Text(song.title)
-                    .font(.headline)
-
-                Text(song.artist)
+                
             }.padding(2)
         }
     }
@@ -169,7 +178,7 @@ struct SongView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         
-        return TestView(view: ContentView())
+        return TestView(view: ContentView().environmentObject(Player.shared))
     }
 }
 
