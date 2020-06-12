@@ -136,6 +136,7 @@ final class Player: ObservableObject {
         
         // Set the metadata
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+        
     }
     
 
@@ -182,9 +183,16 @@ final class Player: ObservableObject {
         play()
     }
     
+    
+    
     var token: Any?
     
+    let isPlayingQueue = DispatchQueue(label: "IsPlayingListerner")
+    let isPlayingDispatchGroup = DispatchGroup()
+    
     func play() {
+        // Set this first, as to not break the async queue
+        isPlaying = true
         switch player {
         case .AVPlayer(let player, _):
             player.play()
@@ -199,10 +207,20 @@ final class Player: ObservableObject {
                                                     self.setupNowPlaying(song: self.nowPlaying!, elapsed: seconds, total: duration)
             })
             
+            isPlayingQueue.async {
+                while self.isPlaying {
+                    if player.timeControlStatus == .paused {
+                        DispatchQueue.main.async {
+                            self.isPlaying = false
+                        }
+                    }
+                }
+            }
+            
         default:
+            isPlaying = false
             break
         }
-        isPlaying = true
     }
     
     @objc func avPlayerDidFinishPlaying(note: NSNotification) {
