@@ -136,6 +136,7 @@ final class Player: ObservableObject {
         
         // Set the metadata
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+        
     }
     
 
@@ -182,9 +183,16 @@ final class Player: ObservableObject {
         play()
     }
     
+    
+    
     var token: Any?
     
+    let isPlayingQueue = DispatchQueue(label: "IsPlayingListerner")
+    let isPlayingDispatchGroup = DispatchGroup()
+    
     func play() {
+        // Set this first, as to not break the async queue
+        isPlaying = true
         switch player {
         case .AVPlayer(let player, _):
             player.play()
@@ -199,10 +207,54 @@ final class Player: ObservableObject {
                                                     self.setupNowPlaying(song: self.nowPlaying!, elapsed: seconds, total: duration)
             })
             
+            NotificationCenter.default.addObserver(self,
+                                                   selector: #selector(handleInterruption),
+                                                   name: AVAudioSession.interruptionNotification,
+                                                   object: nil)
+            
+            isPlayingQueue.async {
+                while self.isPlaying {
+                    if player.timeControlStatus == .paused {
+                        DispatchQueue.main.async {
+                            self.isPlaying = false
+                        }
+                    }
+                }
+            }
+            
         default:
+            isPlaying = false
             break
         }
-        isPlaying = true
+    }
+    
+    @objc func handleInterruption(notification: Notification) {
+        guard let userInfo = notification.userInfo,
+            let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+            let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
+                return
+        }
+        
+        // Switch over the interruption type.
+        switch type {
+            
+            case .began:
+            // An interruption began. Update the UI as needed.
+                self.isPlaying = false
+            case .ended:
+                // An interruption ended. Resume playback, if appropriate.
+                
+                guard let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt else { return }
+                let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+                if options.contains(.shouldResume) {
+                    // Interruption ended. Playback should resume.
+                    self.play()
+                } else {
+                    // Interruption ended. Playback should not resume.
+            }
+            
+            default: ()
+        }
     }
     
     @objc func avPlayerDidFinishPlaying(note: NSNotification) {
