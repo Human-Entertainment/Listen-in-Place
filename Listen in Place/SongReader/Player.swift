@@ -207,6 +207,11 @@ final class Player: ObservableObject {
                                                     self.setupNowPlaying(song: self.nowPlaying!, elapsed: seconds, total: duration)
             })
             
+            NotificationCenter.default.addObserver(self,
+                                                   selector: #selector(handleInterruption),
+                                                   name: AVAudioSession.interruptionNotification,
+                                                   object: nil)
+            
             isPlayingQueue.async {
                 while self.isPlaying {
                     if player.timeControlStatus == .paused {
@@ -220,6 +225,35 @@ final class Player: ObservableObject {
         default:
             isPlaying = false
             break
+        }
+    }
+    
+    @objc func handleInterruption(notification: Notification) {
+        guard let userInfo = notification.userInfo,
+            let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+            let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
+                return
+        }
+        
+        // Switch over the interruption type.
+        switch type {
+            
+            case .began:
+            // An interruption began. Update the UI as needed.
+                self.isPlaying = false
+            case .ended:
+                // An interruption ended. Resume playback, if appropriate.
+                
+                guard let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt else { return }
+                let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+                if options.contains(.shouldResume) {
+                    // Interruption ended. Playback should resume.
+                    self.play()
+                } else {
+                    // Interruption ended. Playback should not resume.
+            }
+            
+            default: ()
         }
     }
     
