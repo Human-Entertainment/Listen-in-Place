@@ -21,6 +21,9 @@ struct ContentView: View {
     @State
     var showSongContext = false
     
+    @State
+    var showDocumentPicker = false
+    
     var body: some View {
         VStack {
             NavigationView {
@@ -34,12 +37,19 @@ struct ContentView: View {
                         .separatorStyle = .none
                 }
                 .navigationBarTitle(Text("Song"))
-                .navigationBarItems(trailing: DocumentPickerButton(documentTypes: ["public.mp3", "org.xiph.flac"],
-                                                                   onOpen: self.openSong){
-                    Image(systemName: "plus.circle.fill")
-                        .resizable()
-                        .padding()
-                } )
+                .navigationBarItems(trailing: Button {
+                                                self.showDocumentPicker = true
+                                               } label: {
+                                                    Image(systemName: "plus.circle.fill")
+                                                        .resizable()
+                                                        .padding()
+                                               })
+                .sheet(isPresented: self.$showDocumentPicker) {
+                    DocumentPicker(onSuccess: self.openSong) { error in
+                        print(error)
+                        self.showDocumentPicker = false // causes undefined behaviour
+                    }
+                }
             }
             if self.player.nowPlaying != nil {
                 GlobalControls()
@@ -48,6 +58,7 @@ struct ContentView: View {
             } else {
                 EmptyView()
             }
+            
         }
         
     }
@@ -63,6 +74,30 @@ struct ContentView: View {
             defer { url.stopAccessingSecurityScopedResource() }
             
             self.player.add(url: url)
+        }
+    }
+}
+
+struct DocumentPicker: View {
+    @Environment(\.importFiles) var file
+    
+    var body: some View {
+        EmptyView()
+    }
+    
+    init(onSuccess: @escaping ([URL]) -> (),
+         onError: @escaping (Error) -> () = { print($0) })
+    {
+        file.callAsFunction(multipleOfType: [.epub]) { result in
+            guard let result = result else { return }
+            switch result {
+                case .success(let urls):
+                    onSuccess(urls)
+                    break
+                case .failure(let error):
+                    onError(error)
+                    break
+            }
         }
     }
 }
