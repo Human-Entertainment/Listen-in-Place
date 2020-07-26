@@ -88,7 +88,7 @@ struct DocumentPicker: View {
     init(onSuccess: @escaping ([URL]) -> (),
          onError: @escaping (Error) -> () = { print($0) })
     {
-        file.callAsFunction(multipleOfType: [.epub]) { result in
+        file(multipleOfType: [.epub]) { result in
             guard let result = result else { return }
             switch result {
                 case .success(let urls):
