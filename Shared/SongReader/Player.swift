@@ -10,7 +10,6 @@ import NIOTransportServices
 typealias Byte = UInt8
 
 final class Player: ObservableObject {
-    public static let supportedFiles = ["public.mp3", "org.xiph.flac"]
     private let container: NSPersistentContainer
     
     private var player: PlayerEnum
@@ -26,14 +25,19 @@ final class Player: ObservableObject {
 
     func add(url: URL) {
         container.performBackgroundTask { [self] context in
-        
+            do {
                 let newSong = Songs(context: context)
-                newSong.bookmark = try? url.bookmarkData()
+                let bookmark = try url.bookmarkData()
+                newSong.bookmark = bookmark
                 // TODO: Fix this stuff
                 
-                fetchSong(bookmark: try? url.bookmarkData())
+                fetchSong(bookmark: bookmark)
                 
-                try? context.save()
+                
+            } catch {
+                print("An error occured: \(error)")
+            }
+            try? context.save()
             }
     }
 
