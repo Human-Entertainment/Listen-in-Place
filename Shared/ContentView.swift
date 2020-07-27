@@ -184,10 +184,26 @@ struct SongView: View {
     }
 }
 
+// TODO: Fix this
+/*
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         
-        return TestView(view: ContentView().environmentObject(Player.shared))
+        return TestView(view: ContentView()
+                            .environmentObject(Player.shared(persistentContainer)))
     }
+    
+    var persistentContainer: NSPersistentContainer = {
+        let container = NSPersistentContainer(name: "Songs")
+        container.loadPersistentStores { description, error in
+            if let error = error {
+                // Add your error UI here
+                fatalError("Unable to load conatainer with \(error)")
+            }
+            print(description)
+        }
+        print("Making persistant container")
+        return container
+    }()
 }
-
+*/

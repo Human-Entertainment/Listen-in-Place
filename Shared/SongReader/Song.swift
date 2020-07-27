@@ -1,7 +1,9 @@
 import NIO
 import NIOTransportServices
 import Foundation
+#if os(iOS)
 import UIKit
+#endif
 import Combine
 
 enum SongError: Error {
@@ -53,7 +55,7 @@ struct SongPublisher {
     }
     
     func load(bookmark data: Data?) throws -> Future<Song, SongError> {
-        guard let bookmark = data else { throw SongError.noBookmark }
+        guard let bookmark = data else { return Future<Song, SongError> { $0(.failure(SongError.noBookmark )) } }
         
         var isStale = false
         let url = try URL(

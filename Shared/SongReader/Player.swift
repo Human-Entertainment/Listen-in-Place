@@ -11,7 +11,7 @@ typealias Byte = UInt8
 
 final class Player: ObservableObject {
     public static let supportedFiles = ["public.mp3", "org.xiph.flac"]
-    
+    private let container: NSPersistentContainer
     
     private var player: PlayerEnum
     @Published var progress: Float = 0.0
@@ -25,24 +25,23 @@ final class Player: ObservableObject {
     var cancellable = [AnyCancellable]()
 
     func add(url: URL) {
-        guard let context = (UIApplication.shared.delegate as? AppDelegate)?
-            .persistentContainer
-            .viewContext else { return }
+        container.performBackgroundTask { [self] context in
         
-        let newSong = Songs(context: context)
-        newSong.bookmark = try? url.bookmarkData()
-        // TODO: Fix this stuff
-        
-        fetchSong(bookmark: newSong.bookmark)
-        
-        try? context.save()
+                let newSong = Songs(context: context)
+                newSong.bookmark = try? url.bookmarkData()
+                // TODO: Fix this stuff
+                
+                fetchSong(bookmark: try? url.bookmarkData())
+                
+                try? context.save()
+            }
     }
 
     func fetchSong(bookmark: Data?) {
         try? SongPublisher(threadPool: .init(numberOfThreads: 1))
             .load(bookmark: bookmark)
             .print("Song")
-            .sink(receiveCompletion: {
+            .sink {
                 switch $0 {
                     case .failure(let songError):
                         print("Read error with \(songError)")
@@ -53,20 +52,21 @@ final class Player: ObservableObject {
                     
                 }
                 
-            }, receiveValue: { song in
+            } receiveValue: { song in
                 DispatchQueue.main.async {
                     //if !self.all.contains(song) {
                         self.all.append(song)
                     //}
                 }
-            }).store(in: &cancellable)
+            }.store(in: &cancellable)
     }
     
     // MARK: - Setup
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-    private init() {
+    private init(container: NSPersistentContainer) {
+        self.container = container
         player = .none
         // Setup mediacenter controls
         setupRemoteTransportControls()
@@ -78,12 +78,10 @@ final class Player: ObservableObject {
         
     }
     
-    public static let shared = Player()
+    public static let shared: (NSPersistentContainer) -> (Player) = { Player(container: $0) }
     
     func asyncInit() {
-        (UIApplication.shared.delegate as? AppDelegate)?
-            .persistentContainer
-            .performBackgroundTask { context in
+        container.performBackgroundTask { context in
             let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Songs")
             
             do {
@@ -99,7 +97,7 @@ final class Player: ObservableObject {
                 // TODO: Couldn't get file UI
                 print("Couldn't retrieve file in CoreData with error \(error)")
             }
-        }
+            }
     }
     
     func setupRemoteTransportControls() {
