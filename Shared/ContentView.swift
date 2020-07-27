@@ -8,21 +8,15 @@ var errorSong: Song {
 }
 
 struct ContentView: View {
-    @Environment(\.managedObjectContext)
-    var moc
-    /*
-    @FetchRequest(entity: Songs.entity(),
-                  sortDescriptors: [])
-    var songs: FetchedResults<Songs>
-    */
+    @Environment(\.importFiles)
+    var file
+    
     @EnvironmentObject
     var player: Player
     
     @State
     var showSongContext = false
     
-    @State
-    var showDocumentPicker = false
     
     var body: some View {
         VStack {
@@ -38,18 +32,22 @@ struct ContentView: View {
                 }
                 .navigationBarTitle(Text("Song"))
                 .navigationBarItems(trailing: Button {
-                                                self.showDocumentPicker = true
+                                                    file(multipleOfType: [.audio]) { result in
+                                                        guard let result = result else { return }
+                                                        switch result {
+                                                            case .success(let urls):
+                                                                openSong (urls: urls)
+                                                                break
+                                                            case .failure(let error):
+                                                                print(error)
+                                                                break
+                                                        }
+                                                    }
                                                } label: {
                                                     Image(systemName: "plus.circle.fill")
                                                         .resizable()
                                                         .padding()
                                                })
-                .sheet(isPresented: self.$showDocumentPicker) {
-                    DocumentPicker(onSuccess: self.openSong) { error in
-                        print(error)
-                        self.showDocumentPicker = false // causes undefined behaviour
-                    }
-                }
             }
             if self.player.nowPlaying != nil {
                 GlobalControls()
@@ -74,30 +72,6 @@ struct ContentView: View {
             defer { url.stopAccessingSecurityScopedResource() }
             
             self.player.add(url: url)
-        }
-    }
-}
-
-struct DocumentPicker: View {
-    @Environment(\.importFiles) var file
-    
-    var body: some View {
-        EmptyView()
-    }
-    
-    init(onSuccess: @escaping ([URL]) -> (),
-         onError: @escaping (Error) -> () = { print($0) })
-    {
-        file(multipleOfType: [.epub]) { result in
-            guard let result = result else { return }
-            switch result {
-                case .success(let urls):
-                    onSuccess(urls)
-                    break
-                case .failure(let error):
-                    onError(error)
-                    break
-            }
         }
     }
 }
