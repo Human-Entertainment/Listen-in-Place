@@ -30,7 +30,7 @@ final class Player: ObservableObject {
                 newSong.bookmark = bookmark
                 // TODO: Fix this stuff
                 
-                fetchSong(bookmark: bookmark)
+                fetchSong(url: url, bookmark: bookmark)
                 
                 
             } catch {
@@ -41,9 +41,9 @@ final class Player: ObservableObject {
             }
     }
 
-    func fetchSong(bookmark: Data?) {
+    func fetchSong(url: URL, bookmark: Data) {
         try? SongPublisher(threadPool: .init(numberOfThreads: 1))
-            .load(bookmark: bookmark)
+            .load(url: url, bookmark: bookmark)
             .print("Song")
             .sink {
                 switch $0 {
@@ -94,8 +94,21 @@ final class Player: ObservableObject {
                 
                 result.forEach { [weak self] result in
                     guard let bookmark = result.value(forKey: "bookmark") as? Data else { return }
-                    self?.fetchSong(bookmark: bookmark)
                     
+                    do {
+                        
+                        var isStale = false
+                        let url = try URL(
+                            resolvingBookmarkData: bookmark,
+                            options: .withoutUI,
+                            bookmarkDataIsStale: &isStale
+                        )
+                        
+                        self?.fetchSong(url: url, bookmark: bookmark)
+                        
+                    } catch {
+                        print("Couldn't get URL from database because: \(error)")
+                    }
                 }
             } catch {
                 // TODO: Couldn't get file UI

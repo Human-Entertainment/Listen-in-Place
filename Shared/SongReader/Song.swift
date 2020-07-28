@@ -54,30 +54,15 @@ struct SongPublisher {
         self.threadPool = threadPool
     }
     
-    func load(bookmark data: Data?) throws -> Future<Song, SongError> {
-        guard let bookmark = data else { return Future<Song, SongError> { $0(.failure(SongError.noBookmark )) } }
-        
-        var isStale = false
+    func load(url: URL, bookmark: Data) throws -> Future<Song, SongError> {
         var loaded: (URL?, Error?) = (nil, nil)
-        do {
-            let url = try URL(
-                resolvingBookmarkData: bookmark,
-                options: .withoutUI,
-                bookmarkDataIsStale: &isStale
-            )
         
-            let coordinator = NSFileCoordinator()
-            url.coordinatedRead(coordinator) { inputURL,inputError  in
-                loaded = (inputURL, inputError)
-            }
-        
-        } catch {
-            print("Couldn't get URL from bookmark because: \(error)")
+        let coordinator = NSFileCoordinator()
+        url.coordinatedRead(coordinator) { inputURL,inputError  in
+            loaded = (inputURL, inputError)
         }
         
-        
         guard let loadURL = loaded.0 else { return Future<Song, SongError>{ $0(.failure(.coundtReadFile)) } }
-        
         
         return Future<Song, SongError> { promise in
             self.threadPool.start()
@@ -159,7 +144,7 @@ struct SongPublisher {
                                 lyrics: nil,
                                 album: album ?? "Unknown album",
                                 cover: cover ?? UIImage(named: "LP")!,
-                                bookmark: bookmark )
+                                bookmark: bookmark)
                 return song
         }.flatMapErrorThrowing { error in
             let avEnum = PlayerEnum.AVPlayer(.init(url: url), url)
