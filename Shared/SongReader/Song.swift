@@ -58,18 +58,24 @@ struct SongPublisher {
         guard let bookmark = data else { return Future<Song, SongError> { $0(.failure(SongError.noBookmark )) } }
         
         var isStale = false
-        let url = try URL(
-            resolvingBookmarkData: bookmark,
-            options: .withoutUI,
-            relativeTo: nil,
-            bookmarkDataIsStale: &isStale
-        )
-        
         var loaded: (URL?, Error?) = (nil, nil)
-        let coordinator = NSFileCoordinator()
-        url.coordinatedRead(coordinator) { inputURL,inputError  in
-            loaded = (inputURL, inputError)
+        do {
+            let url = try URL(
+                resolvingBookmarkData: bookmark,
+                options: .withoutUI,
+                bookmarkDataIsStale: &isStale
+            )
+        
+            let coordinator = NSFileCoordinator()
+            url.coordinatedRead(coordinator) { inputURL,inputError  in
+                loaded = (inputURL, inputError)
+            }
+        
+        } catch {
+            print("Couldn't get URL from bookmark because: \(error)")
         }
+        
+        
         guard let loadURL = loaded.0 else { return Future<Song, SongError>{ $0(.failure(.coundtReadFile)) } }
         
         
@@ -85,8 +91,6 @@ struct SongPublisher {
                 promise(.failure(.coundtReadFile))
             }
         }
-        
-        
         
         // TODO: make it so MP3 can also be parsed
     }

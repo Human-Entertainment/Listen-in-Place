@@ -37,7 +37,7 @@ struct ListenInPlace: App {
     
     // MARK: - Core Data stack
     
-    public var persistentContainer: NSPersistentContainer = {
+    private var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "Songs")
         container.loadPersistentStores { description, error in
             if let error = error {

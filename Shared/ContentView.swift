@@ -33,7 +33,6 @@ struct ContentView: View {
                 .navigationBarTitle(Text("Song"))
                 .navigationBarItems(trailing: Button {
                                                     file(multipleOfType: [.audio]) { result in
-                                                        guard let result = result else { return }
                                                         switch result {
                                                             case .success(let urls):
                                                                 openSong (urls: urls)
@@ -41,6 +40,8 @@ struct ContentView: View {
                                                             case .failure(let error):
                                                                 print(error)
                                                                 break
+                                                            case .none:
+                                                                print("No item was selected")
                                                         }
                                                     }
                                                } label: {

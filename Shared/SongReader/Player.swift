@@ -1,6 +1,5 @@
 import Foundation
 import AVFoundation
-import UIKit
 import MediaPlayer
 import CoreData
 import Combine
@@ -37,6 +36,7 @@ final class Player: ObservableObject {
             } catch {
                 print("An error occured: \(error)")
             }
+            
             try? context.save()
             }
     }
