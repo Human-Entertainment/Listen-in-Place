@@ -198,8 +198,6 @@ final class Player: ObservableObject {
         play()
     }
     
-    
-    
     var token: Any?
     
     let isPlayingQueue = DispatchQueue(label: "IsPlayingListerner")
@@ -211,22 +209,26 @@ final class Player: ObservableObject {
         switch player {
         case .AVPlayer(let player, _):
             player.play()
-            let interval = 1.0/240
-            token = player.addPeriodicTimeObserver(forInterval: .init(seconds: interval, preferredTimescale: CMTimeScale(NSEC_PER_SEC)),
-                                                   queue: nil,
-                                                   using: {time in
-                                                    let seconds = time.seconds
-                                                    let duration = player.currentItem?.duration.seconds ?? 0
-                                                    let percent = seconds / duration
-                                                    self.progress = Float( percent )
-                                                    self.setupNowPlaying(song: self.nowPlaying!, elapsed: seconds, total: duration)
-            })
+            let interval = 1.0 / 240
+            token = player.addPeriodicTimeObserver(
+                forInterval: .init(seconds: interval, preferredTimescale: CMTimeScale(NSEC_PER_SEC)),
+                queue: nil,
+                using: {time in
+                    let seconds = time.seconds
+                    let duration = player.currentItem?.duration.seconds ?? 0
+                    let percent = seconds / duration
+                    self.progress = Float( percent )
+                    self.setupNowPlaying(song: self.nowPlaying!, elapsed: seconds, total: duration)
+                })
             
-            NotificationCenter.default.addObserver(self,
-                                                   selector: #selector(handleInterruption),
-                                                   name: AVAudioSession.interruptionNotification,
-                                                   object: nil)
-            
+            NotificationCenter
+                .default
+                .addObserver(
+                    self,
+                    selector: #selector(handleInterruption),
+                    name: AVAudioSession.interruptionNotification,
+                    object: nil)
+                
             isPlayingQueue.async {
                 while self.isPlaying {
                     if player.timeControlStatus == .paused {
@@ -236,7 +238,7 @@ final class Player: ObservableObject {
                     }
                 }
             }
-            
+            break
         default:
             isPlaying = false
             break
