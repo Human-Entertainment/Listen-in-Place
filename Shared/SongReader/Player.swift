@@ -52,16 +52,8 @@ final class Player: ObservableObject {
             .load(url: url, bookmark: bookmark)
             .print("Song")
             .sink {
-                switch $0 {
-                    case .failure(let songError):
-                        print("Read error with \(songError)")
-                        break
-                    case .finished:
-                        print("Got all the things")
-                        break
-                    
-                }
-                
+                guard case .failure(let songError) = $0 else { return }
+                print(songError)
             } receiveValue: { song in
                 DispatchQueue.main.async {
                     //if !self.all.contains(song) {
