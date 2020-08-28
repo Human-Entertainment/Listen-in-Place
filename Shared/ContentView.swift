@@ -8,8 +8,6 @@ var errorSong: Song {
 }
 
 struct ContentView: View {
-    @Environment(\.importFiles)
-    var file
     
     @EnvironmentObject
     var player: Player
@@ -17,38 +15,19 @@ struct ContentView: View {
     @State
     var showSongContext = false
     
-    
     var body: some View {
         VStack {
+            AddSongButton()
             NavigationView {
                 List {
-                    ForEach(player.all, id: \.self) { song in
+                    ForEach(player.all) { song in
                         SongCellView(song: song)
                             
                     }
-                }.onAppear {
-                    UITableView.appearance()
-                        .separatorStyle = .none
                 }
                 .navigationBarTitle(Text("Song"))
-                .navigationBarItems(trailing: Button {
-                                                    file(multipleOfType: [.audio]) { result in
-                                                        switch result {
-                                                            case .success(let urls):
-                                                                openSong (urls: urls)
-                                                                break
-                                                            case .failure(let error):
-                                                                print(error)
-                                                                break
-                                                            case .none:
-                                                                print("No item was selected")
-                                                        }
-                                                    }
-                                               } label: {
-                                                    Image(systemName: "plus.circle.fill")
-                                                        .resizable()
-                                                        .padding()
-                                               })
+                /*.navigationBarItems(trailing: */ /*)*/
+                
             }
             if self.player.nowPlaying != nil {
                 GlobalControls()
@@ -57,25 +36,51 @@ struct ContentView: View {
             } else {
                 EmptyView()
             }
+        }
             
+        
+    }
+}
+
+struct AddSongButton: View {
+    @State
+    var presentFiles: Bool = false
+    
+    @EnvironmentObject
+    var player: Player
+    
+    var body: some View {
+        Button {
+            presentFiles = true
+        } label: {
+            Image(systemName: "plus.circle.fill")
+                .resizable()
+                .padding()
         }
         
+        .fileImporter(isPresented: $presentFiles,
+                      allowedContentTypes: [.audio],
+                      allowsMultipleSelection: true,
+                      onCompletion: addSongHandler)
+    }
+    
+    func addSongHandler(result: Result<[URL], Error>?) {
+        guard let urls = try? result?.get() else { return print("Couldn't open files") }
+        
+        openSong (urls: urls)
+
     }
     
     func openSong (urls: [URL]) -> () {
         print("Reading URLS")
         urls.forEach { url in
-            guard url.startAccessingSecurityScopedResource() else {
-                print("Failed to open the file")
-                return
-            }
-            print(url)
-            defer { url.stopAccessingSecurityScopedResource() }
+            
             
             self.player.add(url: url)
         }
     }
 }
+
 
 struct GlobalControls: View {
     @State

@@ -46,6 +46,12 @@ struct Song: Hashable {
     
 }
 
+extension Song: Identifiable {
+    var id: ObjectIdentifier {
+        .init(cover)
+    }
+}
+
 struct SongPublisher {
     private let threadPool: NIOThreadPool
     
@@ -147,6 +153,7 @@ struct SongPublisher {
                                 bookmark: bookmark)
                 return song
         }.flatMapErrorThrowing { error in
+            print(error)
             let avEnum = PlayerEnum.AVPlayer(.init(url: url), url)
             return avEnum.getSong()
         }

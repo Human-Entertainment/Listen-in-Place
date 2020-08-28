@@ -1,4 +1,6 @@
+#if os(iOS)
 import UIKit
+#endif
 import NIO
 
 enum PictureType {

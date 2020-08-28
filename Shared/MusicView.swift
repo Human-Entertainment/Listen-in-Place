@@ -30,17 +30,21 @@ struct MusicView: View {
                     ForEach (player.sharedQueue, id: \.self) { song in
                         SongCellView(song: song)
                     }
-                }.onAppear {
+                }
+                /*
+                // TODO: fix seperator style
+                .onAppear {
                     UITableView.appearance()
                         .separatorStyle = .none
                 }
                     
                 .navigationBarTitle(Text("Queue"))
+ */
                 }
             } else {
                 Spacer()
                 
-                Image(uiImage: song.cover)
+                SwiftUI.Image(uiImage: song.cover)
                     .resizable()
                     .cornerRadius(10)
                     .shadow(radius: 10)

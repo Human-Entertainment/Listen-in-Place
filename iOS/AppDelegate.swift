@@ -5,7 +5,6 @@
 //  Created by Bastian Inuk Christensen on 23/05/2020.
 //  Copyright © 2020 Bastian Inuk Christensen. All rights reserved.
 //
-
 import UIKit
 import AVFoundation
 import CoreData

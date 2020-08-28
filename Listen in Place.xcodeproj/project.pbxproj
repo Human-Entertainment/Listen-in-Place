@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		FC00A0C024CEFEC400497395 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521CDB2479A46600D2AC82 /* AppDelegate.swift */; };
 		FC00A0C124CEFEC800497395 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521CDF2479A46600D2AC82 /* ContentView.swift */; };
 		FC00A0C224CEFEDC00497395 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521D0D2479B06100D2AC82 /* Player.swift */; };
 		FC00A0C324CEFEDF00497395 /* Song.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCBE778A2486516200080BB5 /* Song.swift */; };
@@ -18,7 +17,6 @@
 		FC00A0C824CEFEEB00497395 /* PlayerEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABD2482CB9600ED60BF /* PlayerEnum.swift */; };
 		FC00A0C924CEFEF800497395 /* MusicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521D0B2479A51B00D2AC82 /* MusicView.swift */; };
 		FC00A0CA24CEFEFD00497395 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */; };
-		FC00A0CB24CEFF0100497395 /* SwiftUI+DarkMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD132592479D961008ADEF5 /* SwiftUI+DarkMode.swift */; };
 		FC00A0CC24CEFF0B00497395 /* Songs.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABF2483021A00ED60BF /* Songs.xcdatamodeld */; };
 		FC00A0CD24CEFF0E00497395 /* ArrayBiggerThan.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */; };
 		FC00A0CF24CEFF8400497395 /* NIO in Frameworks */ = {isa = PBXBuildFile; productRef = FC00A0CE24CEFF8400497395 /* NIO */; };
@@ -55,7 +53,12 @@
 		FCBE778924864FB600080BB5 /* NIOFileHandler+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCBE778824864FB600080BB5 /* NIOFileHandler+Extension.swift */; };
 		FCBE778B2486516200080BB5 /* Song.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCBE778A2486516200080BB5 /* Song.swift */; };
 		FCC94AC6247A979B00DCFD25 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */; };
-		FCD1325A2479D961008ADEF5 /* SwiftUI+DarkMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD132592479D961008ADEF5 /* SwiftUI+DarkMode.swift */; };
+		FCF396C324F9A59B0051AB6E /* Metablock.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625AB52482B17600ED60BF /* Metablock.swift */; };
+		FCF396C424F9A5A00051AB6E /* Streaminginfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625AB72482B19600ED60BF /* Streaminginfo.swift */; };
+		FCF396C524F9A5A20051AB6E /* Picture.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625AB92482B1BD00ED60BF /* Picture.swift */; };
+		FCF396C624F9A5A50051AB6E /* VorbisComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ACF2484128600ED60BF /* VorbisComment.swift */; };
+		FCF396CF24F9B3EB0051AB6E /* Songs+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCF396CD24F9B3EB0051AB6E /* Songs+CoreDataClass.swift */; };
+		FCF396D024F9B3EB0051AB6E /* Songs+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCF396CE24F9B3EB0051AB6E /* Songs+CoreDataProperties.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -143,7 +146,8 @@
 		FCBE778824864FB600080BB5 /* NIOFileHandler+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NIOFileHandler+Extension.swift"; sourceTree = "<group>"; };
 		FCBE778A2486516200080BB5 /* Song.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Song.swift; sourceTree = "<group>"; };
 		FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPlayButton.swift; sourceTree = "<group>"; };
-		FCD132592479D961008ADEF5 /* SwiftUI+DarkMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftUI+DarkMode.swift"; sourceTree = "<group>"; };
+		FCF396CD24F9B3EB0051AB6E /* Songs+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Songs+CoreDataClass.swift"; path = "Shared/Models/Songs+CoreDataClass.swift"; sourceTree = "<group>"; };
+		FCF396CE24F9B3EB0051AB6E /* Songs+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Songs+CoreDataProperties.swift"; path = "Shared/Models/Songs+CoreDataProperties.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -203,6 +207,8 @@
 		FC521CCF2479A46600D2AC82 = {
 			isa = PBXGroup;
 			children = (
+				FCF396CD24F9B3EB0051AB6E /* Songs+CoreDataClass.swift */,
+				FCF396CE24F9B3EB0051AB6E /* Songs+CoreDataProperties.swift */,
 				FC521CDA2479A46600D2AC82 /* Shared */,
 				FC67C24F24AF509C00C41163 /* iOS */,
 				FC521CF12479A46800D2AC82 /* Listen in PlaceTests */,
@@ -231,13 +237,11 @@
 		FC521CDA2479A46600D2AC82 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				FC67C25624AF532C00C41163 /* ListenInPlace.swift */,
 				FCBE778C24865A7600080BB5 /* SongReader */,
+				FC67C25624AF532C00C41163 /* ListenInPlace.swift */,
 				FC521CDF2479A46600D2AC82 /* ContentView.swift */,
 				FC521D0B2479A51B00D2AC82 /* MusicView.swift */,
 				FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */,
-				FCD132592479D961008ADEF5 /* SwiftUI+DarkMode.swift */,
-				FC521CDB2479A46600D2AC82 /* AppDelegate.swift */,
 				FC625ABF2483021A00ED60BF /* Songs.xcdatamodeld */,
 				FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */,
 				FC521CE32479A46800D2AC82 /* Preview Content */,
@@ -296,6 +300,7 @@
 			children = (
 				FC521CE92479A46800D2AC82 /* Info.plist */,
 				FC521CE12479A46800D2AC82 /* Assets.xcassets */,
+				FC521CDB2479A46600D2AC82 /* AppDelegate.swift */,
 			);
 			path = iOS;
 			sourceTree = "<group>";
@@ -593,7 +598,6 @@
 				FC625AB82482B19600ED60BF /* Streaminginfo.swift in Sources */,
 				FCBE778924864FB600080BB5 /* NIOFileHandler+Extension.swift in Sources */,
 				FCBE778B2486516200080BB5 /* Song.swift in Sources */,
-				FCD1325A2479D961008ADEF5 /* SwiftUI+DarkMode.swift in Sources */,
 				FC67C28024AF537E00C41163 /* ListenInPlace.swift in Sources */,
 				FC521CE02479A46600D2AC82 /* ContentView.swift in Sources */,
 				FC625ABE2482CB9600ED60BF /* PlayerEnum.swift in Sources */,
@@ -620,10 +624,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FCF396C524F9A5A20051AB6E /* Picture.swift in Sources */,
 				FC00A0C324CEFEDF00497395 /* Song.swift in Sources */,
+				FCF396CF24F9B3EB0051AB6E /* Songs+CoreDataClass.swift in Sources */,
 				FC00A0C724CEFEE800497395 /* Array+Extensions.swift in Sources */,
 				FC00A0CA24CEFEFD00497395 /* AirPlayButton.swift in Sources */,
-				FC00A0C024CEFEC400497395 /* AppDelegate.swift in Sources */,
+				FCF396D024F9B3EB0051AB6E /* Songs+CoreDataProperties.swift in Sources */,
+				FCF396C624F9A5A50051AB6E /* VorbisComment.swift in Sources */,
 				FC00A0CC24CEFF0B00497395 /* Songs.xcdatamodeld in Sources */,
 				FC67C28124AF53BE00C41163 /* ListenInPlace.swift in Sources */,
 				FC00A0C124CEFEC800497395 /* ContentView.swift in Sources */,
@@ -631,8 +638,9 @@
 				FC00A0C224CEFEDC00497395 /* Player.swift in Sources */,
 				FC00A0C524CEFEE300497395 /* NIOFileHandler+Extension.swift in Sources */,
 				FC00A0CD24CEFF0E00497395 /* ArrayBiggerThan.swift in Sources */,
+				FCF396C324F9A59B0051AB6E /* Metablock.swift in Sources */,
 				FC00A0C824CEFEEB00497395 /* PlayerEnum.swift in Sources */,
-				FC00A0CB24CEFF0100497395 /* SwiftUI+DarkMode.swift in Sources */,
+				FCF396C424F9A5A00051AB6E /* Streaminginfo.swift in Sources */,
 				FC00A0C924CEFEF800497395 /* MusicView.swift in Sources */,
 				FC00A0C424CEFEE100497395 /* Flac.swift in Sources */,
 			);

@@ -23,7 +23,13 @@ final class Player: ObservableObject {
     var cancellable = [AnyCancellable]()
 
     func add(url: URL) {
+        guard url.startAccessingSecurityScopedResource() else {
+            print("Failed to open the file")
+            return
+        }
+        
         container.performBackgroundTask { [self] context in
+            defer { url.stopAccessingSecurityScopedResource() }
             do {
                 let newSong = Songs(context: context)
                 let bookmark = try url.bookmarkData()
@@ -38,7 +44,7 @@ final class Player: ObservableObject {
             }
             
             try? context.save()
-            }
+        }
     }
 
     func fetchSong(url: URL, bookmark: Data) {

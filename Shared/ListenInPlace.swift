@@ -18,10 +18,12 @@ struct ListenInPlace: App {
     
     var body: some Scene {
         WindowGroup() {
+            let player = Player.shared(persistentContainer)
+            
             ContentView()
                 .accentColor(.orange)
-                .environmentObject(Player.shared(persistentContainer))
                 .environment(\.managedObjectContext, self.persistentContainer.viewContext)
+                .environmentObject(player)
         }
         .onChange(of: scenePhase) { phase in
             switch phase {
