@@ -14,10 +14,12 @@ struct ContentView: View {
     
     @State
     var showSongContext = false
+    @State
+    var presentFiles = false
     
     var body: some View {
         VStack {
-            AddSongButton()
+            
             NavigationView {
                 List {
                     ForEach(player.all) { song in
@@ -26,7 +28,7 @@ struct ContentView: View {
                     }
                 }
                 .navigationBarTitle(Text("Song"))
-                /*.navigationBarItems(trailing: */ /*)*/
+                .navigationBarItems(trailing: AddSongButton(presentFiles: $presentFiles))
                 
             }
             if self.player.nowPlaying != nil {
@@ -38,26 +40,6 @@ struct ContentView: View {
             }
         }
             
-        
-    }
-}
-
-struct AddSongButton: View {
-    @State
-    var presentFiles: Bool = false
-    
-    @EnvironmentObject
-    var player: Player
-    
-    var body: some View {
-        Button {
-            presentFiles = true
-        } label: {
-            Image(systemName: "plus.circle.fill")
-                .resizable()
-                .padding()
-        }
-        
         .fileImporter(isPresented: $presentFiles,
                       allowedContentTypes: [.audio],
                       allowsMultipleSelection: true,
@@ -68,7 +50,7 @@ struct AddSongButton: View {
         guard let urls = try? result?.get() else { return print("Couldn't open files") }
         
         openSong (urls: urls)
-
+        
     }
     
     func openSong (urls: [URL]) -> () {
@@ -77,6 +59,21 @@ struct AddSongButton: View {
             
             
             self.player.add(url: url)
+        }
+    }
+}
+
+struct AddSongButton: View {
+    @Binding
+    var presentFiles: Bool
+    
+    var body: some View {
+        Button {
+            presentFiles = true
+        } label: {
+            Image(systemName: "plus.circle.fill")
+                .resizable()
+                .padding()
         }
     }
 }
