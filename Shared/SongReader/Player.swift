@@ -56,9 +56,9 @@ final class Player: ObservableObject {
                 print(songError)
             } receiveValue: { song in
                 DispatchQueue.main.async {
-                    //if !self.all.contains(song) {
+                    if !self.all.contains(song) {
                         self.all.append(song)
-                    //}
+                    }
                 }
             }.store(in: &cancellable)
     }
