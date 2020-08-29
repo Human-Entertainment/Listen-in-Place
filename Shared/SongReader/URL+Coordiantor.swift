@@ -8,15 +8,20 @@ extension URL {
                                 on eventLoop: EventLoop) -> EventLoopFuture<URL> {
         let promise = eventLoop.makePromise(of: URL.self)
         
-        let error: NSErrorPointer = nil
-        coordinator.coordinate(readingItemAt: self, options: [],
-                               error: error, byAccessor: { url in
+        eventLoop.execute {
+            let error: NSErrorPointer = nil
+            coordinator
+                .coordinate(readingItemAt: self,
+                            options: [],
+                            error: error,
+                            byAccessor: { url in
                                 if let error = error as? Error {
                                     promise.fail(error)
                                 } else {
                                     promise.succeed(url)
                                 }
-        })
+                            })
+        }
         
         return promise.futureResult
     }
