@@ -12,10 +12,9 @@ import CoreData
 
 @main
 struct ListenInPlace: App {
-    
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @Environment(\.scenePhase) var scenePhase
-    
+    @Environment(\.scenePhase)
+    var scenePhase
+        
     var body: some Scene {
         WindowGroup() {
             let player = Player.shared(persistentContainer)
@@ -43,7 +42,7 @@ struct ListenInPlace: App {
         let container = NSPersistentContainer(name: "Songs")
         container.loadPersistentStores { description, error in
             if let error = error {
-                // Add your error UI here
+                // TODO: Add your error UI here
                 fatalError("Unable to load conatainer with \(error)")
             }
             print(description)

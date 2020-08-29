@@ -11,16 +11,7 @@ enum SongError: Error {
     case coundtReadFile
 }
 
-struct Song: Hashable {
-    static func == (lhs: Song, rhs: Song) -> Bool {
-        guard lhs.title == rhs.title &&
-              lhs.artist == rhs.artist &&
-              lhs.album == rhs.album &&
-              lhs.cover == rhs.cover else { return false }
-        
-        return true
-    }
-    
+struct Song {
     private(set) var title: String = ""
     private(set) var artist: String = ""
     private(set) var lyrics: String? = nil
@@ -29,11 +20,11 @@ struct Song: Hashable {
     private(set) var bookmark: Data? = nil
     
     init(title: String,
-              artist: String,
-              lyrics: String? = nil,
-              album: String? = nil,
-              cover: UIImage? = nil,
-              bookmark: Data? = nil)
+         artist: String,
+         lyrics: String? = nil,
+         album: String? = nil,
+         cover: UIImage? = nil,
+         bookmark: Data? = nil)
     {
         self.title = title
         self.artist = artist
@@ -44,6 +35,17 @@ struct Song: Hashable {
     }
     
     
+}
+
+extension Song: Hashable {
+    static func == (lhs: Song, rhs: Song) -> Bool {
+        guard lhs.title == rhs.title &&
+                lhs.artist == rhs.artist &&
+                lhs.album == rhs.album &&
+                lhs.cover == rhs.cover else { return false }
+        
+        return true
+    }
 }
 
 extension Song: Identifiable {
@@ -61,16 +63,16 @@ struct SongPublisher {
     }
     
     func load(url: URL, bookmark: Data) throws -> Future<Song, SongError> {
-        var loaded: (URL?, Error?) = (nil, nil)
-        
-        let coordinator = NSFileCoordinator()
-        url.coordinatedRead(coordinator) { inputURL,inputError  in
-            loaded = (inputURL, inputError)
-        }
-        
-        guard let loadURL = loaded.0 else { return Future<Song, SongError>{ $0(.failure(.coundtReadFile)) } }
-        
-        return Future<Song, SongError> { promise in
+        Future<Song, SongError> { promise in
+            var coordinated: (URL?, Error?) = (nil, nil)
+            
+            let coordinator = NSFileCoordinator()
+            url.coordinatedRead(coordinator) { inputURL,inputError  in
+                coordinated = (inputURL, inputError)
+            }
+            
+            guard let loadURL = coordinated.0 else { return promise(.failure(.coundtReadFile)) }
+            
             self.threadPool.start()
             let loaded = self.asyncLoad(url: loadURL, bookmark: bookmark)
             loaded.whenSuccess { song in

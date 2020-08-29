@@ -24,7 +24,6 @@
 		FC00A0D324CEFF9C00497395 /* NIOTransportServices in Frameworks */ = {isa = PBXBuildFile; productRef = FC00A0D224CEFF9C00497395 /* NIOTransportServices */; };
 		FC00A0D524CEFFA300497395 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC00A0D424CEFFA300497395 /* CoreData.framework */; };
 		FC06D5AE248BB4270041E794 /* ArrayBiggerThan.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */; };
-		FC521CDC2479A46600D2AC82 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521CDB2479A46600D2AC82 /* AppDelegate.swift */; };
 		FC521CE02479A46600D2AC82 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521CDF2479A46600D2AC82 /* ContentView.swift */; };
 		FC521CE22479A46800D2AC82 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC521CE12479A46800D2AC82 /* Assets.xcassets */; };
 		FC521CE52479A46800D2AC82 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC521CE42479A46800D2AC82 /* Preview Assets.xcassets */; };
@@ -109,7 +108,6 @@
 		FC00A0D424CEFFA300497395 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk/System/Library/Frameworks/CoreData.framework; sourceTree = DEVELOPER_DIR; };
 		FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayBiggerThan.swift; sourceTree = "<group>"; };
 		FC521CD82479A46600D2AC82 /* iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		FC521CDB2479A46600D2AC82 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FC521CDF2479A46600D2AC82 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		FC521CE12479A46800D2AC82 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FC521CE42479A46800D2AC82 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -300,7 +298,6 @@
 			children = (
 				FC521CE92479A46800D2AC82 /* Info.plist */,
 				FC521CE12479A46800D2AC82 /* Assets.xcassets */,
-				FC521CDB2479A46600D2AC82 /* AppDelegate.swift */,
 			);
 			path = iOS;
 			sourceTree = "<group>";
@@ -586,7 +583,6 @@
 				FCC94AC6247A979B00DCFD25 /* AirPlayButton.swift in Sources */,
 				FCBE778724864D6E00080BB5 /* Flac.swift in Sources */,
 				FC625ACE2483D4E800ED60BF /* URL+Coordiantor.swift in Sources */,
-				FC521CDC2479A46600D2AC82 /* AppDelegate.swift in Sources */,
 				FC625ABA2482B1BD00ED60BF /* Picture.swift in Sources */,
 				FC521D0C2479A51B00D2AC82 /* MusicView.swift in Sources */,
 				FC625AD02484128700ED60BF /* VorbisComment.swift in Sources */,

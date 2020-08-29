@@ -66,8 +66,18 @@ final class Player: ObservableObject {
     // MARK: - Setup
     deinit {
         NotificationCenter.default.removeObserver(self)
+        
     }
     private init(container: NSPersistentContainer) {
+        
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            // Set the audio session category, mode, and options.
+            try audioSession.setCategory(.playback, mode: .default, options: [])
+        } catch {
+            print("Failed to set audio session category.")
+        }
+        
         self.container = container
         player = .none
         // Setup mediacenter controls
