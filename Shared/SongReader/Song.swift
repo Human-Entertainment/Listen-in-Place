@@ -57,30 +57,34 @@ extension Song: Identifiable {
 struct SongPublisher {
     private let threadPool: NIOThreadPool
     
-    init(threadPool: NIOThreadPool)
+    private let eventLoop: EventLoop
+    
+    init(threadPool: NIOThreadPool,
+         on eventLoop: EventLoop = NIOTSEventLoopGroup().next())
     {
         self.threadPool = threadPool
+        self.eventLoop = eventLoop
     }
     
     func load(url: URL, bookmark: Data) throws -> Future<Song, SongError> {
         Future<Song, SongError> { promise in
-            var coordinated: (URL?, Error?) = (nil, nil)
             
-            let coordinator = NSFileCoordinator()
-            url.coordinatedRead(coordinator) { inputURL,inputError  in
-                coordinated = (inputURL, inputError)
-            }
-            
-            guard let loadURL = coordinated.0 else { return promise(.failure(.coundtReadFile)) }
-            
-            self.threadPool.start()
-            let loaded = self.asyncLoad(url: loadURL, bookmark: bookmark)
-            loaded.whenSuccess { song in
-                promise(.success(song))
-            }
-            loaded.whenFailure { error in
+            let coordinator = url.coordinatedRead(coordinator: NSFileCoordinator(),
+                                on: eventLoop)
+            coordinator.whenSuccess { url in
                 
-                print(error)
+                self.threadPool.start()
+                let loaded = self.asyncLoad(url: url, bookmark: bookmark)
+                loaded.whenSuccess { song in
+                    promise(.success(song))
+                }
+                loaded.whenFailure { error in
+                    
+                    print(error)
+                    promise(.failure(.coundtReadFile))
+                }
+            }
+            coordinator.whenFailure { error in
                 promise(.failure(.coundtReadFile))
             }
         }
@@ -93,8 +97,6 @@ struct SongPublisher {
         var artist: String? = nil
         var title: String? = nil
         var cover: UIImage? = nil
-        
-        let eventLoop = NIOTSEventLoopGroup().next()
         
         return NonBlockingFileIO(threadPool: self.threadPool)
             .metablockReader(path: url.path,
