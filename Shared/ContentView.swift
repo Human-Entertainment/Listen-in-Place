@@ -8,38 +8,28 @@ var errorSong: Song {
 }
 
 struct ContentView: View {
-    @Environment(\.managedObjectContext)
-    var moc
-    /*
-    @FetchRequest(entity: Songs.entity(),
-                  sortDescriptors: [])
-    var songs: FetchedResults<Songs>
-    */
+    
     @EnvironmentObject
     var player: Player
     
     @State
     var showSongContext = false
+    @State
+    var presentFiles = false
     
     var body: some View {
         VStack {
+            
             NavigationView {
                 List {
-                    ForEach(player.all, id: \.self) { song in
+                    ForEach(player.all) { song in
                         SongCellView(song: song)
                             
                     }
-                }.onAppear {
-                    UITableView.appearance()
-                        .separatorStyle = .none
                 }
                 .navigationBarTitle(Text("Song"))
-                .navigationBarItems(trailing: DocumentPickerButton(documentTypes: ["public.mp3", "org.xiph.flac"],
-                                                                   onOpen: self.openSong){
-                    Image(systemName: "plus.circle.fill")
-                        .resizable()
-                        .padding()
-                } )
+                .navigationBarItems(trailing: AddSongButton(presentFiles: $presentFiles))
+                
             }
             if self.player.nowPlaying != nil {
                 GlobalControls()
@@ -49,23 +39,45 @@ struct ContentView: View {
                 EmptyView()
             }
         }
+            
+        .fileImporter(isPresented: $presentFiles,
+                      allowedContentTypes: [.audio],
+                      allowsMultipleSelection: true,
+                      onCompletion: addSongHandler)
+    }
+    
+    func addSongHandler(result: Result<[URL], Error>?) {
+        guard let urls = try? result?.get() else { return print("Couldn't open files") }
+        
+        openSong (urls: urls)
         
     }
     
     func openSong (urls: [URL]) -> () {
         print("Reading URLS")
         urls.forEach { url in
-            guard url.startAccessingSecurityScopedResource() else {
-                print("Failed to open the file")
-                return
-            }
-            print(url)
-            defer { url.stopAccessingSecurityScopedResource() }
+            
             
             self.player.add(url: url)
         }
     }
 }
+
+struct AddSongButton: View {
+    @Binding
+    var presentFiles: Bool
+    
+    var body: some View {
+        Button {
+            presentFiles = true
+        } label: {
+            Image(systemName: "plus.circle.fill")
+                .resizable()
+                .padding()
+        }
+    }
+}
+
 
 struct GlobalControls: View {
     @State
@@ -175,10 +187,26 @@ struct SongView: View {
     }
 }
 
+// TODO: Fix this
+/*
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         
-        return TestView(view: ContentView().environmentObject(Player.shared))
+        return TestView(view: ContentView()
+                            .environmentObject(Player.shared(persistentContainer)))
     }
+    
+    var persistentContainer: NSPersistentContainer = {
+        let container = NSPersistentContainer(name: "Songs")
+        container.loadPersistentStores { description, error in
+            if let error = error {
+                // Add your error UI here
+                fatalError("Unable to load conatainer with \(error)")
+            }
+            print(description)
+        }
+        print("Making persistant container")
+        return container
+    }()
 }
-
+*/

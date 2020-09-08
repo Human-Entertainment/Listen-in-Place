@@ -30,17 +30,21 @@ struct MusicView: View {
                     ForEach (player.sharedQueue, id: \.self) { song in
                         SongCellView(song: song)
                     }
-                }.onAppear {
+                }
+                /*
+                // TODO: fix seperator style
+                .onAppear {
                     UITableView.appearance()
                         .separatorStyle = .none
                 }
                     
                 .navigationBarTitle(Text("Queue"))
+ */
                 }
             } else {
                 Spacer()
                 
-                Image(uiImage: song.cover)
+                SwiftUI.Image(uiImage: song.cover)
                     .resizable()
                     .cornerRadius(10)
                     .shadow(radius: 10)
@@ -133,9 +137,25 @@ struct MusicControls: View {
     }
 }
 
+// TODO: Fix this
+/*
 struct MusicView_Previews: PreviewProvider {
     static var previews: some View {
         MusicView(song: errorSong)
-            .environmentObject(Player.shared)
+            .environmentObject(Player.shared(self.persistentCointer))
     }
+    
+    var persistentContainer: NSPersistentContainer = {
+        let container = NSPersistentContainer(name: "Songs")
+        container.loadPersistentStores { description, error in
+            if let error = error {
+                // Add your error UI here
+                fatalError("Unable to load conatainer with \(error)")
+            }
+            print(description)
+        }
+        print("Making persistant container")
+        return container
+    }()
 }
+*/

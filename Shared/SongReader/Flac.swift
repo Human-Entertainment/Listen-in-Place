@@ -1,7 +1,9 @@
 import NIOTransportServices
 import NIO
 import Foundation
+#if os(iOS)
 import UIKit
+#endif
 
 struct Flac {
     struct Head {

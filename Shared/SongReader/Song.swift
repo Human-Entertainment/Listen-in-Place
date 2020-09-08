@@ -1,7 +1,9 @@
 import NIO
 import NIOTransportServices
 import Foundation
+#if os(iOS)
 import UIKit
+#endif
 import Combine
 
 enum SongError: Error {
@@ -9,16 +11,7 @@ enum SongError: Error {
     case coundtReadFile
 }
 
-struct Song: Hashable {
-    static func == (lhs: Song, rhs: Song) -> Bool {
-        guard lhs.title == rhs.title &&
-              lhs.artist == rhs.artist &&
-              lhs.album == rhs.album &&
-              lhs.cover == rhs.cover else { return false }
-        
-        return true
-    }
-    
+struct Song {
     private(set) var title: String = ""
     private(set) var artist: String = ""
     private(set) var lyrics: String? = nil
@@ -27,11 +20,11 @@ struct Song: Hashable {
     private(set) var bookmark: Data? = nil
     
     init(title: String,
-              artist: String,
-              lyrics: String? = nil,
-              album: String? = nil,
-              cover: UIImage? = nil,
-              bookmark: Data? = nil)
+         artist: String,
+         lyrics: String? = nil,
+         album: String? = nil,
+         cover: UIImage? = nil,
+         bookmark: Data? = nil)
     {
         self.title = title
         self.artist = artist
@@ -44,47 +37,57 @@ struct Song: Hashable {
     
 }
 
+extension Song: Hashable {
+    static func == (lhs: Song, rhs: Song) -> Bool {
+        guard lhs.title == rhs.title &&
+                lhs.artist == rhs.artist &&
+                lhs.album == rhs.album &&
+                lhs.cover == rhs.cover else { return false }
+        
+        return true
+    }
+}
+
+extension Song: Identifiable {
+    var id: ObjectIdentifier {
+        .init(cover)
+    }
+}
+
 struct SongPublisher {
     private let threadPool: NIOThreadPool
     
-    init(threadPool: NIOThreadPool)
+    private let eventLoop: EventLoop
+    
+    init(threadPool: NIOThreadPool,
+         on eventLoop: EventLoop = NIOTSEventLoopGroup().next())
     {
         self.threadPool = threadPool
+        self.eventLoop = eventLoop
     }
     
-    func load(bookmark data: Data?) throws -> Future<Song, SongError> {
-        guard let bookmark = data else { throw SongError.noBookmark }
-        
-        var isStale = false
-        let url = try URL(
-            resolvingBookmarkData: bookmark,
-            options: .withoutUI,
-            relativeTo: nil,
-            bookmarkDataIsStale: &isStale
-        )
-        
-        var loaded: (URL?, Error?) = (nil, nil)
-        let coordinator = NSFileCoordinator()
-        url.coordinatedRead(coordinator) { inputURL,inputError  in
-            loaded = (inputURL, inputError)
-        }
-        guard let loadURL = loaded.0 else { return Future<Song, SongError>{ $0(.failure(.coundtReadFile)) } }
-        
-        
-        return Future<Song, SongError> { promise in
-            self.threadPool.start()
-            let loaded = self.asyncLoad(url: loadURL, bookmark: bookmark)
-            loaded.whenSuccess { song in
-                promise(.success(song))
-            }
-            loaded.whenFailure { error in
+    func load(url: URL, bookmark: Data) throws -> Future<Song, SongError> {
+        Future<Song, SongError> { promise in
+            
+            let coordinator = url.coordinatedRead(coordinator: NSFileCoordinator(),
+                                on: eventLoop)
+            coordinator.whenSuccess { url in
                 
-                print(error)
+                self.threadPool.start()
+                let loaded = self.asyncLoad(url: url, bookmark: bookmark)
+                loaded.whenSuccess { song in
+                    promise(.success(song))
+                }
+                loaded.whenFailure { error in
+                    
+                    print(error)
+                    promise(.failure(.coundtReadFile))
+                }
+            }
+            coordinator.whenFailure { error in
                 promise(.failure(.coundtReadFile))
             }
         }
-        
-        
         
         // TODO: make it so MP3 can also be parsed
     }
@@ -94,8 +97,6 @@ struct SongPublisher {
         var artist: String? = nil
         var title: String? = nil
         var cover: UIImage? = nil
-        
-        let eventLoop = NIOTSEventLoopGroup().next()
         
         return NonBlockingFileIO(threadPool: self.threadPool)
             .metablockReader(path: url.path,
@@ -153,9 +154,10 @@ struct SongPublisher {
                                 lyrics: nil,
                                 album: album ?? "Unknown album",
                                 cover: cover ?? UIImage(named: "LP")!,
-                                bookmark: bookmark )
+                                bookmark: bookmark)
                 return song
         }.flatMapErrorThrowing { error in
+            print(error)
             let avEnum = PlayerEnum.AVPlayer(.init(url: url), url)
             return avEnum.getSong()
         }
