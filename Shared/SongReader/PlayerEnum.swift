@@ -9,7 +9,7 @@ enum PlayerEnum {
         var lyrics: String? = nil
         var title = "Unknown Title"
         var artist = "Unknown Artist"
-        var cover: UIImage? = nil
+        var cover: Data? = nil
         var album: String? = nil
         var bookmark: Data? = nil
         
@@ -34,7 +34,7 @@ enum PlayerEnum {
                         case .commonKeyAlbumName:
                             album = metadata.value as? String ?? album
                         case .commonKeyArtwork:
-                            cover = UIImage(data: metadata.value as? Data ?? Data.init())
+                            cover = metadata.value as? Data
                         default: break
                     }
                 }
@@ -45,7 +45,12 @@ enum PlayerEnum {
                 break
         }
         
-        let song = Song(title: title, artist: artist, lyrics: lyrics, album: album, cover: cover, bookmark: bookmark)
+        let song = Song(title: title,
+                        artist: artist,
+                        lyrics: lyrics,
+                        album: album,
+                        cover: cover,
+                        bookmark: bookmark)
         return song
     }
 }

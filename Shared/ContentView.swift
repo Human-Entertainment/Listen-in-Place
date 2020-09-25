@@ -22,7 +22,7 @@ struct ContentView: View {
             
             NavigationView {
                 List {
-                    ForEach(player.all) { song in
+                    ForEach(player.all, id: \.coverImage) { song in
                         SongCellView(song: song)
                             
                     }
@@ -137,12 +137,6 @@ struct SongCellView: View {
                 .cancel { self.showAction.toggle() }
             ])
         }
-           /*
-        .contextMenu {
-            Button(action: { self.player.addToQueue(self.song) }, label: {
-                Text("Add to queue")
-            })
-        }*/
     }
     
 }
@@ -171,7 +165,7 @@ struct SongView: View {
     var body: some View {
         HStack {
             
-            Image(uiImage: song.cover)
+            Image(uiImage: song.coverImage)
                 .resizable()
                 .renderingMode(.original)
                 .frame(width: CGFloat(self.frame), height: CGFloat(self.frame), alignment: .leading)

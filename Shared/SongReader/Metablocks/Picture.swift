@@ -16,7 +16,7 @@ struct Picture: MetaBlcok {
     let height: Int
     let colorDepth: Int
     let colorCount: Int
-    let image: UIImage?
+    let image: Data?
     
     init(bytes: inout ByteBuffer) throws {
         //guard let pictureType =  else { throw PictureError.pictureTypeError }
@@ -73,7 +73,7 @@ struct Picture: MetaBlcok {
             throw PictureError.dataError
         }
         
-        self.image = UIImage(data: data)
+        self.image = data
     }
     
     init(bytes: ArraySlice<Byte>) {
@@ -117,7 +117,7 @@ struct Picture: MetaBlcok {
         let pictureLength = bytes[colorCountEnd..<pictureLengthEnd].int + pictureLengthEnd
         
         let imageData = bytes[pictureLengthEnd..<pictureLength].data
-        image = UIImage(data: imageData)
+        image = imageData
     }
 }
 
