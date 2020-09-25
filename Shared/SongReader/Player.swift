@@ -82,10 +82,16 @@ final class Player: ObservableObject {
         player = .none
         // Setup mediacenter controls
         setupRemoteTransportControls()
-        NotificationCenter.default.addObserver(self,
+        NotificationCenter.default
+            .publisher(for: .AVPlayerItemDidPlayToEndTime)
+            .sink(receiveValue: avPlayerDidFinishPlaying)
+            .store(in: &cancellable)
+            
+            /*
+            .addObserver(self,
                                                selector: #selector(avPlayerDidFinishPlaying(note:)),
                                                name: .AVPlayerItemDidPlayToEndTime, object: nil)
-        
+        */
         asyncInit()
         
     }
@@ -122,7 +128,7 @@ final class Player: ObservableObject {
                 // TODO: Couldn't get file UI
                 print("Couldn't retrieve file in CoreData with error \(error)")
             }
-            }
+        }
     }
     
     func setupRemoteTransportControls() {
@@ -140,6 +146,28 @@ final class Player: ObservableObject {
             self.pause()
             return .success
         }
+        
+        commandCenter.changePlaybackPositionCommand.addTarget { [unowned self] remoteEvent in
+            guard let event = remoteEvent as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
+            switch player {
+                case .AVPlayer(let player, _):
+                    
+                    //let duration = player.currentItem?.duration.seconds ?? 0
+                    let seek = event.positionTime
+                    player.seek(to: CMTime(seconds: seek, preferredTimescale: CMTimeScale(1000)))
+                    return .success
+                default:
+                    
+                    return .success
+            }
+            
+            
+        }
+        
+        commandCenter.bookmarkCommand.addTarget { [unowned self] event in
+            .commandFailed
+        }
+
     }
     
     func setupNowPlaying(song: Song, elapsed: Double, total: Double) {
@@ -282,7 +310,7 @@ final class Player: ObservableObject {
         }
     }
     
-    @objc func avPlayerDidFinishPlaying(note: NSNotification) {
+    @objc func avPlayerDidFinishPlaying(note: Notification) {
         guard case let PlayerEnum.AVPlayer(player, _) = self.player else { return }
         if let token = token {
             player.removeTimeObserver(token)
