@@ -150,8 +150,8 @@ final class Player: ObservableObject {
         nowPlayingInfo[MPMediaItemPropertyArtist] = song.artist
         
         nowPlayingInfo[MPMediaItemPropertyArtwork] =
-            MPMediaItemArtwork(boundsSize: song.cover.size) { size in
-                return song.cover
+            MPMediaItemArtwork(boundsSize: song.coverImage.size) { size in
+                return song.coverImage
         }
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = elapsed
         nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = total

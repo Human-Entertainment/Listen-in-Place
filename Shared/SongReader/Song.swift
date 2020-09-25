@@ -1,9 +1,6 @@
 import NIO
 import NIOTransportServices
 import Foundation
-#if os(iOS)
-import UIKit
-#endif
 import Combine
 
 enum SongError: Error {
@@ -15,7 +12,7 @@ struct Song {
     private(set) var title: String = ""
     private(set) var artist: String = ""
     private(set) var lyrics: String? = nil
-    private(set) var cover: UIImage = UIImage(named: "LP")!
+    private(set) var cover: Data? = nil
     private(set) var album: String? = nil
     private(set) var bookmark: Data? = nil
     
@@ -23,14 +20,14 @@ struct Song {
          artist: String,
          lyrics: String? = nil,
          album: String? = nil,
-         cover: UIImage? = nil,
+         cover: Data? = nil,
          bookmark: Data? = nil)
     {
         self.title = title
         self.artist = artist
         self.lyrics = lyrics
         self.album = album
-        self.cover = cover ?? UIImage(named: "LP")!
+        self.cover = cover
         self.bookmark = bookmark
     }
     
@@ -39,18 +36,10 @@ struct Song {
 
 extension Song: Hashable {
     static func == (lhs: Song, rhs: Song) -> Bool {
-        guard lhs.title == rhs.title &&
-                lhs.artist == rhs.artist &&
-                lhs.album == rhs.album &&
-                lhs.cover == rhs.cover else { return false }
-        
-        return true
-    }
-}
-
-extension Song: Identifiable {
-    var id: ObjectIdentifier {
-        .init(cover)
+        lhs.title == rhs.title &&
+        lhs.artist == rhs.artist &&
+        lhs.album == rhs.album &&
+        lhs.cover == rhs.cover
     }
 }
 
@@ -96,7 +85,7 @@ struct SongPublisher {
         var album: String? = nil
         var artist: String? = nil
         var title: String? = nil
-        var cover: UIImage? = nil
+        var cover: Data? = nil
         
         return NonBlockingFileIO(threadPool: self.threadPool)
             .metablockReader(path: url.path,
@@ -153,7 +142,7 @@ struct SongPublisher {
                                 artist: artist ?? "Unknown artist",
                                 lyrics: nil,
                                 album: album ?? "Unknown album",
-                                cover: cover ?? UIImage(named: "LP")!,
+                                cover: cover,
                                 bookmark: bookmark)
                 return song
         }.flatMapErrorThrowing { error in

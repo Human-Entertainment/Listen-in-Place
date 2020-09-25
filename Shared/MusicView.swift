@@ -44,7 +44,7 @@ struct MusicView: View {
             } else {
                 Spacer()
                 
-                SwiftUI.Image(uiImage: song.cover)
+                SwiftUI.Image(uiImage: song.coverImage)
                     .resizable()
                     .cornerRadius(10)
                     .shadow(radius: 10)

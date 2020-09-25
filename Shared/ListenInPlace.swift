@@ -14,11 +14,15 @@ import CoreData
 struct ListenInPlace: App {
     @Environment(\.scenePhase)
     var scenePhase
+    
+    let player: Player
+    init() {
+        player = Player.shared(persistentContainer)
+    }
+        
         
     var body: some Scene {
         WindowGroup() {
-            let player = Player.shared(persistentContainer)
-            
             ContentView()
                 .accentColor(.orange)
                 .environment(\.managedObjectContext, self.persistentContainer.viewContext)
