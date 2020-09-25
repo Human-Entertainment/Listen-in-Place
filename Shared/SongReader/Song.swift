@@ -147,6 +147,7 @@ struct SongPublisher {
                 return song
         }.flatMapErrorThrowing { error in
             print(error)
+            // Fallback for when the song metadata isn't supported
             let avEnum = PlayerEnum.AVPlayer(.init(url: url), url)
             return avEnum.getSong()
         }
@@ -154,10 +155,4 @@ struct SongPublisher {
     }
 
 
-}
-
-
-
-extension Notification.Name {
-    static let newSong = Notification.Name("New Song")
 }
