@@ -54,7 +54,7 @@ struct ContentView: View {
     }
     
     func addSongHandler(result: Result<[URL], Error>?) {
-        guard let urls = try? result?.get() else { return print("Couldn't open files") }
+        guard case let .success(urls) = result else { return print("Couldn't open files") }
         
         openSong (urls: urls)
         

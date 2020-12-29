@@ -91,72 +91,70 @@ struct SongPublisher {
     }
     
     private func asyncLoad(url: URL, bookmark: Data) -> EventLoopFuture<Song> {
-        var album: String? = nil
-        var artist: String? = nil
-        var title: String? = nil
-        var cover: Data? = nil
-        var tracknumber: String? = nil
         
         return NonBlockingFileIO(threadPool: self.threadPool)
             .metablockReader(path: url.path,
                              on: eventLoop)
-            { data, flac, type  in
+            { data, flac, type, song  in
                 var bytes = data
                 switch type {
                     case 0:
                         print("Streaminfro block")
-                        break
+                        return song
                     case 1:
                         print("Padding block")
-                    break
+                        return song
                     case 2:
                         print("Application block")
-                    break
+                        return song
                     case 3:
                         print("Seekable block")
-                    break
+                        return song
                     case 4:
                         print("Vorbis comment block")
-                        guard let vorbis = try? VorbisComment(bytes: &bytes) else { return }
-                        
-                        artist = vorbis.artist // comments["artist"]
-                        album = vorbis.album // comments["album"]
-                        title = vorbis.title //comments["title"]
-                        tracknumber = vorbis.tracknumber
+                        guard let vorbis = try? VorbisComment(bytes: &bytes) else { return song }
                         print(vorbis)
-                    break
+                        return Song (
+                            title: vorbis.title ?? song.title,
+                            artist: vorbis.artist ?? song.artist,
+                            tracknumber: vorbis.tracknumber,
+                            lyrics: song.lyrics,
+                            album: vorbis.album,
+                            cover: song.cover,
+                            bookmark: song.bookmark
+                        )
                     case 5:
                         print("Cuesheet")
-                    break
+                        return song
                     case 6:
                         print("Image")
                         do {
                             let picture = try Picture(bytes: &bytes)
                             
                             if picture.pictureType == .CoverFront {
-                                cover = picture.image
+                                let cover = picture.image
                                 print(cover as Any)
+                                return Song (
+                                    title: song.title,
+                                    artist: song.artist,
+                                    tracknumber: song.tracknumber,
+                                    lyrics: song.lyrics,
+                                    album: song.album,
+                                    cover: cover,
+                                    bookmark: song.bookmark
+                                )
                             } else {
                                 print(picture.mimeType)
+                                return song
                             }
                         } catch {
                             print("Image loading issue \(error)")
+                            return song
                         }
-                        break
                     default:
                         assertionFailure("Heck?")
-                        break
+                        return song
                 }
-        }.map { _ -> Song in
-                // TODO: Figure out of how to load this together with the rest of the async stuff
-                let song = Song(title: title ?? "Unknow title",
-                                artist: artist ?? "Unknown artist",
-                                tracknumber: tracknumber,
-                                lyrics: nil,
-                                album: album ?? "Unknown album",
-                                cover: cover,
-                                bookmark: bookmark)
-                return song
         }.flatMapErrorThrowing { error in
             print(error)
             // Fallback for when the song metadata isn't supported
