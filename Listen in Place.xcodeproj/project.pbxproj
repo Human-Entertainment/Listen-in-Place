@@ -15,7 +15,6 @@
 		FC00A0C624CEFEE500497395 /* URL+Coordiantor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ACD2483D4E800ED60BF /* URL+Coordiantor.swift */; };
 		FC00A0C724CEFEE800497395 /* Array+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABB2482B1F300ED60BF /* Array+Extensions.swift */; };
 		FC00A0C824CEFEEB00497395 /* PlayerEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABD2482CB9600ED60BF /* PlayerEnum.swift */; };
-		FC00A0C924CEFEF800497395 /* MusicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521D0B2479A51B00D2AC82 /* MusicView.swift */; };
 		FC00A0CA24CEFEFD00497395 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */; };
 		FC00A0CC24CEFF0B00497395 /* Songs.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABF2483021A00ED60BF /* Songs.xcdatamodeld */; };
 		FC00A0CD24CEFF0E00497395 /* ArrayBiggerThan.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */; };
@@ -51,6 +50,7 @@
 		FCBE778724864D6E00080BB5 /* Flac.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCBE778624864D6E00080BB5 /* Flac.swift */; };
 		FCBE778924864FB600080BB5 /* NIOFileHandler+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCBE778824864FB600080BB5 /* NIOFileHandler+Extension.swift */; };
 		FCBE778B2486516200080BB5 /* Song.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCBE778A2486516200080BB5 /* Song.swift */; };
+		FCC0E5F0259B700B009CA70C /* Match in Frameworks */ = {isa = PBXBuildFile; productRef = FCC0E5EF259B700B009CA70C /* Match */; };
 		FCC94AC6247A979B00DCFD25 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */; };
 		FCF396C324F9A59B0051AB6E /* Metablock.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625AB52482B17600ED60BF /* Metablock.swift */; };
 		FCF396C424F9A5A00051AB6E /* Streaminginfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625AB72482B19600ED60BF /* Streaminginfo.swift */; };
@@ -58,6 +58,10 @@
 		FCF396C624F9A5A50051AB6E /* VorbisComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ACF2484128600ED60BF /* VorbisComment.swift */; };
 		FCF396CF24F9B3EB0051AB6E /* Songs+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCF396CD24F9B3EB0051AB6E /* Songs+CoreDataClass.swift */; };
 		FCF396D024F9B3EB0051AB6E /* Songs+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCF396CE24F9B3EB0051AB6E /* Songs+CoreDataProperties.swift */; };
+		FCF396D224FB7A260051AB6E /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FCF396D124FB7A260051AB6E /* Launch Screen.storyboard */; };
+		FCFAC320251DE96200B36992 /* AlbumGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFAC31F251DE96200B36992 /* AlbumGridView.swift */; };
+		FCFAC327251DF2AE00B36992 /* Song+iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFAC326251DF2AD00B36992 /* Song+iOS.swift */; };
+		FCFAC32E251DF30E00B36992 /* Song+macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFAC32D251DF30E00B36992 /* Song+macOS.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -146,6 +150,10 @@
 		FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPlayButton.swift; sourceTree = "<group>"; };
 		FCF396CD24F9B3EB0051AB6E /* Songs+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Songs+CoreDataClass.swift"; path = "Shared/Models/Songs+CoreDataClass.swift"; sourceTree = "<group>"; };
 		FCF396CE24F9B3EB0051AB6E /* Songs+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Songs+CoreDataProperties.swift"; path = "Shared/Models/Songs+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		FCF396D124FB7A260051AB6E /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		FCFAC31F251DE96200B36992 /* AlbumGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumGridView.swift; sourceTree = "<group>"; };
+		FCFAC326251DF2AD00B36992 /* Song+iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Song+iOS.swift"; sourceTree = "<group>"; };
+		FCFAC32D251DF30E00B36992 /* Song+macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Song+macOS.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -155,6 +163,7 @@
 			files = (
 				FC625AC42483093F00ED60BF /* CoreData.framework in Frameworks */,
 				FCBE77822485B27D00080BB5 /* NIOFoundationCompat in Frameworks */,
+				FCC0E5F0259B700B009CA70C /* Match in Frameworks */,
 				FCBE77802485B27D00080BB5 /* NIO in Frameworks */,
 				FCBE77852485B4E900080BB5 /* NIOTransportServices in Frameworks */,
 			);
@@ -235,14 +244,15 @@
 		FC521CDA2479A46600D2AC82 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				FCFAC31E251DE91E00B36992 /* Views */,
 				FCBE778C24865A7600080BB5 /* SongReader */,
 				FC67C25624AF532C00C41163 /* ListenInPlace.swift */,
 				FC521CDF2479A46600D2AC82 /* ContentView.swift */,
-				FC521D0B2479A51B00D2AC82 /* MusicView.swift */,
 				FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */,
 				FC625ABF2483021A00ED60BF /* Songs.xcdatamodeld */,
 				FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */,
 				FC521CE32479A46800D2AC82 /* Preview Content */,
+				FCF396D124FB7A260051AB6E /* Launch Screen.storyboard */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -341,8 +351,19 @@
 				FC625ACD2483D4E800ED60BF /* URL+Coordiantor.swift */,
 				FC625ABB2482B1F300ED60BF /* Array+Extensions.swift */,
 				FC625ABD2482CB9600ED60BF /* PlayerEnum.swift */,
+				FCFAC326251DF2AD00B36992 /* Song+iOS.swift */,
+				FCFAC32D251DF30E00B36992 /* Song+macOS.swift */,
 			);
 			path = SongReader;
+			sourceTree = "<group>";
+		};
+		FCFAC31E251DE91E00B36992 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				FCFAC31F251DE96200B36992 /* AlbumGridView.swift */,
+				FC521D0B2479A51B00D2AC82 /* MusicView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -366,6 +387,7 @@
 				FCBE777F2485B27D00080BB5 /* NIO */,
 				FCBE77812485B27D00080BB5 /* NIOFoundationCompat */,
 				FCBE77842485B4E900080BB5 /* NIOTransportServices */,
+				FCC0E5EF259B700B009CA70C /* Match */,
 			);
 			productName = "Listen in Place";
 			productReference = FC521CD82479A46600D2AC82 /* iOS.app */;
@@ -512,6 +534,7 @@
 			packageReferences = (
 				FCBE777E2485B27D00080BB5 /* XCRemoteSwiftPackageReference "swift-nio" */,
 				FCBE77832485B4E900080BB5 /* XCRemoteSwiftPackageReference "swift-nio-transport-services" */,
+				FCC0E5EE259B700B009CA70C /* XCRemoteSwiftPackageReference "Swift-Match" */,
 			);
 			productRefGroup = FC521CD92479A46600D2AC82 /* Products */;
 			projectDirPath = "";
@@ -532,6 +555,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FCF396D224FB7A260051AB6E /* Launch Screen.storyboard in Resources */,
 				FC521CE52479A46800D2AC82 /* Preview Assets.xcassets in Resources */,
 				FC521CE22479A46800D2AC82 /* Assets.xcassets in Resources */,
 			);
@@ -588,6 +612,7 @@
 				FC625AD02484128700ED60BF /* VorbisComment.swift in Sources */,
 				FC521D0E2479B06100D2AC82 /* Player.swift in Sources */,
 				FC625AC12483021B00ED60BF /* Songs.xcdatamodeld in Sources */,
+				FCFAC320251DE96200B36992 /* AlbumGridView.swift in Sources */,
 				FC06D5AE248BB4270041E794 /* ArrayBiggerThan.swift in Sources */,
 				FC625AB62482B17600ED60BF /* Metablock.swift in Sources */,
 				FC625ABC2482B1F300ED60BF /* Array+Extensions.swift in Sources */,
@@ -597,6 +622,7 @@
 				FC67C28024AF537E00C41163 /* ListenInPlace.swift in Sources */,
 				FC521CE02479A46600D2AC82 /* ContentView.swift in Sources */,
 				FC625ABE2482CB9600ED60BF /* PlayerEnum.swift in Sources */,
+				FCFAC327251DF2AE00B36992 /* Song+iOS.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -632,12 +658,12 @@
 				FC00A0C124CEFEC800497395 /* ContentView.swift in Sources */,
 				FC00A0C624CEFEE500497395 /* URL+Coordiantor.swift in Sources */,
 				FC00A0C224CEFEDC00497395 /* Player.swift in Sources */,
+				FCFAC32E251DF30E00B36992 /* Song+macOS.swift in Sources */,
 				FC00A0C524CEFEE300497395 /* NIOFileHandler+Extension.swift in Sources */,
 				FC00A0CD24CEFF0E00497395 /* ArrayBiggerThan.swift in Sources */,
 				FCF396C324F9A59B0051AB6E /* Metablock.swift in Sources */,
 				FC00A0C824CEFEEB00497395 /* PlayerEnum.swift in Sources */,
 				FCF396C424F9A5A00051AB6E /* Streaminginfo.swift in Sources */,
-				FC00A0C924CEFEF800497395 /* MusicView.swift in Sources */,
 				FC00A0C424CEFEE100497395 /* Flac.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -808,7 +834,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "\"Shared/Preview Content\"";
 				DEVELOPMENT_TEAM = 2D7T23VV7R;
 				ENABLE_PREVIEWS = YES;
@@ -839,7 +865,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "\"Shared/Preview Content\"";
 				DEVELOPMENT_TEAM = 2D7T23VV7R;
 				ENABLE_PREVIEWS = YES;
@@ -1182,6 +1208,14 @@
 				minimumVersion = 1.5.1;
 			};
 		};
+		FCC0E5EE259B700B009CA70C /* XCRemoteSwiftPackageReference "Swift-Match" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:Human-Entertainment/Swift-Match.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1214,6 +1248,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = FCBE77832485B4E900080BB5 /* XCRemoteSwiftPackageReference "swift-nio-transport-services" */;
 			productName = NIOTransportServices;
+		};
+		FCC0E5EF259B700B009CA70C /* Match */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FCC0E5EE259B700B009CA70C /* XCRemoteSwiftPackageReference "Swift-Match" */;
+			productName = Match;
 		};
 /* End XCSwiftPackageProductDependency section */
 

@@ -1,6 +1,7 @@
 import SwiftUI
 import AVFoundation
 import CoreData
+import Match
 
 var errorSong: Song {
     let song = Song(title: "Couldn't load title", artist: "Cound't load artis")
@@ -8,6 +9,10 @@ var errorSong: Song {
 }
 
 struct ContentView: View {
+    
+    
+    @Environment(\.horizontalSizeClass)
+    var horizontalSizeClass
     
     @EnvironmentObject
     var player: Player
@@ -18,32 +23,34 @@ struct ContentView: View {
     var presentFiles = false
     
     var body: some View {
-        VStack {
-            
-            NavigationView {
-                List {
-                    ForEach(player.all, id: \.coverImage) { song in
-                        SongCellView(song: song)
-                            
-                    }
-                }
-                .navigationBarTitle(Text("Song"))
-                .navigationBarItems(trailing: AddSongButton(presentFiles: $presentFiles))
-                
+        match (horizontalSizeClass ?? .regular)
+        {
+            given (UserInterfaceSizeClass.compact) {
+                CompactView(
+                    showSongContext: $showSongContext,
+                    presentFiles: $presentFiles
+                )
             }
-            if self.player.nowPlaying != nil {
-                GlobalControls()
-                    .frame(width: .none, height: 100, alignment: .bottom)
-                    .alignmentGuide(.bottom, computeValue: {d in d[explicit: .bottom]!})
-            } else {
-                EmptyView()
-            }
-        }
             
-        .fileImporter(isPresented: $presentFiles,
-                      allowedContentTypes: [.audio],
-                      allowsMultipleSelection: true,
-                      onCompletion: addSongHandler)
+            given (UserInterfaceSizeClass.regular) {
+                CompactView(
+                    showSongContext: $showSongContext,
+                    presentFiles: $presentFiles
+                )
+            }
+        } fallback: {
+            CompactView(
+                showSongContext: $showSongContext,
+                presentFiles: $presentFiles
+            )
+        }.fileImporter(
+            isPresented: $presentFiles,
+            allowedContentTypes: [.audio],
+            allowsMultipleSelection: true,
+            onCompletion: addSongHandler
+        )
+                    
+        
     }
     
     func addSongHandler(result: Result<[URL], Error>?) {
@@ -60,6 +67,43 @@ struct ContentView: View {
             
             self.player.add(url: url)
         }
+    }
+}
+
+struct CompactView: View
+{
+    @EnvironmentObject
+    var player: Player
+    
+    @Binding
+    var showSongContext: Bool
+    @Binding
+    var presentFiles: Bool
+    
+    var body: some View
+    {
+        VStack {
+            
+            NavigationView {
+                List {
+                    ForEach(player.all) { song in
+                        SongCellView(song: song)
+                        
+                    }
+                }
+                .navigationBarTitle(Text("Song"))
+                .navigationBarItems(trailing: AddSongButton(presentFiles: $presentFiles))
+                
+            }
+            if self.player.nowPlaying != nil {
+                GlobalControls()
+                    .frame(width: .none, height: 100, alignment: .bottom)
+                    .alignmentGuide(.bottom, computeValue: {d in d[explicit: .bottom]!})
+            } else {
+                EmptyView()
+            }
+        }
+
     }
 }
 

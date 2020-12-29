@@ -15,9 +15,11 @@ struct Song {
     private(set) var cover: Data? = nil
     private(set) var album: String? = nil
     private(set) var bookmark: Data? = nil
+    private(set) var tracknumber: String? = nil
     
     init(title: String,
          artist: String,
+         tracknumber: String? = nil,
          lyrics: String? = nil,
          album: String? = nil,
          cover: Data? = nil,
@@ -29,9 +31,16 @@ struct Song {
         self.album = album
         self.cover = cover
         self.bookmark = bookmark
+        self.tracknumber = tracknumber
     }
     
     
+}
+
+extension Song: Identifiable {
+    var id: String {
+        (album ?? "Unknown") + (tracknumber ?? "0")
+    }
 }
 
 extension Song: Hashable {
@@ -86,6 +95,7 @@ struct SongPublisher {
         var artist: String? = nil
         var title: String? = nil
         var cover: Data? = nil
+        var tracknumber: String? = nil
         
         return NonBlockingFileIO(threadPool: self.threadPool)
             .metablockReader(path: url.path,
@@ -112,6 +122,7 @@ struct SongPublisher {
                         artist = vorbis.artist // comments["artist"]
                         album = vorbis.album // comments["album"]
                         title = vorbis.title //comments["title"]
+                        tracknumber = vorbis.tracknumber
                         print(vorbis)
                     break
                     case 5:
@@ -140,6 +151,7 @@ struct SongPublisher {
                 // TODO: Figure out of how to load this together with the rest of the async stuff
                 let song = Song(title: title ?? "Unknow title",
                                 artist: artist ?? "Unknown artist",
+                                tracknumber: tracknumber,
                                 lyrics: nil,
                                 album: album ?? "Unknown album",
                                 cover: cover,

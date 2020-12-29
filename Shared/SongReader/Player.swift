@@ -163,11 +163,11 @@ final class Player: ObservableObject {
             
             
         }
-        
+        /*
         commandCenter.bookmarkCommand.addTarget { [unowned self] event in
             .commandFailed
         }
-
+*/
     }
     
     func setupNowPlaying(song: Song, elapsed: Double, total: Double) {

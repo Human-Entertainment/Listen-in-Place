@@ -9,8 +9,9 @@
 
 import Foundation
 import CoreData
-
+/*
 @objc(Songs)
 public class Songs: NSManagedObject {
 
 }
+*/
