@@ -23,6 +23,7 @@
 		FC00A0D324CEFF9C00497395 /* NIOTransportServices in Frameworks */ = {isa = PBXBuildFile; productRef = FC00A0D224CEFF9C00497395 /* NIOTransportServices */; };
 		FC00A0D524CEFFA300497395 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC00A0D424CEFFA300497395 /* CoreData.framework */; };
 		FC06D5AE248BB4270041E794 /* ArrayBiggerThan.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */; };
+		FC46024B259C8F6900DC1C74 /* AsyncKit in Frameworks */ = {isa = PBXBuildFile; productRef = FC46024A259C8F6900DC1C74 /* AsyncKit */; };
 		FC521CE02479A46600D2AC82 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521CDF2479A46600D2AC82 /* ContentView.swift */; };
 		FC521CE22479A46800D2AC82 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC521CE12479A46800D2AC82 /* Assets.xcassets */; };
 		FC521CE52479A46800D2AC82 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC521CE42479A46800D2AC82 /* Preview Assets.xcassets */; };
@@ -161,6 +162,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FC46024B259C8F6900DC1C74 /* AsyncKit in Frameworks */,
 				FC625AC42483093F00ED60BF /* CoreData.framework in Frameworks */,
 				FCBE77822485B27D00080BB5 /* NIOFoundationCompat in Frameworks */,
 				FCC0E5F0259B700B009CA70C /* Match in Frameworks */,
@@ -388,6 +390,7 @@
 				FCBE77812485B27D00080BB5 /* NIOFoundationCompat */,
 				FCBE77842485B4E900080BB5 /* NIOTransportServices */,
 				FCC0E5EF259B700B009CA70C /* Match */,
+				FC46024A259C8F6900DC1C74 /* AsyncKit */,
 			);
 			productName = "Listen in Place";
 			productReference = FC521CD82479A46600D2AC82 /* iOS.app */;
@@ -535,6 +538,7 @@
 				FCBE777E2485B27D00080BB5 /* XCRemoteSwiftPackageReference "swift-nio" */,
 				FCBE77832485B4E900080BB5 /* XCRemoteSwiftPackageReference "swift-nio-transport-services" */,
 				FCC0E5EE259B700B009CA70C /* XCRemoteSwiftPackageReference "Swift-Match" */,
+				FC460249259C8F6900DC1C74 /* XCRemoteSwiftPackageReference "async-kit" */,
 			);
 			productRefGroup = FC521CD92479A46600D2AC82 /* Products */;
 			projectDirPath = "";
@@ -834,7 +838,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "\"Shared/Preview Content\"";
 				DEVELOPMENT_TEAM = 2D7T23VV7R;
 				ENABLE_PREVIEWS = YES;
@@ -865,7 +869,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_ASSET_PATHS = "\"Shared/Preview Content\"";
 				DEVELOPMENT_TEAM = 2D7T23VV7R;
 				ENABLE_PREVIEWS = YES;
@@ -1192,6 +1196,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		FC460249259C8F6900DC1C74 /* XCRemoteSwiftPackageReference "async-kit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:vapor/async-kit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.0;
+			};
+		};
 		FCBE777E2485B27D00080BB5 /* XCRemoteSwiftPackageReference "swift-nio" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-nio";
@@ -1233,6 +1245,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = FCBE77832485B4E900080BB5 /* XCRemoteSwiftPackageReference "swift-nio-transport-services" */;
 			productName = NIOTransportServices;
+		};
+		FC46024A259C8F6900DC1C74 /* AsyncKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FC460249259C8F6900DC1C74 /* XCRemoteSwiftPackageReference "async-kit" */;
+			productName = AsyncKit;
 		};
 		FCBE777F2485B27D00080BB5 /* NIO */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -21,6 +21,8 @@ final class Player: ObservableObject {
     
     @Published var all = [Song]()
     var cancellable = [AnyCancellable]()
+    
+    private var threadPool = NIOThreadPool(numberOfThreads: 1)
 
     func add(url: URL) {
         guard url.startAccessingSecurityScopedResource() else {
@@ -29,14 +31,14 @@ final class Player: ObservableObject {
         }
         
         container.performBackgroundTask { [self] context in
-            defer { url.stopAccessingSecurityScopedResource() }
             do {
                 let newSong = Songs(context: context)
-                let bookmark = try url.bookmarkData()
-                newSong.bookmark = bookmark
+                newSong.bookmark = try url.bookmarkData()
                 // TODO: Fix this stuff
                 
-                fetchSong(url: url, bookmark: bookmark)
+                fetchSong(url: url,
+                          threadPool: self.threadPool,
+                          on: NIOTSEventLoopGroup().next())
                 
                 
             } catch {
@@ -47,9 +49,16 @@ final class Player: ObservableObject {
         }
     }
 
-    func fetchSong(url: URL, bookmark: Data) {
-        try? SongPublisher(threadPool: .init(numberOfThreads: 1))
-            .load(url: url, bookmark: bookmark)
+    func fetchSong(url: URL,
+                   threadPool: NIOThreadPool?,
+                   on eventloop: EventLoop) {
+        guard let threadPool = threadPool else {
+            print("No threadpool")
+            return
+        }
+        try? SongPublisher(threadPool: threadPool,
+                           on: eventloop)
+            .load(url: url)
             .print("Song")
             .sink {
                 guard case .failure(let songError) = $0 else { return }
@@ -59,6 +68,7 @@ final class Player: ObservableObject {
                     if !self.all.contains(song) {
                         self.all.append(song)
                     }
+                    url.stopAccessingSecurityScopedResource()
                 }
             }.store(in: &cancellable)
     }
@@ -117,8 +127,11 @@ final class Player: ObservableObject {
                             options: .withoutUI,
                             bookmarkDataIsStale: &isStale
                         )
-                        
-                        self?.fetchSong(url: url, bookmark: bookmark)
+                        self?.fetchSong(
+                            url: url,
+                            threadPool: self?.threadPool,
+                            on: NIOTSEventLoopGroup().next()
+                        )
                         
                     } catch {
                         print("Couldn't get URL from database because: \(error)")

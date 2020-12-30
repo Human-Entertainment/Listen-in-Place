@@ -58,13 +58,13 @@ struct SongPublisher {
     private let eventLoop: EventLoop
     
     init(threadPool: NIOThreadPool,
-         on eventLoop: EventLoop = NIOTSEventLoopGroup().next())
+         on eventLoop: EventLoop)
     {
         self.threadPool = threadPool
         self.eventLoop = eventLoop
     }
     
-    func load(url: URL, bookmark: Data) throws -> Future<Song, SongError> {
+    func load(url: URL) throws -> Future<Song, SongError> {
         Future<Song, SongError> { promise in
             
             let coordinator = url.coordinatedRead(coordinator: NSFileCoordinator(),
@@ -72,14 +72,20 @@ struct SongPublisher {
             coordinator.whenSuccess { url in
                 
                 self.threadPool.start()
-                let loaded = self.asyncLoad(url: url, bookmark: bookmark)
-                loaded.whenSuccess { song in
-                    promise(.success(song))
-                }
-                loaded.whenFailure { error in
-                    
-                    print(error)
-                    promise(.failure(.coundtReadFile))
+                self.asyncLoad(
+                    url: url,
+                    threadPool: self.threadPool
+                ).whenComplete { result in
+                    switch (result) {
+                        case let .failure(error):
+                            print(error)
+                            promise(.failure(.coundtReadFile))
+                            break
+                        case let .success(song):
+                            promise(.success(song))
+                            break
+                    }
+                
                 }
             }
             coordinator.whenFailure { error in
@@ -90,12 +96,15 @@ struct SongPublisher {
         // TODO: make it so MP3 can also be parsed
     }
     
-    private func asyncLoad(url: URL, bookmark: Data) -> EventLoopFuture<Song> {
+    private func asyncLoad(
+        url: URL,
+        threadPool: NIOThreadPool) -> EventLoopFuture<Song> {
         
-        return NonBlockingFileIO(threadPool: self.threadPool)
-            .metablockReader(path: url.path,
-                             on: eventLoop)
-            { data, flac, type, song  in
+        return NonBlockingFileIO(threadPool: threadPool)
+            .metablockReader(
+                path: url.path,
+                on: eventLoop
+            ) { data, flac, type, song  in
                 var bytes = data
                 switch type {
                     case 0:
@@ -157,9 +166,13 @@ struct SongPublisher {
                 }
         }.flatMapErrorThrowing { error in
             print(error)
-            // Fallback for when the song metadata isn't supported
-            let avEnum = PlayerEnum.AVPlayer(.init(url: url), url)
-            return avEnum.getSong()
+            if error as? NonBlockingFileIOReadError == NonBlockingFileIOReadError.notFlac {
+                // Fallback for when the song metadata isn't supported
+                let avEnum = PlayerEnum.AVPlayer(.init(url: url), url)
+                return avEnum.getSong()
+            } else {
+                throw error
+            }
         }
        
     }
