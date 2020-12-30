@@ -244,14 +244,24 @@ final class Player: ObservableObject {
     
     var token: Any?
     
-    let isPlayingQueue = DispatchQueue(label: "IsPlayingListerner")
     let isPlayingDispatchGroup = DispatchGroup()
     
     func play() {
         // Set this first, as to not break the async queue
-        isPlaying = true
+        
         switch player {
         case .AVPlayer(let player, _):
+            player.publisher(for: \.timeControlStatus)
+                .sink { controlStatus in
+                    switch controlStatus {
+                        case .paused: self.isPlaying = false
+                        case .playing: self.isPlaying = true
+                        case .waitingToPlayAtSpecifiedRate:
+                            self.isPlaying = false
+                        @unknown default:
+                            self.isPlaying = false
+                    }
+                }.store(in: &cancellable)
             player.play()
             let interval = 1.0 / 240
             token = player.addPeriodicTimeObserver(
@@ -271,15 +281,8 @@ final class Player: ObservableObject {
                 .sink(receiveValue: handleInterruption)
                 .store(in: &cancellable)
                 
-            isPlayingQueue.async {
-                while self.isPlaying {
-                    if player.timeControlStatus == .paused {
-                        DispatchQueue.main.async {
-                            self.isPlaying = false
-                        }
-                    }
-                }
-            }
+            
+            isPlaying = true
             break
         default:
             isPlaying = false
