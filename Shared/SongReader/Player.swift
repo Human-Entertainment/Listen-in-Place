@@ -33,10 +33,12 @@ final class Player: ObservableObject {
         container.performBackgroundTask { [self] context in
             do {
                 let newSong = Songs(context: context)
-                newSong.bookmark = try url.bookmarkData()
+                let bookmark = try url.bookmarkData()
+                newSong.bookmark = bookmark
                 // TODO: Fix this stuff
                 
                 fetchSong(url: url,
+                          bookmark: bookmark,
                           threadPool: self.threadPool,
                           on: NIOTSEventLoopGroup().next())
                 
@@ -50,6 +52,7 @@ final class Player: ObservableObject {
     }
 
     func fetchSong(url: URL,
+                   bookmark: Data,
                    threadPool: NIOThreadPool?,
                    on eventloop: EventLoop) {
         guard let threadPool = threadPool else {
@@ -58,7 +61,7 @@ final class Player: ObservableObject {
         }
         try? SongPublisher(threadPool: threadPool,
                            on: eventloop)
-            .load(url: url)
+            .load(url: url, bookmark: bookmark)
             .print("Song")
             .sink {
                 guard case .failure(let songError) = $0 else { return }
@@ -74,10 +77,6 @@ final class Player: ObservableObject {
     }
     
     // MARK: - Setup
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-        
-    }
     private init(container: NSPersistentContainer) {
         
         let audioSession = AVAudioSession.sharedInstance()
@@ -96,12 +95,7 @@ final class Player: ObservableObject {
             .publisher(for: .AVPlayerItemDidPlayToEndTime)
             .sink(receiveValue: avPlayerDidFinishPlaying)
             .store(in: &cancellable)
-            
-            /*
-            .addObserver(self,
-                                               selector: #selector(avPlayerDidFinishPlaying(note:)),
-                                               name: .AVPlayerItemDidPlayToEndTime, object: nil)
-        */
+        
         asyncInit()
         
     }
@@ -129,6 +123,7 @@ final class Player: ObservableObject {
                         )
                         self?.fetchSong(
                             url: url,
+                            bookmark: bookmark,
                             threadPool: self?.threadPool,
                             on: NIOTSEventLoopGroup().next()
                         )
@@ -272,11 +267,9 @@ final class Player: ObservableObject {
             
             NotificationCenter
                 .default
-                .addObserver(
-                    self,
-                    selector: #selector(handleInterruption),
-                    name: AVAudioSession.interruptionNotification,
-                    object: nil)
+                .publisher(for: AVAudioSession.interruptionNotification)
+                .sink(receiveValue: handleInterruption)
+                .store(in: &cancellable)
                 
             isPlayingQueue.async {
                 while self.isPlaying {
@@ -294,7 +287,7 @@ final class Player: ObservableObject {
         }
     }
     
-    @objc func handleInterruption(notification: Notification) {
+    func handleInterruption(notification: Notification) {
         guard let userInfo = notification.userInfo,
             let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
             let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {

@@ -64,7 +64,7 @@ struct SongPublisher {
         self.eventLoop = eventLoop
     }
     
-    func load(url: URL) throws -> Future<Song, SongError> {
+    func load(url: URL, bookmark: Data) throws -> Future<Song, SongError> {
         Future<Song, SongError> { promise in
             
             let coordinator = url.coordinatedRead(coordinator: NSFileCoordinator(),
@@ -73,6 +73,7 @@ struct SongPublisher {
                 
                 self.threadPool.start()
                 self.asyncLoad(
+                    bookmark: bookmark,
                     url: url,
                     threadPool: self.threadPool
                 ).whenComplete { result in
@@ -97,6 +98,7 @@ struct SongPublisher {
     }
     
     private func asyncLoad(
+        bookmark: Data,
         url: URL,
         threadPool: NIOThreadPool) -> EventLoopFuture<Song> {
         
@@ -130,7 +132,7 @@ struct SongPublisher {
                             lyrics: song.lyrics,
                             album: vorbis.album,
                             cover: song.cover,
-                            bookmark: song.bookmark
+                            bookmark: bookmark
                         )
                     case 5:
                         print("Cuesheet")
@@ -150,7 +152,7 @@ struct SongPublisher {
                                     lyrics: song.lyrics,
                                     album: song.album,
                                     cover: cover,
-                                    bookmark: song.bookmark
+                                    bookmark: bookmark
                                 )
                             } else {
                                 print(picture.mimeType)

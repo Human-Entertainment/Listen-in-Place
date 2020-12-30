@@ -23,31 +23,32 @@ struct ContentView: View {
     var presentFiles = false
     
     var body: some View {
-        match (horizontalSizeClass ?? .regular)
-        {
-            given (UserInterfaceSizeClass.compact) {
-                CompactView(
-                    showSongContext: $showSongContext,
-                    presentFiles: $presentFiles
-                )
-            }
+        
+        VStack {
             
-            given (UserInterfaceSizeClass.regular) {
-                CompactView(
-                    showSongContext: $showSongContext,
-                    presentFiles: $presentFiles
-                )
+            NavigationView {
+                List {
+                    ForEach(player.all) { song in
+                        SongCellView(song: song)
+                        
+                    }
+                }
+                .navigationBarTitle(Text("Song"))
+                .navigationBarItems(trailing: AddSongButton(presentFiles: $presentFiles))
+                
             }
-        } fallback: {
-            CompactView(
-                showSongContext: $showSongContext,
-                presentFiles: $presentFiles
-            )
+            if self.player.nowPlaying != nil {
+                GlobalControls()
+                    .frame(width: .none, height: 100, alignment: .bottom)
+                    .alignmentGuide(.bottom, computeValue: {d in d[explicit: .bottom]!})
+            } else {
+                EmptyView()
+            }
         }.fileImporter(
-            isPresented: $presentFiles,
-            allowedContentTypes: [.audio],
-            allowsMultipleSelection: true,
-            onCompletion: addSongHandler
+        isPresented: $presentFiles,
+        allowedContentTypes: [.audio],
+        allowsMultipleSelection: true,
+        onCompletion: addSongHandler
         )
                     
         
@@ -69,7 +70,7 @@ struct ContentView: View {
         }
     }
 }
-
+/*
 struct CompactView: View
 {
     @EnvironmentObject
@@ -82,31 +83,11 @@ struct CompactView: View
     
     var body: some View
     {
-        VStack {
-            
-            NavigationView {
-                List {
-                    ForEach(player.all) { song in
-                        SongCellView(song: song)
-                        
-                    }
-                }
-                .navigationBarTitle(Text("Song"))
-                .navigationBarItems(trailing: AddSongButton(presentFiles: $presentFiles))
-                
-            }
-            if self.player.nowPlaying != nil {
-                GlobalControls()
-                    .frame(width: .none, height: 100, alignment: .bottom)
-                    .alignmentGuide(.bottom, computeValue: {d in d[explicit: .bottom]!})
-            } else {
-                EmptyView()
-            }
-        }
+        
 
     }
 }
-
+*/
 struct AddSongButton: View {
     @Binding
     var presentFiles: Bool
