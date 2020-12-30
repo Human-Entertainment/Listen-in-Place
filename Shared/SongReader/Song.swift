@@ -57,11 +57,10 @@ struct SongPublisher {
     
     private let eventLoop: EventLoop
     
-    init(threadPool: NIOThreadPool,
-         on eventLoop: EventLoop)
+    init(threadPool: NIOThreadPool)
     {
         self.threadPool = threadPool
-        self.eventLoop = eventLoop
+        self.eventLoop = NIOTSEventLoopGroup().next()
     }
     
     func load(url: URL, bookmark: Data) throws -> Future<Song, SongError> {

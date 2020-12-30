@@ -32,7 +32,13 @@ struct ContentView: View {
                         SongCellView(song: song)
                         
                     }
+                    .onDelete { indexSet in
+                        for index in indexSet {
+                            player.remove(at: index)
+                        }
+                    }
                 }
+                
                 .navigationBarTitle(Text("Song"))
                 .navigationBarItems(trailing: AddSongButton(presentFiles: $presentFiles))
                 
@@ -70,24 +76,7 @@ struct ContentView: View {
         }
     }
 }
-/*
-struct CompactView: View
-{
-    @EnvironmentObject
-    var player: Player
-    
-    @Binding
-    var showSongContext: Bool
-    @Binding
-    var presentFiles: Bool
-    
-    var body: some View
-    {
-        
 
-    }
-}
-*/
 struct AddSongButton: View {
     @Binding
     var presentFiles: Bool
@@ -144,18 +133,14 @@ struct SongCellView: View {
     
     let song: Song
     var body: some View {
-        Button(action: {
-            try? self.player.play(self.song)
-        }) {
-            SongView(song: song)
-                .onTapGesture {
-                    try? self.player.play(self.song)
-            }
-            .onLongPressGesture {
-                self.showAction.toggle()
-            }
-        }
         
+        SongView(song: song)
+            .onTapGesture {
+                try? self.player.play(self.song)
+        }
+        .onLongPressGesture {
+            self.showAction.toggle()
+        }
         .actionSheet(isPresented: $showAction){
             ActionSheet(title: "Hi", message: "Hello", buttons: [
                 .default("Play last", action: { self.player.addToQueue(self.song) }),

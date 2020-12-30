@@ -40,8 +40,7 @@ final class Player: ObservableObject {
                 
                 fetchSong(url: url,
                           bookmark: bookmark,
-                          threadPool: self.threadPool,
-                          on: NIOTSEventLoopGroup().next())
+                          threadPool: self.threadPool)
                 
                 
             } catch {
@@ -52,16 +51,40 @@ final class Player: ObservableObject {
         }
     }
 
+    func remove(at index: Int)
+    {
+        let song = self.all.remove(at: index)
+        container.performBackgroundTask { context in
+            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Songs")
+            
+            do {
+                // TODO: - Fix this
+                (try context.fetch(request) as? [NSManagedObject])?
+                    .filter { $0.value(forKey: "bookmark") as? Data == song.bookmark }
+                    .forEach {
+                        $0.managedObjectContext?.delete($0)
+                        do {
+                            try $0.managedObjectContext?.save()
+                            print("Deleted \(song.title)")
+                        } catch {
+                            print("Couldn't delete \(song.title) because \(error)")
+                        }
+                    }
+                
+            } catch {
+                print("Error \(error) orccured")
+            }
+        }
+    }
+    
     func fetchSong(url: URL,
                    bookmark: Data,
-                   threadPool: NIOThreadPool?,
-                   on eventloop: EventLoop) {
+                   threadPool: NIOThreadPool?) {
         guard let threadPool = threadPool else {
             print("No threadpool")
             return
         }
-        try? SongPublisher(threadPool: threadPool,
-                           on: eventloop)
+        try? SongPublisher(threadPool: threadPool)
             .load(url: url, bookmark: bookmark)
             .print("Song")
             .sink {
@@ -125,8 +148,7 @@ final class Player: ObservableObject {
                         self?.fetchSong(
                             url: url,
                             bookmark: bookmark,
-                            threadPool: self?.threadPool,
-                            on: NIOTSEventLoopGroup().next()
+                            threadPool: self?.threadPool
                         )
                         
                     } catch {
@@ -288,7 +310,6 @@ final class Player: ObservableObject {
                         self.isPlaying = false
                 }
             }.store(in: &cancellable)
-        player.actionAtItemEnd = .advance
         player.play()
         
         self.addPeriodicTimeObserver()
