@@ -11,7 +11,8 @@ typealias Byte = UInt8
 final class Player: ObservableObject {
     private let container: NSPersistentContainer
     
-    private var player: PlayerEnum
+    private var player: AVPlayer?
+    
     @Published var progress: Float = 0.0
     @Published var isPlaying = false
     private var url: URL? = nil
@@ -88,7 +89,7 @@ final class Player: ObservableObject {
         }
         
         self.container = container
-        player = .none
+        player = nil
         // Setup mediacenter controls
         setupRemoteTransportControls()
         NotificationCenter.default
@@ -157,20 +158,27 @@ final class Player: ObservableObject {
         
         commandCenter.changePlaybackPositionCommand.addTarget { [unowned self] remoteEvent in
             guard let event = remoteEvent as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
-            switch player {
-                case .AVPlayer(let player, _):
-                    
-                    //let duration = player.currentItem?.duration.seconds ?? 0
-                    let seek = event.positionTime
-                    player.seek(to: CMTime(seconds: seek, preferredTimescale: CMTimeScale(1000)))
-                    return .success
-                default:
-                    
-                    return .success
-            }
+    
+            //let duration = player.currentItem?.duration.seconds ?? 0
+            let seek = event.positionTime
+            guard let player = player else { return .noActionableNowPlayingItem }
+            player.seek(to: CMTime(seconds: seek, preferredTimescale: CMTimeScale(1000)))
+            return .success
             
             
         }
+        
+        commandCenter.nextTrackCommand.addTarget { [unowned self] remoteEvent in
+            guard self.nextSong() != nil else { return .noSuchContent }
+            self.playNext()
+            return .success
+        }
+        
+        
+        commandCenter.previousTrackCommand.addTarget { _ in
+            return .commandFailed
+        }
+        
         /*
         commandCenter.bookmarkCommand.addTarget { [unowned self] event in
             .commandFailed
@@ -227,14 +235,9 @@ final class Player: ObservableObject {
         )
         
         pause()
-        player = .AVPlayer(.init(url: url), url)
+        player = .init(url: url)
         
-        switch player {
-            case .AVPlayer(_, let url):
-                self.url = url
-            default:
-                break
-        }
+        self.url = url
         nowPlaying = song
         
         // TODO: Empty queue and add this song to queue
@@ -242,52 +245,63 @@ final class Player: ObservableObject {
         play()
     }
     
-    var token: Any?
+    var timerObserver: Any?
     
-    let isPlayingDispatchGroup = DispatchGroup()
-    
-    func play() {
-        // Set this first, as to not break the async queue
-        
-        switch player {
-        case .AVPlayer(let player, _):
-            player.publisher(for: \.timeControlStatus)
-                .sink { controlStatus in
-                    switch controlStatus {
-                        case .paused: self.isPlaying = false
-                        case .playing: self.isPlaying = true
-                        case .waitingToPlayAtSpecifiedRate:
-                            self.isPlaying = false
-                        @unknown default:
-                            self.isPlaying = false
-                    }
-                }.store(in: &cancellable)
-            player.play()
-            let interval = 1.0 / 240
-            token = player.addPeriodicTimeObserver(
+    func addPeriodicTimeObserver()
+    {
+            
+        let interval = 1.0 / 240
+        timerObserver = player?.addPeriodicTimeObserver(
                 forInterval: .init(seconds: interval, preferredTimescale: CMTimeScale(NSEC_PER_SEC)),
                 queue: nil,
                 using: {time in
                     let seconds = time.seconds
-                    let duration = player.currentItem?.duration.seconds ?? 0
+                    let duration = self.player?.currentItem?.duration.seconds ?? 0
                     let percent = seconds / duration
                     self.progress = Float( percent )
                     self.setupNowPlaying(song: self.nowPlaying!, elapsed: seconds, total: duration)
                 })
-            
-            NotificationCenter
-                .default
-                .publisher(for: AVAudioSession.interruptionNotification)
-                .sink(receiveValue: handleInterruption)
-                .store(in: &cancellable)
-                
-            
-            isPlaying = true
-            break
-        default:
-            isPlaying = false
-            break
+    }
+    
+    func removePeriodicTimeObserver()
+    {
+        guard let token = timerObserver else {
+            return
         }
+        player?.removeTimeObserver(token)
+        
+        timerObserver = nil
+    }
+    
+    func play() {
+        guard let player = player else {
+            return
+        }
+        player.publisher(for: \.timeControlStatus)
+            .sink { controlStatus in
+                switch controlStatus {
+                    case .paused: self.isPlaying = false
+                    case .playing: self.isPlaying = true
+                    case .waitingToPlayAtSpecifiedRate:
+                        self.isPlaying = false
+                    @unknown default:
+                        self.isPlaying = false
+                }
+            }.store(in: &cancellable)
+        player.actionAtItemEnd = .advance
+        player.play()
+        
+        self.addPeriodicTimeObserver()
+        
+        NotificationCenter
+            .default
+            .publisher(for: AVAudioSession.interruptionNotification)
+            .sink(receiveValue: handleInterruption)
+            .store(in: &cancellable)
+            
+        
+        isPlaying = true
+           
     }
     
     func handleInterruption(notification: Notification) {
@@ -319,11 +333,8 @@ final class Player: ObservableObject {
         }
     }
     
-    @objc func avPlayerDidFinishPlaying(note: Notification) {
-        guard case let PlayerEnum.AVPlayer(player, _) = self.player else { return }
-        if let token = token {
-            player.removeTimeObserver(token)
-        }
+    func avPlayerDidFinishPlaying(note: Notification) {
+        self.removePeriodicTimeObserver()
         
         playNext()
     }
@@ -338,25 +349,15 @@ final class Player: ObservableObject {
     }
     
     func pause() {
-        switch player {
-        case .AVPlayer(let player, _):
-            player.pause()
-            
-        default:
-            break
-        }
+       player?.pause()
     }
     
     func seek(to: Float){
-        switch player {
-            case .AVPlayer(let player, _):
                 
-                let duration = player.currentItem?.duration.seconds ?? 0
-                let percent = Double(to) * duration
-                player.seek(to: .init(seconds: percent, preferredTimescale: CMTimeScale(10)))
-            default:
-                break
-        }
+        let duration = player?.currentItem?.duration.seconds ?? 0
+        let percent = Double(to) * duration
+        player?.seek(to: .init(seconds: percent, preferredTimescale: CMTimeScale(10)))
+           
     }
     
     func toggle() {
