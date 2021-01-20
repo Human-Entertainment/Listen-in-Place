@@ -1,7 +1,12 @@
 import NIOTransportServices
 import NIO
+import AsyncKit
 
 extension NonBlockingFileIO {
+    typealias Callback = (_ buffer: ByteBuffer,
+                          _ flac: Flac,
+                          _ metaType: Int,
+                          _ song: Song) -> (Song)
     
     /// Read the metadata blocks from a flac file
     /// - Parameters:
@@ -11,13 +16,13 @@ extension NonBlockingFileIO {
     /// - Returns: Void
     func metablockReader(path: String,
                          on eventLoop: EventLoop,
-                         callback: @escaping (_ buffer: ByteBuffer,_ flac: Flac,_ metaType: Int) -> ()) ->
-        EventLoopFuture<Void> {
-         let promise = eventLoop.makePromise(of: Void.self)
+                         callback: @escaping Callback) ->
+        EventLoopFuture<Song> {
         
-        self.openFile(path: path,
-                      eventLoop: NIOTSEventLoopGroup().next())
-            .flatMap { handler, region in
+        return self.openFile(
+            path: path,
+            eventLoop: eventLoop
+        ).flatMap { handler, region in
                
                 self.isFlac(handler: handler,
                             eventLoop: eventLoop,
@@ -26,33 +31,26 @@ extension NonBlockingFileIO {
                     print(error)
                     try? handler.close()
                                 
-                }.flatMap{ _ in
-                    self.asyncLoadMeta(
+                }.flatMap{ [self] _ in
+                    asyncLoadMeta(
                         handler: handler,
                         eventLoop: eventLoop,
                         fileIndex: region.readerIndex + 4,
                         flac: Flac(),
                         callback: callback)
                 }
-            }.cascade(to: promise)
-            return promise.futureResult
+            }
     }
-        
+    
     func isFlac(handler: NIOFileHandle,
                 eventLoop: EventLoop,
                 fileIndex: Int) -> EventLoopFuture<Void> {
-        return self.read(fileHandle: handler,
-                         fromOffset: Int64(fileIndex),
-                         byteCount: 4, allocator: .init(),
-                         eventLoop: eventLoop)
-            .flatMap { data in
-                var buffer = data
-                if buffer.readString(length: 4) == "fLaC" {
-                    return eventLoop.makeSucceededFuture(Void())
-                } else {
-                    return eventLoop.makeFailedFuture(NonBlockingFileIOReadError.notFlac)
-                }
-        }
+        self.readChunked(fileHandle: handler, byteCount: 4,allocator: .init(), eventLoop: eventLoop, chunkHandler: { buffer in
+            guard buffer.getString(at: buffer.readerIndex, length: 4) == "fLaC" else {
+                return eventLoop.makeFailedFuture(NonBlockingFileIOReadError.notFlac)
+            }
+            return eventLoop.makeSucceededFuture(Void())
+        })
     }
     
     
@@ -60,30 +58,35 @@ extension NonBlockingFileIO {
                        eventLoop: EventLoop,
                        fileIndex: Int,
                        flac: Flac,
-                       callback: @escaping (ByteBuffer,Flac,Int) -> ()) -> EventLoopFuture<Void> {
+                       song: Song = Song(title: "unknown", artist: "unknown"),
+                       callback: @escaping Callback) -> EventLoopFuture<Song> {
+        
         self.read(fileHandle: handler,
                   fromOffset: Int64(fileIndex),
                   byteCount: 4, allocator: .init(),
                   eventLoop: eventLoop)
         .flatMap { byteBuffer -> EventLoopFuture<(ByteBuffer, Flac.Head)> in
             var buffer = byteBuffer
-            // TODO: Better error handling
-            
-            let head = try! flac.readHead(bytes: &buffer)
-            let bodyIndex = fileIndex + 4
-            return self.read(
-                fileHandle: handler,
-                fromOffset: Int64(bodyIndex),
-                byteCount: head.bodyLength,
-                allocator: .init(),
-                eventLoop: eventLoop
-            ).and(value: head)
+            do{
+                let head = try flac.readHead(bytes: &buffer)
+                let bodyIndex = fileIndex + 4
+                return self.read(
+                    fileHandle: handler,
+                    fromOffset: Int64(bodyIndex),
+                    byteCount: head.bodyLength,
+                    allocator: .init(),
+                    eventLoop: eventLoop
+                ).and(value: head)
+            } catch {
+                return eventLoop.makeFailedFuture( error )
+            }
         }.flatMap { buffer, head in
             
-            callback(buffer, flac, head.metaType)
+            let newSong = callback(buffer, flac, head.metaType, song)
             if head.isLast {
                 return eventLoop.submit {
-                    try? handler.close() 
+                    try? handler.close()
+                    return newSong
                 }
             } else {
                 return self.asyncLoadMeta(
@@ -91,6 +94,7 @@ extension NonBlockingFileIO {
                     eventLoop: eventLoop,
                     fileIndex: fileIndex + 4 + head.bodyLength,
                     flac: flac,
+                    song: newSong,
                     callback: callback)
             }
         }

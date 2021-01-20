@@ -1,6 +1,7 @@
 import SwiftUI
 import AVFoundation
 import CoreData
+import Match
 
 var errorSong: Song {
     let song = Song(title: "Couldn't load title", artist: "Cound't load artis")
@@ -8,6 +9,10 @@ var errorSong: Song {
 }
 
 struct ContentView: View {
+    
+    
+    @Environment(\.horizontalSizeClass)
+    var horizontalSizeClass
     
     @EnvironmentObject
     var player: Player
@@ -18,15 +23,22 @@ struct ContentView: View {
     var presentFiles = false
     
     var body: some View {
+        
         VStack {
             
             NavigationView {
                 List {
-                    ForEach(player.all, id: \.coverImage) { song in
+                    ForEach(player.all) { song in
                         SongCellView(song: song)
-                            
+                        
+                    }
+                    .onDelete { indexSet in
+                        for index in indexSet {
+                            player.remove(at: index)
+                        }
                     }
                 }
+                
                 .navigationBarTitle(Text("Song"))
                 .navigationBarItems(trailing: AddSongButton(presentFiles: $presentFiles))
                 
@@ -38,16 +50,18 @@ struct ContentView: View {
             } else {
                 EmptyView()
             }
-        }
-            
-        .fileImporter(isPresented: $presentFiles,
-                      allowedContentTypes: [.audio],
-                      allowsMultipleSelection: true,
-                      onCompletion: addSongHandler)
+        }.fileImporter(
+        isPresented: $presentFiles,
+        allowedContentTypes: [.audio],
+        allowsMultipleSelection: true,
+        onCompletion: addSongHandler
+        )
+                    
+        
     }
     
     func addSongHandler(result: Result<[URL], Error>?) {
-        guard let urls = try? result?.get() else { return print("Couldn't open files") }
+        guard case let .success(urls) = result else { return print("Couldn't open files") }
         
         openSong (urls: urls)
         
@@ -119,18 +133,14 @@ struct SongCellView: View {
     
     let song: Song
     var body: some View {
-        Button(action: {
-            try? self.player.play(self.song)
-        }) {
-            SongView(song: song)
-                .onTapGesture {
-                    try? self.player.play(self.song)
-            }
-            .onLongPressGesture {
-                self.showAction.toggle()
-            }
-        }
         
+        SongView(song: song)
+            .onTapGesture {
+                try? self.player.play(self.song)
+        }
+        .onLongPressGesture {
+            self.showAction.toggle()
+        }
         .actionSheet(isPresented: $showAction){
             ActionSheet(title: "Hi", message: "Hello", buttons: [
                 .default("Play last", action: { self.player.addToQueue(self.song) }),

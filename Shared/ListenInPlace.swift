@@ -31,9 +31,11 @@ struct ListenInPlace: App {
         .onChange(of: scenePhase) { phase in
             switch phase {
                 case .active:
+                    self.player.addPeriodicTimeObserver()
                     break
                 case .inactive, .background:
                     self.saveContext()
+                    self.player.removePeriodicTimeObserver()
                 @unknown default:
                     fatalError("Unknown case")
             }

@@ -11,7 +11,8 @@ typealias Byte = UInt8
 final class Player: ObservableObject {
     private let container: NSPersistentContainer
     
-    private var player: PlayerEnum
+    private var player: AVPlayer?
+    
     @Published var progress: Float = 0.0
     @Published var isPlaying = false
     private var url: URL? = nil
@@ -21,6 +22,8 @@ final class Player: ObservableObject {
     
     @Published var all = [Song]()
     var cancellable = [AnyCancellable]()
+    
+    private var threadPool = NIOThreadPool(numberOfThreads: 1)
 
     func add(url: URL) {
         guard url.startAccessingSecurityScopedResource() else {
@@ -29,14 +32,15 @@ final class Player: ObservableObject {
         }
         
         container.performBackgroundTask { [self] context in
-            defer { url.stopAccessingSecurityScopedResource() }
             do {
                 let newSong = Songs(context: context)
                 let bookmark = try url.bookmarkData()
                 newSong.bookmark = bookmark
                 // TODO: Fix this stuff
                 
-                fetchSong(url: url, bookmark: bookmark)
+                fetchSong(url: url,
+                          bookmark: bookmark,
+                          threadPool: self.threadPool)
                 
                 
             } catch {
@@ -47,8 +51,40 @@ final class Player: ObservableObject {
         }
     }
 
-    func fetchSong(url: URL, bookmark: Data) {
-        try? SongPublisher(threadPool: .init(numberOfThreads: 1))
+    func remove(at index: Int)
+    {
+        let song = self.all.remove(at: index)
+        container.performBackgroundTask { context in
+            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Songs")
+            
+            do {
+                // TODO: - Fix this
+                (try context.fetch(request) as? [NSManagedObject])?
+                    .filter { $0.value(forKey: "bookmark") as? Data == song.bookmark }
+                    .forEach {
+                        $0.managedObjectContext?.delete($0)
+                        do {
+                            try $0.managedObjectContext?.save()
+                            print("Deleted \(song.title)")
+                        } catch {
+                            print("Couldn't delete \(song.title) because \(error)")
+                        }
+                    }
+                
+            } catch {
+                print("Error \(error) orccured")
+            }
+        }
+    }
+    
+    func fetchSong(url: URL,
+                   bookmark: Data,
+                   threadPool: NIOThreadPool?) {
+        guard let threadPool = threadPool else {
+            print("No threadpool")
+            return
+        }
+        try? SongPublisher(threadPool: threadPool)
             .load(url: url, bookmark: bookmark)
             .print("Song")
             .sink {
@@ -59,15 +95,12 @@ final class Player: ObservableObject {
                     if !self.all.contains(song) {
                         self.all.append(song)
                     }
+                    url.stopAccessingSecurityScopedResource()
                 }
             }.store(in: &cancellable)
     }
     
     // MARK: - Setup
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-        
-    }
     private init(container: NSPersistentContainer) {
         
         let audioSession = AVAudioSession.sharedInstance()
@@ -79,12 +112,13 @@ final class Player: ObservableObject {
         }
         
         self.container = container
-        player = .none
+        player = nil
         // Setup mediacenter controls
         setupRemoteTransportControls()
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(avPlayerDidFinishPlaying(note:)),
-                                               name: .AVPlayerItemDidPlayToEndTime, object: nil)
+        NotificationCenter.default
+            .publisher(for: .AVPlayerItemDidPlayToEndTime)
+            .sink(receiveValue: avPlayerDidFinishPlaying)
+            .store(in: &cancellable)
         
         asyncInit()
         
@@ -111,8 +145,11 @@ final class Player: ObservableObject {
                             options: .withoutUI,
                             bookmarkDataIsStale: &isStale
                         )
-                        
-                        self?.fetchSong(url: url, bookmark: bookmark)
+                        self?.fetchSong(
+                            url: url,
+                            bookmark: bookmark,
+                            threadPool: self?.threadPool
+                        )
                         
                     } catch {
                         print("Couldn't get URL from database because: \(error)")
@@ -122,7 +159,7 @@ final class Player: ObservableObject {
                 // TODO: Couldn't get file UI
                 print("Couldn't retrieve file in CoreData with error \(error)")
             }
-            }
+        }
     }
     
     func setupRemoteTransportControls() {
@@ -140,6 +177,35 @@ final class Player: ObservableObject {
             self.pause()
             return .success
         }
+        
+        commandCenter.changePlaybackPositionCommand.addTarget { [unowned self] remoteEvent in
+            guard let event = remoteEvent as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
+    
+            //let duration = player.currentItem?.duration.seconds ?? 0
+            let seek = event.positionTime
+            guard let player = player else { return .noActionableNowPlayingItem }
+            player.seek(to: CMTime(seconds: seek, preferredTimescale: CMTimeScale(1000)))
+            return .success
+            
+            
+        }
+        
+        commandCenter.nextTrackCommand.addTarget { [unowned self] remoteEvent in
+            guard self.nextSong() != nil else { return .noSuchContent }
+            self.playNext()
+            return .success
+        }
+        
+        
+        commandCenter.previousTrackCommand.addTarget { _ in
+            return .commandFailed
+        }
+        
+        /*
+        commandCenter.bookmarkCommand.addTarget { [unowned self] event in
+            .commandFailed
+        }
+*/
     }
     
     func setupNowPlaying(song: Song, elapsed: Double, total: Double) {
@@ -191,14 +257,9 @@ final class Player: ObservableObject {
         )
         
         pause()
-        player = .AVPlayer(.init(url: url), url)
+        player = .init(url: url)
         
-        switch player {
-            case .AVPlayer(_, let url):
-                self.url = url
-            default:
-                break
-        }
+        self.url = url
         nowPlaying = song
         
         // TODO: Empty queue and add this song to queue
@@ -206,54 +267,65 @@ final class Player: ObservableObject {
         play()
     }
     
-    var token: Any?
+    var timerObserver: Any?
     
-    let isPlayingQueue = DispatchQueue(label: "IsPlayingListerner")
-    let isPlayingDispatchGroup = DispatchGroup()
-    
-    func play() {
-        // Set this first, as to not break the async queue
-        isPlaying = true
-        switch player {
-        case .AVPlayer(let player, _):
-            player.play()
-            let interval = 1.0 / 240
-            token = player.addPeriodicTimeObserver(
+    func addPeriodicTimeObserver()
+    {
+            
+        let interval = 1.0 / 240
+        timerObserver = player?.addPeriodicTimeObserver(
                 forInterval: .init(seconds: interval, preferredTimescale: CMTimeScale(NSEC_PER_SEC)),
                 queue: nil,
                 using: {time in
                     let seconds = time.seconds
-                    let duration = player.currentItem?.duration.seconds ?? 0
+                    let duration = self.player?.currentItem?.duration.seconds ?? 0
                     let percent = seconds / duration
                     self.progress = Float( percent )
                     self.setupNowPlaying(song: self.nowPlaying!, elapsed: seconds, total: duration)
                 })
-            
-            NotificationCenter
-                .default
-                .addObserver(
-                    self,
-                    selector: #selector(handleInterruption),
-                    name: AVAudioSession.interruptionNotification,
-                    object: nil)
-                
-            isPlayingQueue.async {
-                while self.isPlaying {
-                    if player.timeControlStatus == .paused {
-                        DispatchQueue.main.async {
-                            self.isPlaying = false
-                        }
-                    }
-                }
-            }
-            break
-        default:
-            isPlaying = false
-            break
-        }
     }
     
-    @objc func handleInterruption(notification: Notification) {
+    func removePeriodicTimeObserver()
+    {
+        guard let token = timerObserver else {
+            return
+        }
+        player?.removeTimeObserver(token)
+        
+        timerObserver = nil
+    }
+    
+    func play() {
+        guard let player = player else {
+            return
+        }
+        player.publisher(for: \.timeControlStatus)
+            .sink { controlStatus in
+                switch controlStatus {
+                    case .paused: self.isPlaying = false
+                    case .playing: self.isPlaying = true
+                    case .waitingToPlayAtSpecifiedRate:
+                        self.isPlaying = false
+                    @unknown default:
+                        self.isPlaying = false
+                }
+            }.store(in: &cancellable)
+        player.play()
+        
+        self.addPeriodicTimeObserver()
+        
+        NotificationCenter
+            .default
+            .publisher(for: AVAudioSession.interruptionNotification)
+            .sink(receiveValue: handleInterruption)
+            .store(in: &cancellable)
+            
+        
+        isPlaying = true
+           
+    }
+    
+    func handleInterruption(notification: Notification) {
         guard let userInfo = notification.userInfo,
             let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
             let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
@@ -282,11 +354,8 @@ final class Player: ObservableObject {
         }
     }
     
-    @objc func avPlayerDidFinishPlaying(note: NSNotification) {
-        guard case let PlayerEnum.AVPlayer(player, _) = self.player else { return }
-        if let token = token {
-            player.removeTimeObserver(token)
-        }
+    func avPlayerDidFinishPlaying(note: Notification) {
+        self.removePeriodicTimeObserver()
         
         playNext()
     }
@@ -301,25 +370,15 @@ final class Player: ObservableObject {
     }
     
     func pause() {
-        switch player {
-        case .AVPlayer(let player, _):
-            player.pause()
-            
-        default:
-            break
-        }
+       player?.pause()
     }
     
     func seek(to: Float){
-        switch player {
-            case .AVPlayer(let player, _):
                 
-                let duration = player.currentItem?.duration.seconds ?? 0
-                let percent = Double(to) * duration
-                player.seek(to: .init(seconds: percent, preferredTimescale: CMTimeScale(10)))
-            default:
-                break
-        }
+        let duration = player?.currentItem?.duration.seconds ?? 0
+        let percent = Double(to) * duration
+        player?.seek(to: .init(seconds: percent, preferredTimescale: CMTimeScale(10)))
+           
     }
     
     func toggle() {
