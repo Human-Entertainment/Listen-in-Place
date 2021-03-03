@@ -17,7 +17,7 @@ class SongObserving: ObservableObject
     )
     {
         songs = .init()
-        cancellables = .init()
+        cancellable = .init()
 
         ValueObservation
         .tracking (
@@ -25,7 +25,7 @@ class SongObserving: ObservableObject
             .filter(Column("albumID") == parent.id)
             .fetchAll
         ).publisher(in: dbWriter)
-        sink(
+        .sink(
                 receiveCompletion: {error in
 
                 },
