@@ -1,15 +1,15 @@
 import Foundation
 import AVFoundation
 import MediaPlayer
-import CoreData
 import Combine
 import NIO
 import NIOTransportServices
+import GRDB
 
 typealias Byte = UInt8
 
 final class Player: ObservableObject {
-    private let container: NSPersistentContainer
+    let dbPool = DatabaseQueue()
     
     private var player: AVPlayer?
     
@@ -30,51 +30,18 @@ final class Player: ObservableObject {
             print("Failed to open the file")
             return
         }
-        
-        container.performBackgroundTask { [self] context in
-            do {
-                let newSong = Songs(context: context)
-                let bookmark = try url.bookmarkData()
-                newSong.bookmark = bookmark
-                // TODO: Fix this stuff
-                
-                fetchSong(url: url,
-                          bookmark: bookmark,
-                          threadPool: self.threadPool)
-                
-                
-            } catch {
-                print("An error occured: \(error)")
-            }
-            
-            try? context.save()
+        do {
+            let bookmark = try url.bookmarkData()
+            fetchSong(url: url, bookmark: bookmark, threadPool: self.threadPool)
+        } catch {
+            // TODO: Properly handle this with grace
+            print("Failed to make bookmark at \(#file)")
         }
     }
 
     func remove(at index: Int)
     {
-        let song = self.all.remove(at: index)
-        container.performBackgroundTask { context in
-            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Songs")
-            
-            do {
-                // TODO: - Fix this
-                (try context.fetch(request) as? [NSManagedObject])?
-                    .filter { $0.value(forKey: "bookmark") as? Data == song.bookmark }
-                    .forEach {
-                        $0.managedObjectContext?.delete($0)
-                        do {
-                            try $0.managedObjectContext?.save()
-                            print("Deleted \(song.title)")
-                        } catch {
-                            print("Couldn't delete \(song.title) because \(error)")
-                        }
-                    }
-                
-            } catch {
-                print("Error \(error) orccured")
-            }
-        }
+        // let song = self.all.remove(at: index)
     }
     
     func fetchSong(url: URL,
@@ -101,7 +68,7 @@ final class Player: ObservableObject {
     }
     
     // MARK: - Setup
-    private init(container: NSPersistentContainer) {
+    private init() {
         
         let audioSession = AVAudioSession.sharedInstance()
         do {
@@ -111,7 +78,6 @@ final class Player: ObservableObject {
             print("Failed to set audio session category.")
         }
         
-        self.container = container
         player = nil
         // Setup mediacenter controls
         setupRemoteTransportControls()
@@ -119,48 +85,14 @@ final class Player: ObservableObject {
             .publisher(for: .AVPlayerItemDidPlayToEndTime)
             .sink(receiveValue: avPlayerDidFinishPlaying)
             .store(in: &cancellable)
-        
-        asyncInit()
-        
+
+        all.append(contentsOf: dbPool.read { database in
+            (try? Song.fetchAll(database) ) ?? [Song]()
+        })
     }
     
-    public static let shared: (NSPersistentContainer) -> (Player) = { Player(container: $0) }
+    public static let shared = Player()
     
-    func asyncInit() {
-        container.performBackgroundTask { context in
-            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Songs")
-            
-            do {
-                // TODO: - Fix this
-                guard let result = try context.fetch(request) as? [NSManagedObject] else { return }
-                
-                result.forEach { [weak self] result in
-                    guard let bookmark = result.value(forKey: "bookmark") as? Data else { return }
-                    
-                    do {
-                        
-                        var isStale = false
-                        let url = try URL(
-                            resolvingBookmarkData: bookmark,
-                            options: .withoutUI,
-                            bookmarkDataIsStale: &isStale
-                        )
-                        self?.fetchSong(
-                            url: url,
-                            bookmark: bookmark,
-                            threadPool: self?.threadPool
-                        )
-                        
-                    } catch {
-                        print("Couldn't get URL from database because: \(error)")
-                    }
-                }
-            } catch {
-                // TODO: Couldn't get file UI
-                print("Couldn't retrieve file in CoreData with error \(error)")
-            }
-        }
-    }
     
     func setupRemoteTransportControls() {
         // Get the shared MPRemoteCommandCenter
@@ -211,10 +143,11 @@ final class Player: ObservableObject {
     func setupNowPlaying(song: Song, elapsed: Double, total: Double) {
         // Define Now Playing Info
         var nowPlayingInfo = [String : Any]()
-        nowPlayingInfo[MPMediaItemPropertyTitle] = song.title
-        
-        nowPlayingInfo[MPMediaItemPropertyArtist] = song.artist
-        
+        song.metadata.map { metadata in
+            nowPlayingInfo[MPMediaItemPropertyTitle] = metadata.title
+
+            nowPlayingInfo[MPMediaItemPropertyArtist] = metadata.artist
+        }
         nowPlayingInfo[MPMediaItemPropertyArtwork] =
             MPMediaItemArtwork(boundsSize: song.coverImage.size) { size in
                 return song.coverImage

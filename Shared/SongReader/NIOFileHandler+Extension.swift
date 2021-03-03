@@ -19,7 +19,7 @@ extension NonBlockingFileIO {
                          callback: @escaping Callback) ->
         EventLoopFuture<Song> {
         
-        return self.openFile(
+        self.openFile(
             path: path,
             eventLoop: eventLoop
         ).flatMap { handler, region in
@@ -37,6 +37,7 @@ extension NonBlockingFileIO {
                         eventLoop: eventLoop,
                         fileIndex: region.readerIndex + 4,
                         flac: Flac(),
+                        song: Song(),
                         callback: callback)
                 }
             }
@@ -58,9 +59,8 @@ extension NonBlockingFileIO {
                        eventLoop: EventLoop,
                        fileIndex: Int,
                        flac: Flac,
-                       song: Song = Song(title: "unknown", artist: "unknown"),
+                       song: Song,
                        callback: @escaping Callback) -> EventLoopFuture<Song> {
-        
         self.read(fileHandle: handler,
                   fromOffset: Int64(fileIndex),
                   byteCount: 4, allocator: .init(),

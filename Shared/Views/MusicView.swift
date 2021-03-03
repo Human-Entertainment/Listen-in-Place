@@ -19,13 +19,8 @@ struct MusicView: View {
     
     var body: some View {
         VStack {
-            
-            
             if showQueue {
-                
                 NavigationView {
-                
-                
                 List {
                     ForEach (player.sharedQueue, id: \.self) { song in
                         SongCellView(song: song)
@@ -51,7 +46,8 @@ struct MusicView: View {
                     .padding()
                     .aspectRatio(contentMode: .fit)
 
-                Text(song.title)
+                let title = song.metadata?.title ?? "Unknown Title"
+                Text(title)
 
                 Slider(value: Binding( get: {self.player.progress},
                                        set: self.player.seek))

@@ -1,10 +1,13 @@
 import SwiftUI
 import AVFoundation
-import CoreData
+import GRDB
 import Match
+import CoreData
 
 var errorSong: Song {
-    let song = Song(title: "Couldn't load title", artist: "Cound't load artis")
+    let metadata = Song.Metadata(title: "Couldn't load title", artist: "Cound't load artis")
+    var song = Song()
+    song.metadata = metadata
     return song
 }
 
@@ -17,6 +20,9 @@ struct ContentView: View {
     @EnvironmentObject
     var player: Player
     
+    @StateObject
+    var albumObserver = AlbumObserving(on: DatabaseQueue())
+    
     @State
     var showSongContext = false
     @State
@@ -28,13 +34,13 @@ struct ContentView: View {
             
             NavigationView {
                 List {
-                    ForEach(player.all) { song in
+                    ForEach(albumObserver.albums) { song in
                         SongCellView(song: song)
                         
                     }
                     .onDelete { indexSet in
                         for index in indexSet {
-                            player.remove(at: index)
+                            albumObserver.albums.remove(at: index)
                         }
                     }
                 }
@@ -160,7 +166,9 @@ extension Text: ExpressibleByStringLiteral {
 }
 
 var notPlaying: Song {
-    let song = Song(title: "Not Playing", artist: "Not Playing")
+    let metadata = Song.Metadata(title: "Not Playing", artist: "Not Playing")
+    var song = Song()
+    song.metadata = metadata
     return song
 }
 
@@ -184,8 +192,8 @@ struct SongView: View {
                 
 
             VStack (alignment: .leading) {
-                Text(song.title)
-                
+                let title = song.metadata?.title ?? "Unknown Title"
+                Text(title)
             }.padding(2)
         }
     }

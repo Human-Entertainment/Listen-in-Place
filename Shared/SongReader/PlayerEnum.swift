@@ -57,7 +57,7 @@ enum PlayerEnum {
                         case .commonKeyArtist, .commonKeyAuthor:
                             artist = metadata.value as? String ?? artist
                         case .commonKeyAlbumName:
-                            album = metadata.value as? String ?? album
+                            album =  metadata.value as? String ?? album
                         case .commonKeyArtwork:
                             cover = metadata.value as? Data
                         default: break
@@ -69,13 +69,11 @@ enum PlayerEnum {
             default:
                 break
         }
-        
-        let song = Song(title: title,
-                        artist: artist,
-                        lyrics: lyrics,
-                        album: album,
-                        cover: cover,
-                        bookmark: bookmark)
+        let metadata = Song.Metadata(title: title , artist: artist)
+        var song = Song()
+        song.metadata = metadata
+        song.cover = cover
+        song.bookmark = bookmark
         return song
     }
 }
