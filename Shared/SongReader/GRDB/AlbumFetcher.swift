@@ -5,29 +5,27 @@ import SwiftUI
 class AlbumObserving: ObservableObject
 {
     @Published
-    var albums: [Song]
-    var cancellabled: Set<AnyCancellable>
+    var albums: [Album]
+    var cancellable: Set<AnyCancellable>
     
     init(
-        on dbQueue: DatabaseQueue
+        on dbWriter: DatabaseWriter
     ) {
         albums = .init()
-        cancellabled = .init()
-        ValueObservation.tracking { database in
-                try Song.fetchAll(database)
-            }.publisher(in: dbQueue)
+        // Set so we can mutate the albums any time
+        cancellable = .init()
+        ValueObservation.tracking(Album.all().fetchAll)
+            .publisher(in: dbWriter)
             .sink(
                 receiveCompletion: {error in
                     
                 },
-                receiveValue: { [weak self] model in
-                    self?.albums.append(contentsOf: model)
-            }).store(in: &cancellabled)
-        
-        DispatchQueue(label: "Hello").async { [weak self] in
-            sleep(5)
-            guard let `self` = self else { print("Self wasn't retained"); return }
-            print(self.albums)
-        }
+                receiveValue: append
+            ).store(in: &cancellable)
+    }
+
+    func append(album: [Album])
+    {
+        self.albums.append(contentsOf: album)
     }
 }

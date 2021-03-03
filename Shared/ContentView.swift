@@ -21,7 +21,7 @@ struct ContentView: View {
     var player: Player
     
     @StateObject
-    var albumObserver = AlbumObserving(on: DatabaseQueue())
+    var albumObserver = AlbumObserving(on: AppDatabase.shared.dbWriter)
     
     @State
     var showSongContext = false
@@ -34,6 +34,7 @@ struct ContentView: View {
             
             NavigationView {
                 List {
+                    /*
                     ForEach(albumObserver.albums) { song in
                         SongCellView(song: song)
                         
@@ -42,7 +43,7 @@ struct ContentView: View {
                         for index in indexSet {
                             albumObserver.albums.remove(at: index)
                         }
-                    }
+                    }*/
                 }
                 
                 .navigationBarTitle(Text("Song"))
