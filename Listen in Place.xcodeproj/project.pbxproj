@@ -10,6 +10,7 @@
 		3166719D7B7E6376EDCA713D /* Song.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3166721D3D9FBDB862DABAE7 /* Song.swift */; };
 		31667343AA5DBA8AB68AE153 /* SongObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31667973D07B947C435DDDCD /* SongObserver.swift */; };
 		316674E5B11560D202FF8BAD /* AlbumObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31667FF1FCEE3AFA604FFA24 /* AlbumObserver.swift */; };
+		316675DC91FE78F80B6BDE47 /* SongObserving.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31667E2B137FDCB2851A9407 /* SongObserving.swift */; };
 		316676EC07D9481B90004F78 /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31667C70DC464DFA2D5A142B /* AppDatabase.swift */; };
 		31667728EB3E12A5DFF59EFD /* Album.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31667F4DC6549ECE22A54179 /* Album.swift */; };
 		316677C0FCA9CBE352DDE53E /* SongObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31667973D07B947C435DDDCD /* SongObserver.swift */; };
@@ -17,6 +18,7 @@
 		31667BBEECF1A69427ABB6B8 /* Album.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31667F4DC6549ECE22A54179 /* Album.swift */; };
 		31667BD5DA6F5E13B1022B3C /* SongPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31667DA6C984D7EE2E9F4B68 /* SongPublisher.swift */; };
 		31667C837A62D6197DEB4113 /* Song+macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31667D269AFA5755C3A0A7EB /* Song+macOS.swift */; };
+		31667C890123E6C0FA7C6675 /* SongObserving.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31667E2B137FDCB2851A9407 /* SongObserving.swift */; };
 		31667CBF50B9B66781BC0398 /* SongPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31667DA6C984D7EE2E9F4B68 /* SongPublisher.swift */; };
 		31667CCDFFAFA234993645E0 /* Song+iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3166781F922458C143AF19B6 /* Song+iOS.swift */; };
 		31667EB5B4E11C9EA33BBE86 /* AlbumObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31667FF1FCEE3AFA604FFA24 /* AlbumObserver.swift */; };
@@ -115,6 +117,7 @@
 		31667C70DC464DFA2D5A142B /* AppDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDatabase.swift; sourceTree = "<group>"; };
 		31667D269AFA5755C3A0A7EB /* Song+macOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Song+macOS.swift"; sourceTree = "<group>"; };
 		31667DA6C984D7EE2E9F4B68 /* SongPublisher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SongPublisher.swift; sourceTree = "<group>"; };
+		31667E2B137FDCB2851A9407 /* SongObserving.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SongObserving.swift; sourceTree = "<group>"; };
 		31667F4DC6549ECE22A54179 /* Album.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Album.swift; sourceTree = "<group>"; };
 		31667FF1FCEE3AFA604FFA24 /* AlbumObserver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlbumObserver.swift; sourceTree = "<group>"; };
 		FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayBiggerThan.swift; sourceTree = "<group>"; };
@@ -231,6 +234,7 @@
 			children = (
 				FC33E33525B8892000666F9F /* AlbumFetcher.swift */,
 				31667C70DC464DFA2D5A142B /* AppDatabase.swift */,
+				31667E2B137FDCB2851A9407 /* SongObserving.swift */,
 			);
 			path = GRDB;
 			sourceTree = "<group>";
@@ -653,6 +657,7 @@
 				31667B29498D9A82D41C44C4 /* Song.swift in Sources */,
 				31667CBF50B9B66781BC0398 /* SongPublisher.swift in Sources */,
 				316676EC07D9481B90004F78 /* AppDatabase.swift in Sources */,
+				316675DC91FE78F80B6BDE47 /* SongObserving.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -699,6 +704,7 @@
 				3166719D7B7E6376EDCA713D /* Song.swift in Sources */,
 				31667BD5DA6F5E13B1022B3C /* SongPublisher.swift in Sources */,
 				31667F3F530D95640FA9C2E9 /* AppDatabase.swift in Sources */,
+				31667C890123E6C0FA7C6675 /* SongObserving.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
