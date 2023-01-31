@@ -140,6 +140,16 @@ final class Player: ObservableObject {
                 options: .withoutUI,
                 bookmarkDataIsStale: &isStale
             )
+            
+            guard url.startAccessingSecurityScopedResource() else {
+                print("Failed to open the file")
+                return
+            }
+            
+            defer {
+                url.stopAccessingSecurityScopedResource()
+            }
+            
             if (isStale) {
                 print("Data is stale")
             }
