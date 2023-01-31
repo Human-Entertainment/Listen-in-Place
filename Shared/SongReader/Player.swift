@@ -222,7 +222,9 @@ final class Player: ObservableObject {
         nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = 1
         
         // Set the metadata
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+        let infoCenter = MPNowPlayingInfoCenter.default()
+        infoCenter.nowPlayingInfo = nowPlayingInfo
+        infoCenter.playbackState = isPlaying ? .playing : .paused
         
     }
     
@@ -377,7 +379,8 @@ final class Player: ObservableObject {
     }
     
     func pause() {
-       player?.pause()
+        isPlaying = false
+        player?.pause()
     }
     
     func seek(to: Float){
