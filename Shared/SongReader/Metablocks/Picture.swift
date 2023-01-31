@@ -8,7 +8,7 @@ enum PictureType {
     case other
 }
 
-struct Picture: MetaBlcok {
+struct Picture {
     let pictureType: PictureType
     let mimeType: String
     let description: String
@@ -18,9 +18,9 @@ struct Picture: MetaBlcok {
     let colorCount: Int
     let image: Data?
     
-    init(bytes: inout ByteBuffer) throws {
+    init(bytes buffer: ByteBuffer) throws {
         //guard let pictureType =  else { throw PictureError.pictureTypeError }
-        
+        var bytes = buffer
         switch bytes.readInteger(endianness: .big, as: UInt32.self) {
             case 3:
                 self.pictureType = .CoverFront

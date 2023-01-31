@@ -31,6 +31,10 @@ final class Player: ObservableObject {
             return
         }
         
+        defer {
+            url.stopAccessingSecurityScopedResource()
+        }
+        
         let context = container.newBackgroundContext()
         
         guard let bookmark = (try? await context.perform {

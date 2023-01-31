@@ -1,9 +1,9 @@
 import NIO
 
-struct Streaminfo: MetaBlcok {
+struct Streaminfo {
     let bytes: ByteBuffer
     
-    init(bytes: inout ByteBuffer) throws {
+    init(bytes: ByteBuffer) throws {
         self.bytes = bytes
     }
 }

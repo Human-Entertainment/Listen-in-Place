@@ -70,13 +70,12 @@ extension Song {
                 
         var song = Song(title: "unknown", artist: "unknown", bookmark: bookmark)
         do {
-            for try await (data, type) in try await NonBlockingFileIO(threadPool: threadPool)
-                .metablockReader(path: url.path, on: NIOTSEventLoopGroup().next())
+            for try await (buffer, metaType) in try await NonBlockingFileIO(threadPool: threadPool)
+                .metablockReader(path: url.path(percentEncoded: false), on: NIOTSEventLoopGroup().next())
             {
-                var bytes = data
-                switch type {
+                switch metaType {
                     case 0:
-                        print("Streaminf szo block")
+                        print("Streaminfo block")
                         continue
                     case 1:
                         print("Padding block")
@@ -89,7 +88,7 @@ extension Song {
                         continue
                     case 4:
                         print("Vorbis comment block")
-                        guard let vorbis = try? VorbisComment(bytes: &bytes) else { continue }
+                        guard let vorbis = try? VorbisComment(bytes: buffer) else { continue }
                         song.loadVorbis(comment: vorbis)
 
                     case 5:
@@ -98,7 +97,7 @@ extension Song {
                     case 6:
                         print("Image")
                         do {
-                            let picture = try Picture(bytes: &bytes)
+                            let picture = try Picture(bytes: buffer)
                             
                             if picture.pictureType == .CoverFront {
                                 let cover = picture.image
@@ -130,6 +129,5 @@ extension Song {
         return song
        
     }
-
 
 }

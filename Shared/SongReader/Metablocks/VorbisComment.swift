@@ -1,9 +1,9 @@
 import NIO
 
 @dynamicMemberLookup
-struct VorbisComment: MetaBlcok {
+struct VorbisComment {
     var comments: [String: String]
-    init(bytes: inout ByteBuffer) throws {
+    init(bytes: ByteBuffer) throws {
         comments = try VorbisComment.getVorbisComment(bytes: bytes)        
     }
     
