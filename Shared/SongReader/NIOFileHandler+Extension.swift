@@ -11,10 +11,8 @@ extension NonBlockingFileIO {
     func metablockReader(path: String,
                          on eventLoop: EventLoop) async throws -> AsyncThrowingStream<(buffer: ByteBuffer, metaType: Int), any Swift.Error> {
         
-        let handler = try await self.openFile(path: path,
-                                               mode: .read,
+        let (handler, region) = try await self.openFile(path: path,
                                                eventLoop: eventLoop).get()
-        let region = try FileRegion(fileHandle: handler)
             
         guard await isFlac(handler: handler, eventLoop: eventLoop, fileIndex: region.readerIndex) else {
             try handler.close()
