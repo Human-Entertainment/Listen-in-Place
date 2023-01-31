@@ -30,7 +30,7 @@ enum PlayerEnum {
         player.removeTimeObserver(token)
     }
     
-    func getSong() -> Song {
+    func getSong() async throws -> Song {
         var lyrics: String? = nil
         var title = "Unknown Title"
         var artist = "Unknown Artist"
@@ -38,36 +38,34 @@ enum PlayerEnum {
         var album: String? = nil
         var bookmark: Data? = nil
         
-        switch self {
-            case .AVPlayer(let player, let url):
-                guard let asset = player.currentItem?.asset else { break }
-                lyrics = asset.lyrics
-                
-                
-                
-                asset.commonMetadata.forEach { metadata in
-                    guard let common = metadata.commonKey else {
-                        print("Not common key")
-                        return
-                    }
-                    
-                    switch common{
-                        case .commonKeyTitle:
-                            title = metadata.value as? String ?? title
-                        case .commonKeyArtist, .commonKeyAuthor:
-                            artist = metadata.value as? String ?? artist
-                        case .commonKeyAlbumName:
-                            album = metadata.value as? String ?? album
-                        case .commonKeyArtwork:
-                            cover = metadata.value as? Data
-                        default: break
-                    }
+        if case let .AVPlayer(player, url) = self {
+            guard let asset = player.currentItem?.asset else {
+                throw Error.wrongSong
+            }
+            
+            lyrics = try? await asset.load(.lyrics)
+            
+            for metadata in try await asset.load(.commonMetadata) {
+                guard let common = metadata.commonKey else {
+                    print("Not common key")
+                    continue
                 }
                 
-                bookmark = try? url.bookmarkData()
-                break
-            default:
-                break
+                switch common{
+                    case .commonKeyTitle:
+                    title = try await metadata.load(.value) as? String ?? title
+                    case .commonKeyArtist, .commonKeyAuthor:
+                        artist = try await metadata.load(.value) as? String ?? artist
+                    case .commonKeyAlbumName:
+                        album = try await metadata.load(.value) as? String ?? album
+                    case .commonKeyArtwork:
+                        cover = try? await metadata.load(.value) as? Data
+                    default: break
+                }
+            }
+            
+            bookmark = try? url.bookmarkData()
+            
         }
         
         let song = Song(title: title,
@@ -77,5 +75,9 @@ enum PlayerEnum {
                         cover: cover,
                         bookmark: bookmark)
         return song
+    }
+    
+    enum Error : Swift.Error {
+        case wrongSong
     }
 }

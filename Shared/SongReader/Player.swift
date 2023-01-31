@@ -254,15 +254,24 @@ final class Player: ObservableObject {
             bookmarkDataIsStale: &isStale
         )
         
+        guard url.startAccessingSecurityScopedResource() else {
+            return
+        }
+        
         pause()
         player = .init(url: url)
         
+        self.url?.stopAccessingSecurityScopedResource()
         self.url = url
         nowPlaying = song
         
         // TODO: Empty queue and add this song to queue
         
         play()
+    }
+    
+    deinit {
+        url?.stopAccessingSecurityScopedResource()
     }
     
     var timerObserver: Any?

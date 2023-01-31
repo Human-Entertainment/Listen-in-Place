@@ -120,7 +120,7 @@ extension Song {
             if error as? NonBlockingFileIOReadError == NonBlockingFileIOReadError.notFlac {
                 // Fallback for when the song metadata isn't supported
                 let avEnum = PlayerEnum.AVPlayer(.init(url: url), url)
-                return avEnum.getSong()
+                return try await avEnum.getSong()
             } else {
                 throw error
             }
