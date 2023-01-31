@@ -34,7 +34,17 @@ struct Song {
         self.tracknumber = tracknumber
     }
     
+    mutating func loadVorbis(comment vorbis: VorbisComment) {
+        self.title = vorbis.title ?? self.title
+        self.artist = vorbis.artist ?? self.artist
+        self.tracknumber = vorbis.tracknumber
+        
+        self.album = vorbis.album
+    }
     
+    mutating func set(cover data: Data?) {
+        cover = data
+    }
 }
 
 extension Song: Identifiable {
@@ -63,34 +73,21 @@ struct SongPublisher {
         self.eventLoop = NIOTSEventLoopGroup().next()
     }
     
-    func load(url: URL, bookmark: Data) throws -> Future<Song, SongError> {
-        Future<Song, SongError> { promise in
-            
-            let coordinator = url.coordinatedRead(coordinator: NSFileCoordinator(),
-                                on: eventLoop)
-            coordinator.whenSuccess { url in
+    func load(url: URL, bookmark: Data) async -> Result<Song, SongError> {
+        do {
+            let url = try await url.coordinatedRead(
+                coordinator: NSFileCoordinator(),
+                on: eventLoop).get()
                 
-                self.threadPool.start()
-                self.asyncLoad(
-                    bookmark: bookmark,
-                    url: url,
-                    threadPool: self.threadPool
-                ).whenComplete { result in
-                    switch (result) {
-                        case let .failure(error):
-                            print(error)
-                            promise(.failure(.coundtReadFile))
-                            break
-                        case let .success(song):
-                            promise(.success(song))
-                            break
-                    }
-                
-                }
-            }
-            coordinator.whenFailure { error in
-                promise(.failure(.coundtReadFile))
-            }
+            self.threadPool.start()
+            let song = try await self.asyncLoad(
+                bookmark: bookmark,
+                url: url
+            )
+
+            return .success(song)
+        } catch {
+            return .failure(.coundtReadFile)
         }
         
         // TODO: make it so MP3 can also be parsed
@@ -98,74 +95,62 @@ struct SongPublisher {
     
     private func asyncLoad(
         bookmark: Data,
-        url: URL,
-        threadPool: NIOThreadPool) -> EventLoopFuture<Song> {
+        url: URL) async throws -> Song {
         
-        return NonBlockingFileIO(threadPool: threadPool)
-            .metablockReader(
-                path: url.path,
-                on: eventLoop
-            ) { data, flac, type, song  in
+        var song = Song(title: "unknown", artist: "unknown", bookmark: bookmark)
+        do {
+            for try await (data, type) in try await NonBlockingFileIO(threadPool: threadPool)
+                .metablockReader(
+                    path: url.path,
+                    on: eventLoop
+                ) {
                 var bytes = data
                 switch type {
-                    case 0:
-                        print("Streaminfro block")
-                        return song
-                    case 1:
-                        print("Padding block")
-                        return song
-                    case 2:
-                        print("Application block")
-                        return song
-                    case 3:
-                        print("Seekable block")
-                        return song
-                    case 4:
-                        print("Vorbis comment block")
-                        guard let vorbis = try? VorbisComment(bytes: &bytes) else { return song }
-                        print(vorbis)
-                        return Song (
-                            title: vorbis.title ?? song.title,
-                            artist: vorbis.artist ?? song.artist,
-                            tracknumber: vorbis.tracknumber,
-                            lyrics: song.lyrics,
-                            album: vorbis.album,
-                            cover: song.cover,
-                            bookmark: bookmark
-                        )
-                    case 5:
-                        print("Cuesheet")
-                        return song
-                    case 6:
-                        print("Image")
-                        do {
-                            let picture = try Picture(bytes: &bytes)
+                case 0:
+                    print("Streaminfro block")
+                    continue
+                case 1:
+                    print("Padding block")
+                    continue
+                case 2:
+                    print("Application block")
+                    continue
+                case 3:
+                    print("Seekable block")
+                    continue
+                case 4:
+                    print("Vorbis comment block")
+                    guard let vorbis = try? VorbisComment(bytes: &bytes) else { continue }
+                    
+                    song.loadVorbis(comment: vorbis)
+
+                case 5:
+                    print("Cuesheet")
+                    continue
+                case 6:
+                    print("Image")
+                    do {
+                        let picture = try Picture(bytes: &bytes)
+                        
+                        if picture.pictureType == .CoverFront {
+                            let cover = picture.image
+                            print(cover as Any)
                             
-                            if picture.pictureType == .CoverFront {
-                                let cover = picture.image
-                                print(cover as Any)
-                                return Song (
-                                    title: song.title,
-                                    artist: song.artist,
-                                    tracknumber: song.tracknumber,
-                                    lyrics: song.lyrics,
-                                    album: song.album,
-                                    cover: cover,
-                                    bookmark: bookmark
-                                )
-                            } else {
-                                print(picture.mimeType)
-                                return song
-                            }
-                        } catch {
-                            print("Image loading issue \(error)")
-                            return song
+                            song.set(cover: cover)
+                        } else {
+                            print(picture.mimeType)
+                            continue
                         }
-                    default:
-                        assertionFailure("Heck?")
-                        return song
+                    } catch {
+                        print("Image loading issue \(error)")
+                        continue
+                    }
+                default:
+                    assertionFailure("Heck?")
+                    break
                 }
-        }.flatMapErrorThrowing { error in
+            }
+        } catch {
             print(error)
             if error as? NonBlockingFileIOReadError == NonBlockingFileIOReadError.notFlac {
                 // Fallback for when the song metadata isn't supported
@@ -175,6 +160,8 @@ struct SongPublisher {
                 throw error
             }
         }
+            
+        return song
        
     }
 

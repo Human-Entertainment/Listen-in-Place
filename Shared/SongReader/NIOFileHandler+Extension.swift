@@ -3,99 +3,78 @@ import NIO
 import AsyncKit
 
 extension NonBlockingFileIO {
-    typealias Callback = (_ buffer: ByteBuffer,
-                          _ flac: Flac,
-                          _ metaType: Int,
-                          _ song: Song) -> (Song)
-    
-    /// Read the metadata blocks from a flac file
+       /// Read the metadata blocks from a flac file
     /// - Parameters:
     ///   - path: The path for the flac file
     ///   - eventLoop: Execute on this eventloop
     ///   - callback: This is to handle the metadata
     /// - Returns: Void
     func metablockReader(path: String,
-                         on eventLoop: EventLoop,
-                         callback: @escaping Callback) ->
-        EventLoopFuture<Song> {
+                         on eventLoop: EventLoop) async throws -> AsyncThrowingStream<(buffer: ByteBuffer, metaType: Int), any Swift.Error> {
         
-        return self.openFile(
-            path: path,
-            eventLoop: eventLoop
-        ).flatMap { handler, region in
-               
-                self.isFlac(handler: handler,
-                            eventLoop: eventLoop,
-                            fileIndex: region.readerIndex)
-                .flatMapErrorThrowing { error in
-                    print(error)
-                    try? handler.close()
-                                
-                }.flatMap{ [self] _ in
-                    asyncLoadMeta(
-                        handler: handler,
-                        eventLoop: eventLoop,
-                        fileIndex: region.readerIndex + 4,
-                        flac: Flac(),
-                        callback: callback)
-                }
-            }
+        let (handler, region) = try await self.openFile(path: path, eventLoop: eventLoop).get()
+            
+        guard await isFlac(handler: handler, eventLoop: eventLoop, fileIndex: region.readerIndex) else {
+            try handler.close()
+            throw NonBlockingFileIOReadError.notFlac
+        }
+            
+        return try await asyncLoadMeta(
+                    handler: handler,
+                    eventLoop: eventLoop,
+                    fileIndex: region.readerIndex + 4,
+                    flac: Flac())
     }
     
     func isFlac(handler: NIOFileHandle,
                 eventLoop: EventLoop,
-                fileIndex: Int) -> EventLoopFuture<Void> {
-        self.readChunked(fileHandle: handler, byteCount: 4,allocator: .init(), eventLoop: eventLoop, chunkHandler: { buffer in
-            guard buffer.getString(at: buffer.readerIndex, length: 4) == "fLaC" else {
-                return eventLoop.makeFailedFuture(NonBlockingFileIOReadError.notFlac)
+                fileIndex: Int) async -> Bool {
+        let buffer: ByteBuffer = await withCheckedContinuation { continuation in
+            let _ = self.readChunked(fileHandle: handler,
+                                     byteCount: 4,
+                                     allocator: .init(),
+                                     eventLoop: eventLoop) { buffer in
+                continuation.resume(returning: buffer)
+                return eventLoop.makeSucceededFuture(Void())
             }
-            return eventLoop.makeSucceededFuture(Void())
-        })
+        }
+
+        return buffer.getString(at: buffer.readerIndex, length: 4) == "fLaC"
     }
-    
-    
+   
     func asyncLoadMeta(handler: NIOFileHandle,
                        eventLoop: EventLoop,
                        fileIndex: Int,
-                       flac: Flac,
-                       song: Song = Song(title: "unknown", artist: "unknown"),
-                       callback: @escaping Callback) -> EventLoopFuture<Song> {
+                       flac: Flac) async throws -> AsyncThrowingStream<(buffer: ByteBuffer, metaType: Int), any Swift.Error> {
         
-        self.read(fileHandle: handler,
-                  fromOffset: Int64(fileIndex),
-                  byteCount: 4, allocator: .init(),
-                  eventLoop: eventLoop)
-        .flatMap { byteBuffer -> EventLoopFuture<(ByteBuffer, Flac.Head)> in
-            var buffer = byteBuffer
-            do{
-                let head = try flac.readHead(bytes: &buffer)
-                let bodyIndex = fileIndex + 4
-                return self.read(
-                    fileHandle: handler,
-                    fromOffset: Int64(bodyIndex),
-                    byteCount: head.bodyLength,
-                    allocator: .init(),
-                    eventLoop: eventLoop
-                ).and(value: head)
-            } catch {
-                return eventLoop.makeFailedFuture( error )
-            }
-        }.flatMap { buffer, head in
-            
-            let newSong = callback(buffer, flac, head.metaType, song)
-            if head.isLast {
-                return eventLoop.submit {
-                    try? handler.close()
-                    return newSong
+        defer { try? handler.close() }
+        
+        return AsyncThrowingStream { continuation in
+            Task {
+                var isLast = false
+                while (!isLast) {
+                    var buff = try await self.read(
+                        fileHandle: handler,
+                        fromOffset: Int64(fileIndex),
+                        byteCount: 4,
+                        allocator: .init(),
+                        eventLoop: eventLoop
+                    ).get()
+                    
+                    let head = try flac.readHead(bytes: &buff)
+                    isLast = head.isLast
+                    let bodyIndex = fileIndex + 4
+                    
+                    let body = try await self.read(
+                        fileHandle: handler,
+                        fromOffset: Int64(bodyIndex),
+                        byteCount: head.bodyLength,
+                        allocator: .init(),
+                        eventLoop: eventLoop
+                    ).get()
+                    
+                    continuation.yield((buffer: buff, metaType: head.metaType))
                 }
-            } else {
-                return self.asyncLoadMeta(
-                    handler: handler,
-                    eventLoop: eventLoop,
-                    fileIndex: fileIndex + 4 + head.bodyLength,
-                    flac: flac,
-                    song: newSong,
-                    callback: callback)
             }
         }
     }

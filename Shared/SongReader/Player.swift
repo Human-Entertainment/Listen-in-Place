@@ -5,6 +5,7 @@ import CoreData
 import Combine
 import NIO
 import NIOTransportServices
+import OrderedCollections
 
 typealias Byte = UInt8
 
@@ -19,36 +20,35 @@ final class Player: ObservableObject {
     @Published var nowPlaying: Song? = nil
     
     // MARK: - Access
-    
-    @Published var all = [Song]()
+    @Published var all = OrderedSet<Song>()
     var cancellable = [AnyCancellable]()
     
     private var threadPool = NIOThreadPool(numberOfThreads: 1)
 
-    func add(url: URL) {
+    func add(url: URL) async throws {
         guard url.startAccessingSecurityScopedResource() else {
             print("Failed to open the file")
             return
         }
         
-        container.performBackgroundTask { [self] context in
-            do {
-                let newSong = Songs(context: context)
-                let bookmark = try url.bookmarkData()
-                newSong.bookmark = bookmark
-                // TODO: Fix this stuff
-                
-                fetchSong(url: url,
-                          bookmark: bookmark,
-                          threadPool: self.threadPool)
-                
-                
-            } catch {
-                print("An error occured: \(error)")
-            }
+        let context = container.newBackgroundContext()
+        
+        defer { try? context.save() }
+        
+        guard let bookmark = (try? await context.perform {
+            let newSong = Songs(context: context)
+            // TODO: Fix this stuff
+            let bookmark = try url.bookmarkData()
+            newSong.bookmark = bookmark
             
-            try? context.save()
+            return bookmark
+        }) else {
+            print("Failed to save the bookmark")
+            return
         }
+            
+        await fetchSong(url: url, bookmark: bookmark)
+                
     }
 
     func remove(at index: Int)
@@ -78,26 +78,17 @@ final class Player: ObservableObject {
     }
     
     func fetchSong(url: URL,
-                   bookmark: Data,
-                   threadPool: NIOThreadPool?) {
-        guard let threadPool = threadPool else {
-            print("No threadpool")
+                   bookmark: Data) async {
+
+        guard let song = try? await SongPublisher(threadPool: threadPool)
+            .load(url: url, bookmark: bookmark).get() else {
             return
         }
-        try? SongPublisher(threadPool: threadPool)
-            .load(url: url, bookmark: bookmark)
-            .print("Song")
-            .sink {
-                guard case .failure(let songError) = $0 else { return }
-                print(songError)
-            } receiveValue: { song in
-                DispatchQueue.main.async {
-                    if !self.all.contains(song) {
-                        self.all.append(song)
-                    }
-                    url.stopAccessingSecurityScopedResource()
-                }
-            }.store(in: &cancellable)
+        
+        await MainActor.run {
+            all.append(song)
+            return
+        }
     }
     
     // MARK: - Setup
@@ -120,45 +111,34 @@ final class Player: ObservableObject {
             .sink(receiveValue: avPlayerDidFinishPlaying)
             .store(in: &cancellable)
         
-        asyncInit()
-        
+        Task {
+            try! await asyncInit()
+        }
     }
     
     public static let shared: (NSPersistentContainer) -> (Player) = { Player(container: $0) }
     
-    func asyncInit() {
-        container.performBackgroundTask { context in
-            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Songs")
+    func asyncInit() async throws {
+        let context = container.newBackgroundContext()
+        let request = try await context.perform {
+            let request = Songs.fetchRequest()
+            request.resultType = .managedObjectResultType
+            return try request.execute()
+        }
+        
+        for res in request {
+            guard let bookmark = res.value(forKey: "bookmark") as? Data else { return }
             
-            do {
-                // TODO: - Fix this
-                guard let result = try context.fetch(request) as? [NSManagedObject] else { return }
-                
-                result.forEach { [weak self] result in
-                    guard let bookmark = result.value(forKey: "bookmark") as? Data else { return }
-                    
-                    do {
-                        
-                        var isStale = false
-                        let url = try URL(
-                            resolvingBookmarkData: bookmark,
-                            options: .withoutUI,
-                            bookmarkDataIsStale: &isStale
-                        )
-                        self?.fetchSong(
-                            url: url,
-                            bookmark: bookmark,
-                            threadPool: self?.threadPool
-                        )
-                        
-                    } catch {
-                        print("Couldn't get URL from database because: \(error)")
-                    }
-                }
-            } catch {
-                // TODO: Couldn't get file UI
-                print("Couldn't retrieve file in CoreData with error \(error)")
-            }
+            var isStale = false
+            let url = try URL(
+                resolvingBookmarkData: bookmark,
+                options: .withoutUI,
+                bookmarkDataIsStale: &isStale
+            )
+            await self.fetchSong(
+                url: url,
+                bookmark: bookmark
+            )
         }
     }
     

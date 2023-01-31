@@ -67,12 +67,11 @@ struct ContentView: View {
         
     }
     
-    func openSong (urls: [URL]) -> () {
-        print("Reading URLS")
-        urls.forEach { url in
-            
-            
-            self.player.add(url: url)
+    func openSong (urls: [URL]) {
+        for url in urls {
+            Task {
+                try? await self.player.add(url: url)
+            }
         }
     }
 }
