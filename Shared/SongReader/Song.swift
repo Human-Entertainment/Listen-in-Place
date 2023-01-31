@@ -2,6 +2,7 @@ import NIO
 import NIOTransportServices
 import Foundation
 import Combine
+import System
 
 enum SongError: Error {
     case noBookmark
@@ -72,82 +73,71 @@ struct SongPublisher {
         self.threadPool = threadPool
         self.eventLoop = NIOTSEventLoopGroup().next()
     }
-    
-    func load(url: URL, bookmark: Data) async -> Result<Song, SongError> {
-        do {
-            let url = try await url.coordinatedRead(
-                coordinator: NSFileCoordinator(),
-                on: eventLoop).get()
-                
-            self.threadPool.start()
-            let song = try await self.asyncLoad(
-                bookmark: bookmark,
-                url: url
-            )
+     
+    func load(url: URL, bookmark: Data) async throws -> Song {
 
-            return .success(song)
-        } catch {
-            return .failure(.coundtReadFile)
-        }
+        let url = try await url.coordinatedRead(coordinator: NSFileCoordinator())
+            
+        self.threadPool.start()
+        let song = try await self.asyncLoad(
+            bookmark: bookmark,
+            url: url
+        )
+
+        return song
+        
         
         // TODO: make it so MP3 can also be parsed
     }
     
-    private func asyncLoad(
-        bookmark: Data,
-        url: URL) async throws -> Song {
+    private func asyncLoad(bookmark: Data, url: URL) async throws -> Song {
         
         var song = Song(title: "unknown", artist: "unknown", bookmark: bookmark)
         do {
             for try await (data, type) in try await NonBlockingFileIO(threadPool: threadPool)
-                .metablockReader(
-                    path: url.path,
-                    on: eventLoop
-                ) {
+                .metablockReader(path: url.path, on: eventLoop)
+            {
                 var bytes = data
                 switch type {
-                case 0:
-                    print("Streaminfro block")
-                    continue
-                case 1:
-                    print("Padding block")
-                    continue
-                case 2:
-                    print("Application block")
-                    continue
-                case 3:
-                    print("Seekable block")
-                    continue
-                case 4:
-                    print("Vorbis comment block")
-                    guard let vorbis = try? VorbisComment(bytes: &bytes) else { continue }
-                    
-                    song.loadVorbis(comment: vorbis)
+                    case 0:
+                        print("Streaminf szo block")
+                        continue
+                    case 1:
+                        print("Padding block")
+                        continue
+                    case 2:
+                        print("Application block")
+                        continue
+                    case 3:
+                        print("Seekable block")
+                        continue
+                    case 4:
+                        print("Vorbis comment block")
+                        guard let vorbis = try? VorbisComment(bytes: &bytes) else { continue }
+                        song.loadVorbis(comment: vorbis)
 
-                case 5:
-                    print("Cuesheet")
-                    continue
-                case 6:
-                    print("Image")
-                    do {
-                        let picture = try Picture(bytes: &bytes)
-                        
-                        if picture.pictureType == .CoverFront {
-                            let cover = picture.image
-                            print(cover as Any)
+                    case 5:
+                        print("Cuesheet")
+                        continue
+                    case 6:
+                        print("Image")
+                        do {
+                            let picture = try Picture(bytes: &bytes)
                             
-                            song.set(cover: cover)
-                        } else {
-                            print(picture.mimeType)
+                            if picture.pictureType == .CoverFront {
+                                let cover = picture.image
+                                song.set(cover: cover)
+                            } else {
+                                print(picture.mimeType)
+                                continue
+                            }
+                        } catch {
+                            print("Image loading issue \(error)")
                             continue
                         }
-                    } catch {
-                        print("Image loading issue \(error)")
-                        continue
-                    }
-                default:
-                    assertionFailure("Heck?")
-                    break
+                    default:
+                        assertionFailure("Heck?")
+                        break
                 }
             }
         } catch {

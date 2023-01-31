@@ -33,8 +33,6 @@ final class Player: ObservableObject {
         
         let context = container.newBackgroundContext()
         
-        defer { try? context.save() }
-        
         guard let bookmark = (try? await context.perform {
             let newSong = Songs(context: context)
             // TODO: Fix this stuff
@@ -49,6 +47,8 @@ final class Player: ObservableObject {
             
         await fetchSong(url: url, bookmark: bookmark)
                 
+        print("Saving")
+        try? context.save()
     }
 
     func remove(at index: Int)
@@ -77,14 +77,14 @@ final class Player: ObservableObject {
         }
     }
     
-    func fetchSong(url: URL,
-                   bookmark: Data) async {
+    func fetchSong(url: URL, bookmark: Data) async {
 
         guard let song = try? await SongPublisher(threadPool: threadPool)
-            .load(url: url, bookmark: bookmark).get() else {
+            .load(url: url, bookmark: bookmark) else {
             return
         }
         
+        print("Like for real fore real")
         await MainActor.run {
             all.append(song)
             return
@@ -135,6 +135,9 @@ final class Player: ObservableObject {
                 options: .withoutUI,
                 bookmarkDataIsStale: &isStale
             )
+            if (isStale) {
+                print("Data is stale")
+            }
             await self.fetchSong(
                 url: url,
                 bookmark: bookmark

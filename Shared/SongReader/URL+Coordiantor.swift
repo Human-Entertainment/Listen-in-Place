@@ -4,25 +4,22 @@ import NIOTransportServices
 
 // From https://github.com/palmin/open-in-place/blob/master/OpenInPlace/UrlCoordination.swift
 extension URL {
-    public func coordinatedRead(coordinator : NSFileCoordinator,
-                                on eventLoop: EventLoop) -> EventLoopFuture<URL> {
-        let promise = eventLoop.makePromise(of: URL.self)
-        
-        eventLoop.execute {
-            let error: NSErrorPointer = nil
+    public func coordinatedRead(coordinator : NSFileCoordinator) async throws -> URL {
+
+        let error: NSErrorPointer = nil
+           
+        return try await withUnsafeThrowingContinuation{ continuation in
             coordinator
                 .coordinate(readingItemAt: self,
                             options: [],
                             error: error,
                             byAccessor: { url in
                                 if let error = error as? Error {
-                                    promise.fail(error)
+                                    continuation.resume(with: .failure(error))
                                 } else {
-                                    promise.succeed(url)
+                                    continuation.resume(with: .success(url))
                                 }
                             })
         }
-        
-        return promise.futureResult
     }
 }
