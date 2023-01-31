@@ -10,6 +10,7 @@ extension NonBlockingFileIO {
     /// - Returns: Void
     func metablockReader(path: String,
                          on eventLoop: EventLoop) async throws -> AsyncThrowingStream<(buffer: ByteBuffer, metaType: Int), any Swift.Error> {
+        
         let handler = try await self.openFile(path: path,
                                                mode: .read,
                                                eventLoop: eventLoop).get()

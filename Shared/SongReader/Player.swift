@@ -79,8 +79,9 @@ final class Player: ObservableObject {
     
     func fetchSong(url: URL, bookmark: Data) async {
 
-        guard let song = try? await SongPublisher(threadPool: threadPool)
-            .load(url: url, bookmark: bookmark) else {
+        threadPool.start()
+        guard let song = try? await Song
+            .load(url: url, bookmark: bookmark, on: threadPool) else {
             return
         }
         

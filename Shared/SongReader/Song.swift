@@ -63,39 +63,15 @@ extension Song: Hashable {
     }
 }
 
-struct SongPublisher {
-    private let threadPool: NIOThreadPool
+extension Song {
     
-    private let eventLoop: EventLoop
-    
-    init(threadPool: NIOThreadPool)
-    {
-        self.threadPool = threadPool
-        self.eventLoop = NIOTSEventLoopGroup().next()
-    }
-     
-    func load(url: URL, bookmark: Data) async throws -> Song {
-
+    static func load(url: URL, bookmark: Data, on threadPool: NIOThreadPool) async throws -> Song {
         let url = try await url.coordinatedRead(coordinator: NSFileCoordinator())
-            
-        self.threadPool.start()
-        let song = try await self.asyncLoad(
-            bookmark: bookmark,
-            url: url
-        )
-
-        return song
-        
-        
-        // TODO: make it so MP3 can also be parsed
-    }
-    
-    private func asyncLoad(bookmark: Data, url: URL) async throws -> Song {
-        
+                
         var song = Song(title: "unknown", artist: "unknown", bookmark: bookmark)
         do {
             for try await (data, type) in try await NonBlockingFileIO(threadPool: threadPool)
-                .metablockReader(path: url.path, on: eventLoop)
+                .metablockReader(path: url.path, on: NIOTSEventLoopGroup().next())
             {
                 var bytes = data
                 switch type {
