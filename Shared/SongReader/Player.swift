@@ -22,85 +22,7 @@ final class Player: ObservableObject {
     // MARK: - Access
     var cancellable = [AnyCancellable]()
     
-    private var threadPool = NIOThreadPool(numberOfThreads: 1)
-    
     var timerObserver: Any? = nil
-/*
-    func add(url: URL) async throws {
-        guard url.startAccessingSecurityScopedResource() else {
-            print("Failed to open the file")
-            return
-        }
-        
-        defer {
-            url.stopAccessingSecurityScopedResource()
-        }
-        
-        let context = container.newBackgroundContext()
-        
-        guard let bookmark = (try? await context.perform {
-            let newSong = Songs(context: context)
-            // TODO: Fix this stuff
-            let bookmark = try url.bookmarkData()
-            newSong.bookmark = bookmark
-            
-            return bookmark
-        }) else {
-            print("Failed to save the bookmark")
-            return
-        }
-            
-        await fetchSong(url: url, bookmark: bookmark)
-                
-        print("Saving")
-        try? context.save()
-    }
-*/
-
-/*
-    func remove(at index: Int)
-    {
-        let song = self.all.remove(at: index)
-        container.performBackgroundTask { context in
-            let request = NSFetchRequest<NSFetchRequestResult>(entityName: "Songs")
-            
-            do {
-                // TODO: - Fix this
-                (try context.fetch(request) as? [NSManagedObject])?
-                    .filter { $0.value(forKey: "bookmark") as? Data == song.bookmark }
-                    .forEach {
-                        $0.managedObjectContext?.delete($0)
-                        do {
-                            try $0.managedObjectContext?.save()
-                            print("Deleted \(song.title)")
-                        } catch {
-                            print("Couldn't delete \(song.title) because \(error)")
-                        }
-                    }
-                
-            } catch {
-                print("Error \(error) orccured")
-            }
-        }
-    }
-*/
-    
-/*
-    func fetchSong(url: URL, bookmark: Data) async {
-
-        threadPool.start()
-        guard let song = try? await Song
-            .load(url: url, bookmark: bookmark, on: threadPool) else {
-            return
-        }
-        
-        print("Like for real fore real")
-        await MainActor.run {
-            all.append(song)
-            return
-        }
-    }
- */
     
     // MARK: - Setup
     init() {
@@ -126,45 +48,6 @@ final class Player: ObservableObject {
             infoCenter.playbackState = self.isPlaying ? .playing : .paused
         }
     }
-    
-    /*
-    func asyncInit() async throws {
-        let context = container.newBackgroundContext()
-        let request = try await context.perform {
-            let request = Songs.fetchRequest()
-            request.resultType = .managedObjectResultType
-            return try request.execute()
-        }
-        
-        for res in request {
-            guard let bookmark = res.value(forKey: "bookmark") as? Data else { return }
-            
-            var isStale = false
-            let url = try URL(
-                resolvingBookmarkData: bookmark,
-                options: .withoutUI,
-                bookmarkDataIsStale: &isStale
-            )
-            
-            guard url.startAccessingSecurityScopedResource() else {
-                print("Failed to open the file")
-                return
-            }
-            
-            defer {
-                url.stopAccessingSecurityScopedResource()
-            }
-            
-            if (isStale) {
-                print("Data is stale")
-            }
-            await self.fetchSong(
-                url: url,
-                bookmark: bookmark
-            )
-        }
-    }
- */
     
     func setupRemoteTransportControls() {
         // Get the shared MPRemoteCommandCenter
@@ -199,7 +82,6 @@ final class Player: ObservableObject {
             self.playNext()
             return .success
         }
-        
         
         commandCenter.previousTrackCommand.addTarget { _ in
             return .commandFailed
