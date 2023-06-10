@@ -3,26 +3,26 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		FC00A0C124CEFEC800497395 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521CDF2479A46600D2AC82 /* ContentView.swift */; };
 		FC00A0C224CEFEDC00497395 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521D0D2479B06100D2AC82 /* Player.swift */; };
-		FC00A0C324CEFEDF00497395 /* Song.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCBE778A2486516200080BB5 /* Song.swift */; };
 		FC00A0C424CEFEE100497395 /* Flac.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCBE778624864D6E00080BB5 /* Flac.swift */; };
 		FC00A0C524CEFEE300497395 /* NIOFileHandler+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCBE778824864FB600080BB5 /* NIOFileHandler+Extension.swift */; };
 		FC00A0C624CEFEE500497395 /* URL+Coordiantor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ACD2483D4E800ED60BF /* URL+Coordiantor.swift */; };
 		FC00A0C724CEFEE800497395 /* Array+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABB2482B1F300ED60BF /* Array+Extensions.swift */; };
 		FC00A0C824CEFEEB00497395 /* PlayerEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABD2482CB9600ED60BF /* PlayerEnum.swift */; };
 		FC00A0CA24CEFEFD00497395 /* AirPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */; };
-		FC00A0CC24CEFF0B00497395 /* Songs.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABF2483021A00ED60BF /* Songs.xcdatamodeld */; };
 		FC00A0CD24CEFF0E00497395 /* ArrayBiggerThan.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */; };
 		FC00A0CF24CEFF8400497395 /* NIO in Frameworks */ = {isa = PBXBuildFile; productRef = FC00A0CE24CEFF8400497395 /* NIO */; };
 		FC00A0D124CEFF9000497395 /* NIOFoundationCompat in Frameworks */ = {isa = PBXBuildFile; productRef = FC00A0D024CEFF9000497395 /* NIOFoundationCompat */; };
 		FC00A0D324CEFF9C00497395 /* NIOTransportServices in Frameworks */ = {isa = PBXBuildFile; productRef = FC00A0D224CEFF9C00497395 /* NIOTransportServices */; };
 		FC00A0D524CEFFA300497395 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC00A0D424CEFFA300497395 /* CoreData.framework */; };
 		FC06D5AE248BB4270041E794 /* ArrayBiggerThan.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */; };
+		FC3437052A35373B00C80BD4 /* Songs.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC3437042A35373B00C80BD4 /* Songs.swift */; };
+		FC3437082A353DF500C80BD4 /* Environment+Threadpool.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC3437072A353DF500C80BD4 /* Environment+Threadpool.swift */; };
 		FC46024B259C8F6900DC1C74 /* AsyncKit in Frameworks */ = {isa = PBXBuildFile; productRef = FC46024A259C8F6900DC1C74 /* AsyncKit */; };
 		FC521CE02479A46600D2AC82 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521CDF2479A46600D2AC82 /* ContentView.swift */; };
 		FC521CE22479A46800D2AC82 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC521CE12479A46800D2AC82 /* Assets.xcassets */; };
@@ -33,7 +33,6 @@
 		FC625ABA2482B1BD00ED60BF /* Picture.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625AB92482B1BD00ED60BF /* Picture.swift */; };
 		FC625ABC2482B1F300ED60BF /* Array+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABB2482B1F300ED60BF /* Array+Extensions.swift */; };
 		FC625ABE2482CB9600ED60BF /* PlayerEnum.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABD2482CB9600ED60BF /* PlayerEnum.swift */; };
-		FC625AC12483021B00ED60BF /* Songs.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC625ABF2483021A00ED60BF /* Songs.xcdatamodeld */; };
 		FC625AC42483093F00ED60BF /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC625AC32483093E00ED60BF /* CoreData.framework */; };
 		FC625ACE2483D4E800ED60BF /* URL+Coordiantor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ACD2483D4E800ED60BF /* URL+Coordiantor.swift */; };
 		FC625AD02484128700ED60BF /* VorbisComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ACF2484128600ED60BF /* VorbisComment.swift */; };
@@ -55,8 +54,6 @@
 		FCF396C424F9A5A00051AB6E /* Streaminginfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625AB72482B19600ED60BF /* Streaminginfo.swift */; };
 		FCF396C524F9A5A20051AB6E /* Picture.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625AB92482B1BD00ED60BF /* Picture.swift */; };
 		FCF396C624F9A5A50051AB6E /* VorbisComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC625ACF2484128600ED60BF /* VorbisComment.swift */; };
-		FCF396CF24F9B3EB0051AB6E /* Songs+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCF396CD24F9B3EB0051AB6E /* Songs+CoreDataClass.swift */; };
-		FCF396D024F9B3EB0051AB6E /* Songs+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCF396CE24F9B3EB0051AB6E /* Songs+CoreDataProperties.swift */; };
 		FCF396D224FB7A260051AB6E /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FCF396D124FB7A260051AB6E /* Launch Screen.storyboard */; };
 		FCFAC320251DE96200B36992 /* AlbumGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFAC31F251DE96200B36992 /* AlbumGridView.swift */; };
 		FCFAC327251DF2AE00B36992 /* Song+iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFAC326251DF2AD00B36992 /* Song+iOS.swift */; };
@@ -79,6 +76,8 @@
 /* Begin PBXFileReference section */
 		FC00A0D424CEFFA300497395 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk/System/Library/Frameworks/CoreData.framework; sourceTree = DEVELOPER_DIR; };
 		FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayBiggerThan.swift; sourceTree = "<group>"; };
+		FC3437042A35373B00C80BD4 /* Songs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Songs.swift; sourceTree = "<group>"; };
+		FC3437072A353DF500C80BD4 /* Environment+Threadpool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Environment+Threadpool.swift"; sourceTree = "<group>"; };
 		FC521CD82479A46600D2AC82 /* iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC521CDF2479A46600D2AC82 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		FC521CE12479A46800D2AC82 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -94,7 +93,6 @@
 		FC625AB92482B1BD00ED60BF /* Picture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Picture.swift; sourceTree = "<group>"; };
 		FC625ABB2482B1F300ED60BF /* Array+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Extensions.swift"; sourceTree = "<group>"; };
 		FC625ABD2482CB9600ED60BF /* PlayerEnum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerEnum.swift; sourceTree = "<group>"; };
-		FC625AC02483021A00ED60BF /* Songs.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Songs.xcdatamodel; sourceTree = "<group>"; };
 		FC625AC32483093E00ED60BF /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		FC625ACD2483D4E800ED60BF /* URL+Coordiantor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Coordiantor.swift"; sourceTree = "<group>"; };
 		FC625ACF2484128600ED60BF /* VorbisComment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VorbisComment.swift; sourceTree = "<group>"; };
@@ -111,8 +109,6 @@
 		FCBE778824864FB600080BB5 /* NIOFileHandler+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NIOFileHandler+Extension.swift"; sourceTree = "<group>"; };
 		FCBE778A2486516200080BB5 /* Song.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Song.swift; sourceTree = "<group>"; };
 		FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPlayButton.swift; sourceTree = "<group>"; };
-		FCF396CD24F9B3EB0051AB6E /* Songs+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Songs+CoreDataClass.swift"; path = "Shared/Models/Songs+CoreDataClass.swift"; sourceTree = "<group>"; };
-		FCF396CE24F9B3EB0051AB6E /* Songs+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Songs+CoreDataProperties.swift"; path = "Shared/Models/Songs+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		FCF396D124FB7A260051AB6E /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		FCFAC31F251DE96200B36992 /* AlbumGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumGridView.swift; sourceTree = "<group>"; };
 		FCFAC326251DF2AD00B36992 /* Song+iOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Song+iOS.swift"; sourceTree = "<group>"; };
@@ -151,11 +147,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FC3437032A35372C00C80BD4 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				FC3437042A35373B00C80BD4 /* Songs.swift */,
+				FCBE778A2486516200080BB5 /* Song.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		FC3437062A353DE500C80BD4 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				FC3437072A353DF500C80BD4 /* Environment+Threadpool.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
 		FC521CCF2479A46600D2AC82 = {
 			isa = PBXGroup;
 			children = (
-				FCF396CD24F9B3EB0051AB6E /* Songs+CoreDataClass.swift */,
-				FCF396CE24F9B3EB0051AB6E /* Songs+CoreDataProperties.swift */,
 				FC521CDA2479A46600D2AC82 /* Shared */,
 				FC67C24F24AF509C00C41163 /* iOS */,
 				FC521CF12479A46800D2AC82 /* Listen in PlaceTests */,
@@ -180,12 +191,13 @@
 		FC521CDA2479A46600D2AC82 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				FC3437062A353DE500C80BD4 /* Utils */,
+				FC3437032A35372C00C80BD4 /* Models */,
 				FCFAC31E251DE91E00B36992 /* Views */,
 				FCBE778C24865A7600080BB5 /* SongReader */,
 				FC67C25624AF532C00C41163 /* ListenInPlace.swift */,
 				FC521CDF2479A46600D2AC82 /* ContentView.swift */,
 				FCC94AC5247A979B00DCFD25 /* AirPlayButton.swift */,
-				FC625ABF2483021A00ED60BF /* Songs.xcdatamodeld */,
 				FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */,
 				FC521CE32479A46800D2AC82 /* Preview Content */,
 				FCF396D124FB7A260051AB6E /* Launch Screen.storyboard */,
@@ -280,7 +292,6 @@
 			children = (
 				FC521D0D2479B06100D2AC82 /* Player.swift */,
 				FC625AB42482B16400ED60BF /* Metablocks */,
-				FCBE778A2486516200080BB5 /* Song.swift */,
 				FCBE778624864D6E00080BB5 /* Flac.swift */,
 				FCBE778824864FB600080BB5 /* NIOFileHandler+Extension.swift */,
 				FC625ACD2483D4E800ED60BF /* URL+Coordiantor.swift */,
@@ -361,8 +372,9 @@
 		FC521CD02479A46600D2AC82 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1200;
-				LastUpgradeCheck = 1200;
+				LastUpgradeCheck = 1500;
 				ORGANIZATIONNAME = "Bastian Inuk Christensen";
 				TargetAttributes = {
 					FC521CD72479A46600D2AC82 = {
@@ -434,7 +446,7 @@
 				FC521D0C2479A51B00D2AC82 /* MusicView.swift in Sources */,
 				FC625AD02484128700ED60BF /* VorbisComment.swift in Sources */,
 				FC521D0E2479B06100D2AC82 /* Player.swift in Sources */,
-				FC625AC12483021B00ED60BF /* Songs.xcdatamodeld in Sources */,
+				FC3437052A35373B00C80BD4 /* Songs.swift in Sources */,
 				FCFAC320251DE96200B36992 /* AlbumGridView.swift in Sources */,
 				FC06D5AE248BB4270041E794 /* ArrayBiggerThan.swift in Sources */,
 				FC625ABC2482B1F300ED60BF /* Array+Extensions.swift in Sources */,
@@ -443,6 +455,7 @@
 				FCBE778B2486516200080BB5 /* Song.swift in Sources */,
 				FC67C28024AF537E00C41163 /* ListenInPlace.swift in Sources */,
 				FC521CE02479A46600D2AC82 /* ContentView.swift in Sources */,
+				FC3437082A353DF500C80BD4 /* Environment+Threadpool.swift in Sources */,
 				FC625ABE2482CB9600ED60BF /* PlayerEnum.swift in Sources */,
 				FCFAC327251DF2AE00B36992 /* Song+iOS.swift in Sources */,
 			);
@@ -453,13 +466,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				FCF396C524F9A5A20051AB6E /* Picture.swift in Sources */,
-				FC00A0C324CEFEDF00497395 /* Song.swift in Sources */,
-				FCF396CF24F9B3EB0051AB6E /* Songs+CoreDataClass.swift in Sources */,
 				FC00A0C724CEFEE800497395 /* Array+Extensions.swift in Sources */,
 				FC00A0CA24CEFEFD00497395 /* AirPlayButton.swift in Sources */,
-				FCF396D024F9B3EB0051AB6E /* Songs+CoreDataProperties.swift in Sources */,
 				FCF396C624F9A5A50051AB6E /* VorbisComment.swift in Sources */,
-				FC00A0CC24CEFF0B00497395 /* Songs.xcdatamodeld in Sources */,
 				FC67C28124AF53BE00C41163 /* ListenInPlace.swift in Sources */,
 				FC00A0C124CEFEC800497395 /* ContentView.swift in Sources */,
 				FC00A0C624CEFEE500497395 /* URL+Coordiantor.swift in Sources */,
@@ -480,6 +489,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -513,6 +523,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -542,6 +553,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -575,6 +587,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -609,7 +622,7 @@
 					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = iOS/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -640,7 +653,7 @@
 					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = iOS/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -665,6 +678,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Shared/Preview Content\"";
 				DEVELOPMENT_TEAM = 2D7T23VV7R;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -674,7 +688,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 13.1;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "app.inuk.list-in-place";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -692,6 +706,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Shared/Preview Content\"";
 				DEVELOPMENT_TEAM = 2D7T23VV7R;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -701,7 +716,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 13.1;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "app.inuk.list-in-place";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -854,19 +869,6 @@
 			productName = OrderedCollections;
 		};
 /* End XCSwiftPackageProductDependency section */
-
-/* Begin XCVersionGroup section */
-		FC625ABF2483021A00ED60BF /* Songs.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				FC625AC02483021A00ED60BF /* Songs.xcdatamodel */,
-			);
-			currentVersion = FC625AC02483021A00ED60BF /* Songs.xcdatamodel */;
-			path = Songs.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = FC521CD02479A46600D2AC82 /* Project object */;
 }

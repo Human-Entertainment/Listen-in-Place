@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 import AVFoundation
 import CoreData
 import Match
@@ -9,18 +10,23 @@ var errorSong: Song {
 }
 
 struct ContentView: View {
-    
-    
+    @Environment(\.modelContext)
+    private var modelContext
     @Environment(\.horizontalSizeClass)
-    var horizontalSizeClass
+    private var horizontalSizeClass
+    @Environment(\.threadPool)
+    private var threadPool
     
-    @EnvironmentObject
-    var player: Player
+    @Environment(Player.self)
+    private var player: Player
     
     @State
-    var showSongContext = false
+    private var showSongContext = false
     @State
-    var presentFiles = false
+    private var presentFiles = false
+    
+    @Query
+    private var songs: [Song]
     
     var body: some View {
         
@@ -28,13 +34,15 @@ struct ContentView: View {
             
             NavigationView {
                 List {
-                    ForEach(player.all) { song in
+                    ForEach(songs) { song in
                         SongCellView(song: song)
                         
                     }
                     .onDelete { indexSet in
-                        for index in indexSet {
-                            player.remove(at: index)
+                        withAnimation {
+                            for index in indexSet {
+                                modelContext.delete(songs[index])
+                            }
                         }
                     }
                 }
@@ -63,14 +71,29 @@ struct ContentView: View {
     func addSongHandler(result: Result<[URL], Error>?) {
         guard case let .success(urls) = result else { return print("Couldn't open files") }
         
-        openSong (urls: urls)
+        openSong(urls: urls)
         
     }
     
-    func openSong (urls: [URL]) {
-        for url in urls {
-            Task {
-                try? await self.player.add(url: url)
+    func openSong(urls: [URL]) {
+        Task {
+            self.threadPool.start()
+            for url in urls {
+                guard url.startAccessingSecurityScopedResource() else {
+                    print("Failed to open the file")
+                    return
+                }
+                
+                defer {
+                    url.stopAccessingSecurityScopedResource()
+                }
+                guard let newSong = try? await Song.load(url: url, bookmark: url.bookmarkData(), on: self.threadPool) else {
+                    continue
+                }
+                
+                withAnimation {
+                    modelContext.insert(newSong)
+                }
             }
         }
     }
@@ -99,7 +122,7 @@ struct GlobalControls: View {
     @State
     var text: String = "Hello"
     
-    @EnvironmentObject
+    @Environment(Player.self)
     var player: Player
     
     var body: some View {
@@ -118,7 +141,7 @@ struct GlobalControls: View {
         .background(Color(.secondarySystemBackground))
         .clipped()
         .sheet(isPresented: self.$showPlayer) {
-            MusicView(song: self.player.nowPlaying ?? notPlaying)
+            MusicView( song: self.player.nowPlaying ?? notPlaying)
                 .environmentObject(self.player)
         }
     }
@@ -126,7 +149,8 @@ struct GlobalControls: View {
 
 struct SongCellView: View {
     
-    @EnvironmentObject var player: Player
+    @Environment(Player.self)
+    var player: Player
     
     @State var showAction = false
     

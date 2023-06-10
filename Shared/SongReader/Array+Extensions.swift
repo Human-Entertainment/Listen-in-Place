@@ -16,6 +16,7 @@ extension Collection where Element == Byte {
     var data: Data {
         Data(self)
     }
+
     var int: Int {
         var compound = 0
         let ints = self.map { Int($0) }

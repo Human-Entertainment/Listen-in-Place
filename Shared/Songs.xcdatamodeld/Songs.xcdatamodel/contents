@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17189" systemVersion="20A5354i" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="Queue" representedClassName="Queue" syncable="YES" codeGenerationType="class">
-        <relationship name="songs" optional="YES" toMany="YES" minCount="1" deletionRule="Nullify" ordered="YES" destinationEntity="Songs" inverseName="queue" inverseEntity="Songs"/>
-    </entity>
-    <entity name="Songs" representedClassName="Songs" syncable="YES" codeGenerationType="class">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22158.8" systemVersion="23A5257q" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="OldSongs" representedClassName="OldSongs" syncable="YES" codeGenerationType="class">
         <attribute name="bookmark" optional="YES" attributeType="Binary"/>
         <relationship name="queue" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Queue" inverseName="songs" inverseEntity="Queue"/>
         <uniquenessConstraints>
@@ -12,8 +9,7 @@
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
-    <elements>
-        <element name="Queue" positionX="161.25" positionY="-36.83203125" width="86.5390625" height="58"/>
-        <element name="Songs" positionX="-24.1015625" positionY="-58.94140625" width="90.265625" height="59"/>
-    </elements>
+    <entity name="Queue" representedClassName="Queue" syncable="YES" codeGenerationType="class">
+        <relationship name="songs" optional="YES" toMany="YES" minCount="1" deletionRule="Nullify" ordered="YES" destinationEntity="OldSongs" inverseName="queue" inverseEntity="OldSongs"/>
+    </entity>
 </model>

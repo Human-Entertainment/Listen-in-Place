@@ -9,26 +9,25 @@
 import SwiftUI
 import UniformTypeIdentifiers
 import CoreData
+import NIO
 
 @main
 struct ListenInPlace: App {
     @Environment(\.scenePhase)
     var scenePhase
     
-    let player: Player
-    init() {
-        player = Player.shared(persistentContainer)
-    }
-        
+    let player: Player = .init()
         
     var body: some Scene {
         WindowGroup() {
             ContentView()
                 .accentColor(.orange)
                 .environment(\.managedObjectContext, self.persistentContainer.viewContext)
-                .environmentObject(player)
+                .environment(\.threadPool, NIOThreadPool(numberOfThreads: 1))
+                .environment(player)
         }
-        .onChange(of: scenePhase) { phase in
+        .modelContainer(for: [Song.self])
+        .onChange(of: scenePhase) { (_oldPhase, phase) in
             switch phase {
                 case .active:
                     self.player.addPeriodicTimeObserver()

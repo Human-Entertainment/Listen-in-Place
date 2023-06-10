@@ -6,25 +6,26 @@ import Combine
 import NIO
 import NIOTransportServices
 import OrderedCollections
+import Observation
 
 typealias Byte = UInt8
 
+@Observable
 final class Player: ObservableObject {
-    private let container: NSPersistentContainer
+    private var player: AVPlayer? = nil
     
-    private var player: AVPlayer?
-    
-    @Published var progress: Float = 0.0
-    @Published var isPlaying = false
+    var progress: Float = 0.0
+    var isPlaying = false
     private var url: URL? = nil
-    @Published var nowPlaying: Song? = nil
+    var nowPlaying: Song? = nil
     
     // MARK: - Access
-    @Published var all = OrderedSet<Song>()
     var cancellable = [AnyCancellable]()
     
     private var threadPool = NIOThreadPool(numberOfThreads: 1)
-
+    
+    var timerObserver: Any? = nil
+/*
     func add(url: URL) async throws {
         guard url.startAccessingSecurityScopedResource() else {
             print("Failed to open the file")
@@ -54,7 +55,9 @@ final class Player: ObservableObject {
         print("Saving")
         try? context.save()
     }
+*/
 
+/*
     func remove(at index: Int)
     {
         let song = self.all.remove(at: index)
@@ -80,7 +83,9 @@ final class Player: ObservableObject {
             }
         }
     }
+*/
     
+/*
     func fetchSong(url: URL, bookmark: Data) async {
 
         threadPool.start()
@@ -95,9 +100,10 @@ final class Player: ObservableObject {
             return
         }
     }
+ */
     
     // MARK: - Setup
-    private init(container: NSPersistentContainer) {
+    init() {
         
         let audioSession = AVAudioSession.sharedInstance()
         do {
@@ -107,7 +113,6 @@ final class Player: ObservableObject {
             print("Failed to set audio session category.")
         }
         
-        self.container = container
         player = nil
         // Setup mediacenter controls
         setupRemoteTransportControls()
@@ -116,13 +121,13 @@ final class Player: ObservableObject {
             .sink(receiveValue: avPlayerDidFinishPlaying)
             .store(in: &cancellable)
         
-        Task {
-            try! await asyncInit()
+        withMutation(keyPath: \.isPlaying) {
+            let infoCenter = MPNowPlayingInfoCenter.default()
+            infoCenter.playbackState = self.isPlaying ? .playing : .paused
         }
     }
     
-    public static let shared: (NSPersistentContainer) -> (Player) = { Player(container: $0) }
-    
+    /*
     func asyncInit() async throws {
         let context = container.newBackgroundContext()
         let request = try await context.perform {
@@ -159,6 +164,7 @@ final class Player: ObservableObject {
             )
         }
     }
+ */
     
     func setupRemoteTransportControls() {
         // Get the shared MPRemoteCommandCenter
@@ -224,13 +230,12 @@ final class Player: ObservableObject {
         // Set the metadata
         let infoCenter = MPNowPlayingInfoCenter.default()
         infoCenter.nowPlayingInfo = nowPlayingInfo
-        infoCenter.playbackState = isPlaying ? .playing : .paused
         
     }
     
 
     // MARK: - Queue
-    @Published
+    @ObservationTracked
     private(set) var sharedQueue = [Song]()
     
     func addToQueue(_ song: Song) {
@@ -275,8 +280,6 @@ final class Player: ObservableObject {
     deinit {
         url?.stopAccessingSecurityScopedResource()
     }
-    
-    var timerObserver: Any?
     
     func addPeriodicTimeObserver()
     {

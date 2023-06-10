@@ -3,13 +3,15 @@ import NIOTransportServices
 import Foundation
 import Combine
 import System
+import SwiftData
 
 enum SongError: Error {
     case noBookmark
     case coundtReadFile
 }
 
-struct Song {
+@Model
+final class Song {
     private(set) var title: String = ""
     private(set) var artist: String = ""
     private(set) var lyrics: String? = nil
@@ -34,8 +36,8 @@ struct Song {
         self.bookmark = bookmark
         self.tracknumber = tracknumber
     }
-    
-    mutating func loadVorbis(comment vorbis: VorbisComment) {
+
+    func loadVorbis(comment vorbis: VorbisComment) {
         self.title = vorbis.title ?? self.title
         self.artist = vorbis.artist ?? self.artist
         self.tracknumber = vorbis.tracknumber
@@ -43,7 +45,7 @@ struct Song {
         self.album = vorbis.album
     }
     
-    mutating func set(cover data: Data?) {
+    func set(cover data: Data?) {
         cover = data
     }
 }
@@ -68,7 +70,7 @@ extension Song {
     static func load(url: URL, bookmark: Data, on threadPool: NIOThreadPool) async throws -> Song {
         let url = try await url.coordinatedRead(coordinator: NSFileCoordinator())
                 
-        var song = Song(title: "unknown", artist: "unknown", bookmark: bookmark)
+        let song = Song(title: "unknown", artist: "unknown", bookmark: bookmark)
         do {
             for try await (buffer, metaType) in try await NonBlockingFileIO(threadPool: threadPool)
                 .metablockReader(path: url.path(percentEncoded: false), on: NIOTSEventLoopGroup().next())

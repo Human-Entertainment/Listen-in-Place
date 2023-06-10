@@ -2,7 +2,7 @@ import SwiftUI
 import Combine
 
 struct MusicView: View {
-    @EnvironmentObject
+    @Environment(Player.self)
     var player: Player
     let song: Song
     
@@ -19,27 +19,13 @@ struct MusicView: View {
     
     var body: some View {
         VStack {
-            
-            
             if showQueue {
-                
                 NavigationView {
-                
-                
-                List {
-                    ForEach (player.sharedQueue, id: \.self) { song in
-                        SongCellView(song: song)
+                    List {
+                        ForEach (player.sharedQueue, id: \.self) { song in
+                            SongCellView(song: song)
+                        }
                     }
-                }
-                /*
-                // TODO: fix seperator style
-                .onAppear {
-                    UITableView.appearance()
-                        .separatorStyle = .none
-                }
-                    
-                .navigationBarTitle(Text("Queue"))
- */
                 }
             } else {
                 Spacer()
@@ -85,7 +71,7 @@ struct MusicView: View {
 }
 
 struct PlayButton: View {
-    @EnvironmentObject
+    @Environment(Player.self)
     var player: Player
     var body: some View {
         Button(action: {
@@ -103,7 +89,7 @@ struct PlayButton: View {
 }
 
 struct NextButton: View {
-    @EnvironmentObject
+    @Environment(Player.self)
     var player: Player
     
     var body: some View {
