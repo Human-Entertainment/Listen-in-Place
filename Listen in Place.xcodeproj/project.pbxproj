@@ -21,7 +21,6 @@
 		FC00A0D324CEFF9C00497395 /* NIOTransportServices in Frameworks */ = {isa = PBXBuildFile; productRef = FC00A0D224CEFF9C00497395 /* NIOTransportServices */; };
 		FC00A0D524CEFFA300497395 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC00A0D424CEFFA300497395 /* CoreData.framework */; };
 		FC06D5AE248BB4270041E794 /* ArrayBiggerThan.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */; };
-		FC3437052A35373B00C80BD4 /* Songs.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC3437042A35373B00C80BD4 /* Songs.swift */; };
 		FC3437082A353DF500C80BD4 /* Environment+Threadpool.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC3437072A353DF500C80BD4 /* Environment+Threadpool.swift */; };
 		FC46024B259C8F6900DC1C74 /* AsyncKit in Frameworks */ = {isa = PBXBuildFile; productRef = FC46024A259C8F6900DC1C74 /* AsyncKit */; };
 		FC521CE02479A46600D2AC82 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC521CDF2479A46600D2AC82 /* ContentView.swift */; };
@@ -76,7 +75,6 @@
 /* Begin PBXFileReference section */
 		FC00A0D424CEFFA300497395 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk/System/Library/Frameworks/CoreData.framework; sourceTree = DEVELOPER_DIR; };
 		FC06D5AD248BB4270041E794 /* ArrayBiggerThan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayBiggerThan.swift; sourceTree = "<group>"; };
-		FC3437042A35373B00C80BD4 /* Songs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Songs.swift; sourceTree = "<group>"; };
 		FC3437072A353DF500C80BD4 /* Environment+Threadpool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Environment+Threadpool.swift"; sourceTree = "<group>"; };
 		FC521CD82479A46600D2AC82 /* iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC521CDF2479A46600D2AC82 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -150,7 +148,6 @@
 		FC3437032A35372C00C80BD4 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				FC3437042A35373B00C80BD4 /* Songs.swift */,
 				FCBE778A2486516200080BB5 /* Song.swift */,
 			);
 			path = Models;
@@ -446,7 +443,6 @@
 				FC521D0C2479A51B00D2AC82 /* MusicView.swift in Sources */,
 				FC625AD02484128700ED60BF /* VorbisComment.swift in Sources */,
 				FC521D0E2479B06100D2AC82 /* Player.swift in Sources */,
-				FC3437052A35373B00C80BD4 /* Songs.swift in Sources */,
 				FCFAC320251DE96200B36992 /* AlbumGridView.swift in Sources */,
 				FC06D5AE248BB4270041E794 /* ArrayBiggerThan.swift in Sources */,
 				FC625ABC2482B1F300ED60BF /* Array+Extensions.swift in Sources */,

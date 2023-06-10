@@ -19,7 +19,6 @@ final class Player: ObservableObject {
     private var url: URL? = nil
     var nowPlaying: Song? = nil
     
-    // MARK: - Access
     var cancellable = [AnyCancellable]()
     
     var timerObserver: Any? = nil
